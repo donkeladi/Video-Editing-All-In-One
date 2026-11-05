@@ -1,0 +1,11 @@
+# Video besar jangan commit terus (guna Release / Git LFS / link cloud)
+input/*
+output/*
+!input/.gitkeep
+!output/.gitkeep
+*.mp4
+*.mov
+*.mkv
+*.wav
+*.mp3
+work/
