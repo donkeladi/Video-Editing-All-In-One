@@ -45,7 +45,7 @@ def build_video():
     sel = "+".join(f"between(t,{max(a-.12,0):.3f},{b+.12:.3f})" for a, b in keep)
     run("ffmpeg", "-y", "-loglevel", "error", "-i", inp, "-vf", f"select='{sel}',setpts=N/FRAME_RATE/TB,{SC}",
         "-af", f"aselect='{sel}',asetpts=N/SR/TB,aresample=48000", *enc(), W + "/s2.mp4")
-    open(W + "/list.txt", "w").write("file s1.mp4\nfile s2.mp4\n")
+    open(W + "/list.txt", "w").write("file s2.mp4\nfile s1.mp4\n")
     run("ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-i", W + "/list.txt", "-c", "copy", W + "/main.mp4")
     for k in ("1694", "1689", "1690", "1691", "1692", "1693", "1696"):
         run("ffmpeg", "-y", "-loglevel", "error", "-i", U + SRC[k] + ".mov", "-an", "-t", "4",
@@ -160,27 +160,25 @@ def card(name, lines, sz=104, label=None, swatches=None):
     sh.save(f"{W}/{name}.png")
 
 # ---------- jadual ----------
-EV = [
- (0.3, 5.8, "i1", dict(lines=["Sandal Candia Wanita", "Gold Chain TP28111L"])),
- (6.0, 8.4, "k_all", dict(label="5 PILIHAN WARNA", lines=[], swatches=["BLACK", "BROWN", "CREAM", "TAN", "PINK"]), "1694"),
- (8.5, 11.9, "i2", dict(lines=["Rekaan minimalist &", "gold chain premium"])),
- (12.0, 14.2, "k_black", dict(label="BLACK", lines=[], swatches=["BLACK"]), "1689"),
- (14.3, 19.8, "i3", dict(lines=["Soft cushioned insole", "lembut sepanjang hari"])),
- (20.0, 22.2, "k_tan", dict(label="TAN", lines=[], swatches=["TAN"]), "1690"),
- (22.3, 27.8, "i4", dict(lines=["Slip-on: mudah sarung", "tanpa perlu ikat tali"])),
- (28.0, 30.2, "k_brown", dict(label="BROWN", lines=[], swatches=["BROWN"]), "1691"),
- (30.3, 35.8, "i5", dict(lines=["Anti-slip outsole", "lebih stabil & selamat"])),
- (36.0, 38.2, "k_pink", dict(label="PINK", lines=[], swatches=["PINK"]), "1692"),
- (38.3, 43.8, "i6", dict(lines=["Ringan, tak bebankan kaki"])),
- (44.0, 46.2, "k_cream", dict(label="CREAM", lines=[], swatches=["CREAM"]), "1693"),
- (46.3, 51.5, "i7", dict(lines=["Padan dengan dress, skirt,", "jeans & seluar panjang"])),
- (51.5, 55.9, "i8", dict(lines=["5 warna: Black, Brown,", "Cream, Tan, Pink"])),
- (56.0, 59.5, "k_gold", dict(label="GOLD CHAIN", lines=[], swatches=["GOLD"]), "1696"),
- (59.6, 63.5, "i9", dict(lines=["Saiz tersedia:", "36 | 37 | 38 | 39 | 40 | 41"])),
- (63.5, 68.5, "i10", dict(lines=["PERHATIAN: Cutting kecil &", "bahagian depan sedikit sempit"])),
- (68.5, 73.0, "i11", dict(lines=["Kaki normal: ambil 1 size lebih besar", "Kaki lebar/kembang: up 2 size"], sz=92)),
- (73.0, 76.5, "i12", dict(lines=["Antara dua saiz?", "Pilih saiz yang lebih besar"])),
- (76.5, 80.2, "i13", dict(lines=["Sesuai untuk jalan-jalan,", "shopping & travel"])),
+EV = [  # diselaraskan dengan transkrip (garis masa: 1699_2 dahulu, kemudian 1700 sebagai penutup)
+ (0.2, 5.6, "i1", dict(lines=["Sandal Candia Wanita", "Gold Chain TP28111L"])),
+ (5.8, 9.0, "k_pel", dict(lines=["Pelbagai pilihan warna"]), "1696"),
+ (9.2, 10.8, "i2", dict(lines=["Sandal wanita moden,", "gold chain premium"])),
+ (10.9, 13.3, "k_all", dict(label="5 PILIHAN WARNA", lines=[], swatches=["BLACK", "BROWN", "CREAM", "TAN", "PINK"]), "1694"),
+ (13.4, 15.3, "k_cream", dict(label="CREAM", lines=[], swatches=["CREAM"]), "1693"),
+ (15.3, 17.9, "k_brown", dict(label="BROWN", lines=[], swatches=["BROWN"]), "1691"),
+ (17.9, 20.4, "k_pink", dict(label="PINK", lines=[], swatches=["PINK"]), "1692"),
+ (20.4, 23.6, "k_tan", dict(label="TAN", lines=[], swatches=["TAN"]), "1690"),
+ (23.6, 26.4, "k_black", dict(label="BLACK", lines=[], swatches=["BLACK"]), "1689"),
+ (26.5, 30.8, "i3", dict(lines=["5 warna: Black, Brown,", "Cream, Tan, Pink"])),
+ (30.9, 34.3, "i4", dict(lines=["Boleh dapatkan", "di beg kuning"])),
+ (34.5, 45.8, "i5", dict(lines=["Soft cushioned insole", "lembut sepanjang hari"])),
+ (45.9, 54.4, "i6", dict(lines=["Anti-slip outsole", "lebih stabil & selamat"])),
+ (54.6, 62.0, "i7", dict(lines=["Finishing kemas,", "bahagian jari lembut"])),
+ (62.3, 70.8, "i8", dict(lines=["HOT ITEM:", "warna Tan & Pink"])),
+ (70.9, 72.3, "k_pink2", dict(label="PINK", lines=[], swatches=["PINK"]), "1692"),
+ (72.3, 74.2, "k_tan2", dict(label="TAN", lines=[], swatches=["TAN"]), "1690"),
+ (74.4, 80.2, "i9", dict(lines=["Check-out di beg kuning", "sekarang!"])),
 ]
 
 def make_scrim():
@@ -224,10 +222,10 @@ def compose():
         "-map", "[v]", "-map", "0:a", "-af", "loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000",
         "-c:v", "libx264", "-crf", "16", "-preset", "slow", "-profile:v", "high", "-pix_fmt", "yuv420p",
         "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-r", "30",
-        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", f"{D}", "output/candia_fullscreen.mp4")
+        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", f"{D}", "output/candia_sync.mp4")
 
 if __name__ == "__main__":
     import sys
     if "--skip-video" not in sys.argv: build_video()
     compose()
-    print("output/candia_fullscreen.mp4")
+    print("output/candia_sync.mp4")
