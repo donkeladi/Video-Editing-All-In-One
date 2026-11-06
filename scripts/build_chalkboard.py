@@ -174,7 +174,7 @@ EV = [  # diselaraskan dengan transkrip (garis masa: 1699_2 dahulu, kemudian 170
  (30.9, 34.3, "i4", dict(lines=["Boleh dapatkan", "di beg kuning"])),
  (34.5, 45.8, "i5", dict(lines=["Soft cushioned insole", "lembut sepanjang hari"])),
  (45.9, 54.4, "i6", dict(lines=["Anti-slip outsole", "lebih stabil & selamat"])),
- (54.6, 62.0, "i7", dict(lines=["Finishing kemas,", "bahagian jari lembut"])),
+ (54.6, 62.0, "i7", dict(lines=["Finishing kemas,", "bahagian jaring lembut"])),
  (62.3, 70.8, "i8", dict(lines=["HOT ITEM:", "warna Tan & Pink"])),
  (70.9, 72.3, "k_pink2", dict(label="PINK", lines=[], swatches=["PINK"]), "1692"),
  (72.3, 74.2, "k_tan2", dict(label="TAN", lines=[], swatches=["TAN"]), "1690"),
