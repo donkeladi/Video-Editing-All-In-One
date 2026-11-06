@@ -61,7 +61,7 @@ def chalkify(mask, rough=0.35):
     tex = np.clip(1 - rough * (0.6 * n + 0.8 * n2) * 1.6 + 0.12, 0, 1)
     out = a * tex
     return Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.6))
-def chalk_layer(size, draw_fn, color, rough=0.35):
+def chalk_layer(size, draw_fn, color, rough=0.22):
     m = Image.new("L", size, 0); draw_fn(ImageDraw.Draw(m))
     m = chalkify(m, rough)
     lay = Image.new("RGBA", size, color + (0,)); lay.putalpha(m); return lay
@@ -154,7 +154,10 @@ def card(name, lines, sz=104, label=None, swatches=None):
         lay.alpha_composite(chalk_layer(S, ring, (244, 244, 238), 0.3))
     else:
         lay.alpha_composite(text_layer(S, lines, sz, col, y0, 0.92))
-    lay.save(f"{W}/{name}.png")
+    sh = Image.new("RGBA", S, (0, 0, 0, 0))
+    a = lay.getchannel("A").filter(ImageFilter.GaussianBlur(10)).point(lambda v: min(255, int(v * 2.6)))
+    sh.putalpha(a); sh.alpha_composite(lay)
+    sh.save(f"{W}/{name}.png")
 
 # ---------- jadual ----------
 EV = [
@@ -180,39 +183,51 @@ EV = [
  (76.5, 80.2, "i13", dict(lines=["Sesuai untuk jalan-jalan,", "shopping & travel"])),
 ]
 
+def make_scrim():
+    h = 900; g = np.zeros((h, 1080, 4), np.uint8)
+    t = np.linspace(0, 1, h); a = (t * t * (3 - 2 * t)) * 215
+    g[..., 3] = a[:, None].astype(np.uint8)
+    Image.fromarray(g, "RGBA").save(W + "/scrim.png")
+
 def compose():
-    make_bg()
+    make_scrim()
     D = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", W + "/main.mp4"],
                              capture_output=True, text=True).stdout)
-    inputs = ["-loop", "1", "-framerate", "30", "-t", f"{D}", "-i", W + "/bg.png", "-i", W + "/main.mp4"]
-    fc = ["[1:v]scale=900:1600,crop=900:1200:0:70,unsharp=5:5:0.45:3:3:0.0,eq=contrast=1.04:saturation=1.08[m]",
-          "[0:v][m]overlay=90:340:format=auto[b0]"]
-    idx, last = 2, "b0"
+    POL = "unsharp=5:5:0.45:3:3:0.0,eq=contrast=1.04:saturation=1.08"
+    inputs = ["-i", W + "/main.mp4", "-loop", "1", "-framerate", "30", "-t", f"{D}", "-i", W + "/scrim.png"]
+    fc = [f"[0:v]{POL}[m]"]
+    idx, last = 2, "m"
+    cut_fc, card_fc = [], []
     for ev in EV:
         s, e, name, kw = ev[:4]
         kk = ev[4] if len(ev) > 4 else None
         card(name, **kw)
         if kk:
             inputs += ["-i", f"{W}/b{kk}.mp4"]
-            fc.append(f"[{idx}:v]trim=0:{e-s:.2f},setpts=PTS-STARTPTS+{s}/TB,scale=900:1600,crop=900:1200:0:170,"
-                      f"unsharp=5:5:0.45:3:3:0.0,eq=contrast=1.04:saturation=1.08[v{idx}]")
-            fc.append(f"[{last}][v{idx}]overlay=90:340:enable='between(t,{s},{e})':eof_action=pass[o{idx}]")
+            fc.append(f"[{idx}:v]trim=0:{e-s:.2f},setpts=PTS-STARTPTS+{s}/TB,{POL}[v{idx}]")
+            fc.append(f"[{last}][v{idx}]overlay=0:0:enable='between(t,{s},{e})':eof_action=pass[o{idx}]")
             last = f"o{idx}"; idx += 1
+    fc.append(f"[{last}][1:v]overlay=0:1020:format=auto[sc]"); last = "sc"
+    for ev in EV:
+        s, e, name = ev[:3]
         inputs += ["-loop", "1", "-framerate", "30", "-t", f"{e-s+0.2:.2f}", "-i", f"{W}/{name}.png"]
-        fc.append(f"[{idx}:v]format=rgba,fade=t=in:st=0:d=0.15:alpha=1,fade=t=out:st={e-s-0.15:.2f}:d=0.15:alpha=1,setpts=PTS-STARTPTS+{s}/TB[c{idx}]")
-        fc.append(f"[{last}][c{idx}]overlay=0:1572:enable='between(t,{s},{e})':eof_action=pass[o{idx}]")
+        rv = min(0.9, (e - s) * 0.35)
+        fc.append(f"[{idx}:v]format=rgba,geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
+                  f"a='alpha(X,Y)*clip((W*1.08*min(1,T/{rv:.2f})-X)/70,0,1)',"
+                  f"fade=t=out:st={e-s-0.2:.2f}:d=0.2:alpha=1,setpts=PTS-STARTPTS+{s}/TB[c{idx}]")
+        fc.append(f"[{last}][c{idx}]overlay=0:1390:enable='between(t,{s},{e})':eof_action=pass[o{idx}]")
         last = f"o{idx}"; idx += 1
     fc.append(f"[{last}]format=yuv420p[v]")
     open(W + "/fc.txt", "w").write(";".join(fc))
     os.makedirs("output", exist_ok=True)
     run("ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex_script", W + "/fc.txt",
-        "-map", "[v]", "-map", "1:a", "-af", "loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000",
+        "-map", "[v]", "-map", "0:a", "-af", "loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000",
         "-c:v", "libx264", "-crf", "16", "-preset", "slow", "-profile:v", "high", "-pix_fmt", "yuv420p",
         "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-r", "30",
-        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", f"{D}", "output/candia_chalkboard.mp4")
+        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", f"{D}", "output/candia_fullscreen.mp4")
 
 if __name__ == "__main__":
     import sys
     if "--skip-video" not in sys.argv: build_video()
     compose()
-    print("output/candia_chalkboard.mp4")
+    print("output/candia_fullscreen.mp4")
