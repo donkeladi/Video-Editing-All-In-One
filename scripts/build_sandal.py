@@ -309,7 +309,7 @@ def draw_overlay(f, t, cutinfo):
                  ease_back((t - 53.2) / 0.45), k)
 
     # ----- HARGA -----
-    if 54.9 <= t < 60.9:
+    if False and 54.9 <= t < 60.9:  # kad harga dibuang atas permintaan
         k = ease_out((t - 54.9) / 0.3) * (1 - clamp((t - 60.5) / 0.4))
         s = ease_back((t - 54.9) / 0.5)
         blit(f, price_card(), W // 2, 1010, s, k)
