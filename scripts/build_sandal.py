@@ -202,176 +202,68 @@ def sub_sprite(text, hi):
         r = 1000 / im.width; im = im.resize((1000, int(im.height * r)), Image.LANCZOS)
     arr = np.asarray(im); cache[key] = arr; return arr
 
-# ---------- cutaway ----------
-# (mula, tamat, jenis, sumber, ss_klip/zoom params, label)
-CUTS = [
-    (7.40, 10.20, "clip", 1727, 0.4, "5 PILIHAN WARNA"),
-    (16.60, 19.00, "photo", "trio", (1.00, 1.18, 0.50, 0.65), "CREAM"),
-    (19.00, 21.30, "photo", "pink_black", (1.00, 1.16, 0.30, 0.68), "PINK  •  HITAM"),
-    (23.70, 27.40, "clip", 1729, 3.0, "HITAM  •  FORMAL"),
-    (33.60, 38.00, "clip", 1730, 3.0, "INSOLE TEBAL"),
-    (38.00, 41.80, "clip", 1728, 0.0, "GOLD CHAIN"),
-    (42.70, 45.60, "photo", "cream_book", (1.00, 1.30, 0.60, 0.62), "MESH + PU LEATHER"),
+# ---------- polaroid pop-up ----------
+PW, PH = 460, 580          # kertas polaroid
+PX, PY, PPW, PPH = 30, 30, 400, 440   # kawasan gambar
+# (mula, tamat, sisi, condong, sumber, param, kapsyen)
+# clip: ("clip", no, ss, zoom, cx, cy) ; photo: ("photo", nama, z0, z1, cx, cy)
+POLS = [
+    (7.60, 10.20, "R", 5, ("clip", 1727, 0.6, 1.0, 0.5, 0.62), "5 pilihan warna"),
+    (10.70, 12.35, "L", -5, ("clip", 1729, 1.2, 2.4, 0.22, 0.55), "Tan"),
+    (12.45, 14.05, "R", 5, ("clip", 1729, 0.0, 2.4, 0.62, 0.62), "Brown"),
+    (17.00, 18.95, "L", -5, ("photo", "trio", 1.2, 1.35, 0.62, 0.78), "Cream"),
+    (19.10, 20.90, "R", 5, ("clip", 1729, 7.0, 1.7, 0.45, 0.62), "Pink"),
+    (24.50, 26.50, "L", -5, ("clip", 1729, 4.2, 1.7, 0.5, 0.65), "Hitam"),
+    (34.00, 37.00, "R", 5, ("clip", 1730, 4.0, 1.25, 0.55, 0.6), "Insole tebal"),
+    (38.20, 41.60, "L", -5, ("clip", 1728, 0.2, 1.3, 0.5, 0.6), "Gold chain"),
+    (42.80, 45.60, "R", 5, ("photo", "cream_book", 1.5, 1.8, 0.58, 0.66), "PU leather"),
+    (47.90, 50.40, "L", -5, ("clip", 1730, 6.5, 1.1, 0.6, 0.65), "Tapak PVC anti-slip"),
 ]
-XF = 0.18  # tempoh transisi
-
-def cut_alpha(t):
-    for c in CUTS:
-        a, b = c[0], c[1]
-        if a - 1e-6 <= t <= b + 1e-6:
-            return c, min(ease_io((t - a) / XF), ease_io((b - t) / XF))
-    return None, 0.0
-
-# ---------- timeline overlay ----------
-SIZES = [36, 37, 38, 39, 40, 41]
-FEATS = [(34.0, "Insole tebal + extra span"), (38.2, "Gold chain finishing"),
-         (42.8, "Material PU leather"), (47.9, "Tapak PVC anti-slip")]
-
-def gold_glint(frame, t, t0, cy, wd=720, ht=140):
-    pass
-
-def draw_overlay(f, t, cutinfo):
-    c, ca = cutinfo
-    # ----- HUD (tema digital) pada cutaway -----
-    if c is not None and ca > 0.01:
-        a = ca
-        L = 70; m = 56; th = 6
-        col = (255, 205, 60)
-        ov = f  # corner brackets
-        for (x, y, dx, dy) in [(m, 110, 1, 1), (W - m, 110, -1, 1), (m, H - 500, 1, -1), (W - m, H - 500, -1, -1)]:
-            cv2.line(ov, (x, y), (x + dx * L, y), col, th, cv2.LINE_AA)
-            cv2.line(ov, (x, y), (x, y + dy * L), col, th, cv2.LINE_AA)
-        blit(f, pill(c[5], 44, fill=DARK, fg=GOLD, h=92, padx=40), W // 2, 190, ease_back((t - c[0]) / 0.4), a)
-        # scan line
-        sy = int(((t - c[0]) * 520) % (H - 700)) + 150
-        band = f[sy:sy + 5].astype(np.float32); f[sy:sy + 5] = np.clip(band * 0.65 + 255 * 0.35, 0, 255).astype(np.uint8)
-
-    # ----- HOOK -----
-    if t < 4.4:
-        k = 1 - clamp((t - 3.9) / 0.4)
-        s, a = pop(t, 0.25, 0.5)
-        blit(f, text_sprite("SANDAL MESH", 112, WHITE, "Black", 10), W // 2, 960, s, a * k)
-        s2, a2 = pop(t, 0.5, 0.5)
-        blit(f, text_sprite("GOLD CHAIN", 130, GOLD, "Black", 10), W // 2, 1085, s2, a2 * k)
-        s3, a3 = pop(t, 0.9, 0.45)
-        blit(f, pill("CANDIA  •  TP28111L", 40, fill=DARK, fg=WHITE, h=84, padx=40), W // 2, 1215, s3, a3 * k)
-    elif t < 6.9:
-        # lencana kecil kekal
-        s, a = pop(t, 4.4, 0.4)
-        blit(f, pill("CANDIA  Sandal Mesh Gold Chain", 34, fill=DARK, fg=WHITE, h=72, padx=34), W // 2, 128, s, a)
-    # lencana kekal selepas hook (kecuali semasa cutaway HUD label ada di y=190)
-    if 6.9 <= t < 60.6 and ca < 0.01:
-        blit(f, pill("CANDIA  Sandal Mesh Gold Chain", 34, fill=DARK, fg=WHITE, h=72, padx=34), W // 2, 128, 1, 1)
-
-    # ----- WARNA (swatch bar animasi) -----
-    order = [("Tan", 10.8), ("Brown", 12.4), ("Cream", 17.0), ("Pink", 19.1), ("Black", 24.6)]
-    if 8.0 <= t < 31.0:
-        bar_k = ease_out((t - 8.0) / 0.4) * (1 - clamp((t - 30.6) / 0.4))
-        # tajuk
-        blit(f, pill("5 PILIHAN WARNA", 40, fill=DARK, fg=GOLD, h=84, padx=40), W // 2, 1005, ease_back((t - 8.0) / 0.45), bar_k)
-        n = len(order); gap = 160; x0 = W // 2 - gap * (n - 1) / 2
-        for i, (nm, ts) in enumerate(order):
-            sc, al = pop(t, 8.6 + i * 0.08, 0.5)
-            active = ts - 0.1 <= t < ts + 1.9
-            pulse = 1 + 0.12 * math.sin((t - ts) * 9) * (1 if active else 0) * (1 - clamp((t - ts) / 1.9))
-            big = 1.22 if active else 1.0
-            cx = x0 + i * gap; cy = 1110
-            sp = chip_sprite(nm, active)
-            blit(f, sp, cx, cy, sc * big * pulse, al * bar_k)
-    # "semua" – semua warna pop bersama selepas 25.6
-    # ----- SENARAI CIRI -----
-    if 34.0 <= t < 50.4:
-        k = 1 - clamp((t - 50.0) / 0.4)
-        for i, (ts, label) in enumerate(FEATS):
-            s, a = pop(t, ts, 0.45)
-            sp = pill(label, 44, fill=(255, 255, 255, 245), fg=INK, h=94, padx=40, check=True)
-            blit(f, sp, 60 + sp.shape[1] / 2 - 60, 880 + i * 122, s, a * k)
-
-    # ----- SAIZ -----
-    if 50.4 <= t < 54.9:
-        k = ease_out((t - 50.4) / 0.35) * (1 - clamp((t - 54.5) / 0.4))
-        blit(f, pill("CUTTING KECIL", 52, fill=(214, 60, 60, 255), fg=WHITE, h=104, padx=50),
-             W // 2, 880, ease_back((t - 50.4) / 0.45), k)
-        gap = 128; x0 = W // 2 - gap * 2.5
-        for i, sz in enumerate(SIZES):
-            sc, al = pop(t, 50.7 + i * 0.1, 0.45)
-            # chip "highlight" bergerak: biasa 37 -> naik 38
-            move = ease_io((t - 52.3) / 0.6)
-            hl_i = 1 + move  # 37 -> 38
-            is_hl = abs(i - hl_i) < 0.5
-            sp = size_chip(sz, is_hl)
-            blit(f, sp, x0 + i * gap, 1000, sc * (1.18 if is_hl and t > 52.3 else 1), al * k)
-        if t > 51.7:
-            blit(f, pill("Kaki normal: UP 1 SIZE", 44, fill=DARK, fg=GOLD, h=92, padx=44), W // 2, 1118,
-                 ease_back((t - 51.7) / 0.45), k)
-        if t > 53.2:
-            blit(f, pill("Kaki lebar: UP 2 SIZE", 44, fill=DARK, fg=WHITE, h=92, padx=44), W // 2, 1228,
-                 ease_back((t - 53.2) / 0.45), k)
-
-    # ----- HARGA -----
-    if False and 54.9 <= t < 60.9:  # kad harga dibuang atas permintaan
-        k = ease_out((t - 54.9) / 0.3) * (1 - clamp((t - 60.5) / 0.4))
-        s = ease_back((t - 54.9) / 0.5)
-        blit(f, price_card(), W // 2, 1010, s, k)
-        gl = ((t - 55.6) * 1.6) % 2.2  # kilauan
-        if gl < 1:
-            pass
-    # ----- CTA -----
-    if t >= 60.9:
-        s = ease_back((t - 60.95) / 0.5)
-        blit(f, pill("KLIK BEG KUNING", 64, fill=GOLD + (255,), fg=INK, h=140, padx=64), W // 2, 1010, s, 1)
-        bob = 18 * math.sin((t - 61) * 7)
-        blit(f, arrow_sprite(), W // 2, 1150 + bob, ease_back((t - 61.2) / 0.5), 1)
-        s2 = ease_back((t - 61.6) / 0.45)
-        blit(f, pill("FOLLOW  •  KOMEN", 46, fill=DARK, fg=WHITE, h=96, padx=48), W // 2, 1275, s2 * (1 if t > 61.6 else 0), 1)
-
-def chip_sprite(name, active):
-    key = ("chip", name, active)
+def polaroid_base(caption):
+    key = ("pol", caption)
     if key in cache: return cache[key]
-    r = 52; wd = 150; ht = 190
     def dr(d, ss):
-        col = COL[name]
-        cx = wd * ss // 2; cy = 70 * ss
-        d.ellipse((cx - (r + 7) * ss, cy - (r + 7) * ss, cx + (r + 7) * ss, cy + (r + 7) * ss),
-                  fill=(255, 205, 60, 255) if active else (255, 255, 255, 255))
-        d.ellipse((cx - r * ss, cy - r * ss, cx + r * ss, cy + r * ss), fill=col + (255,))
-        # kilau
-        d.ellipse((cx - r * .55 * ss, cy - r * .7 * ss, cx - r * .05 * ss, cy - r * .3 * ss), fill=(255, 255, 255, 70))
-        f = F("ExtraBold", 34 * ss); tw = f.getlength(name.upper()); pw = tw + 36 * ss
-        d.rounded_rectangle((cx - pw / 2, 138 * ss, cx + pw / 2, 184 * ss), 23 * ss, fill=(24, 24, 28, 240))
-        d.text((cx, 161 * ss), name.upper(), font=f, fill=GOLD if active else WHITE, anchor="mm")
-    arr = sprite_from(dr, wd + 40, ht)
-    cache[key] = arr; return arr
+        d.rounded_rectangle((0, 0, PW * ss - 1, PH * ss - 1), 10 * ss, fill=(250, 248, 243, 255))
+        d.rectangle((PX * ss, PY * ss, (PX + PPW) * ss, (PY + PPH) * ss), fill=(40, 40, 40, 255))
+        f = F("ExtraBold", 42 * ss)
+        if f.getlength(caption) > (PW - 40) * ss: f = F("ExtraBold", 34 * ss)
+        d.text((PW * ss / 2, (PY + PPH + (PH - PY - PPH) / 2) * ss), caption, font=f, fill=(30, 30, 34), anchor="mm")
+    arr = sprite_from(dr, PW, PH)
+    out = np.asarray(shadow(Image.fromarray(arr), 18, 12, 120)); cache[key] = out; return out
+POL_PAD = 54
 
+def pol_content(img, prm):
+    """img 1080x1920 -> 400x440 crop."""
+    h = int(W * PPH / PPW)
+    y0 = (H - h) // 2
+    return cv2.resize(img[y0:y0 + h], (PPW, PPH), interpolation=cv2.INTER_AREA)
+
+def draw_polaroid(frame, t, p, content):
+    t0, t1, side, tilt, _, cap = p
+    spr = polaroid_base(cap).copy()
+    spr[POL_PAD + PY:POL_PAD + PY + PPH, POL_PAD + PX:POL_PAD + PX + PPW, :3] = content
+    spr[POL_PAD + PY:POL_PAD + PY + PPH, POL_PAD + PX:POL_PAD + PX + PPW, 3] = 255
+    cx = 300 if side == "L" else 780; cy = 1010
+    inn = (t - t0) / 0.5; out = (t - (t1 - 0.3)) / 0.3
+    if inn < 1:
+        e = ease_back(inn, 1.5); sc = 0.35 + 0.65 * e; rot = tilt + (-tilt * 3 - 14 if side == "L" else 14) * (1 - e) * 0.6
+        dx = (-1 if side == "L" else 1) * 160 * (1 - ease_out(inn)); dy = 160 * (1 - ease_out(inn)); al = clamp(inn * 4)
+    else:
+        sc, rot, dx, dy, al = 1.0, tilt + 0.9 * math.sin((t - t0) * 3.2), 0, 0, 1
+    if out > 0:
+        o = ease_io(out); sc *= 1 - 0.12 * o; dy += 70 * o; al *= 1 - o
+    blit(frame, spr, cx + dx, cy + dy, sc, al, rot)
+
+SIZES = [36, 37, 38, 39, 40, 41]
 def size_chip(sz, hl):
     key = ("size", sz, hl)
     if key in cache: return cache[key]
-    wd = 112; ht = 112
+    wd = ht = 104
     def dr(d, ss):
         fill = (255, 205, 60, 255) if hl else (255, 255, 255, 245)
-        d.rounded_rectangle((0, 0, wd * ss - 1, ht * ss - 1), 30 * ss, fill=fill)
-        d.text((wd * ss / 2, ht * ss / 2), str(sz), font=F("Black", 54 * ss), fill=INK, anchor="mm")
+        d.rounded_rectangle((0, 0, wd * ss - 1, ht * ss - 1), 28 * ss, fill=fill)
+        d.text((wd * ss / 2, ht * ss / 2), str(sz), font=F("Black", 50 * ss), fill=INK, anchor="mm")
     arr = np.asarray(shadow(Image.fromarray(sprite_from(dr, wd, ht)), 10, 6, 110)); cache[key] = arr; return arr
-
-def price_card():
-    key = ("price",)
-    if key in cache: return cache[key]
-    wd, ht = 800, 520
-    def dr(d, ss):
-        d.rounded_rectangle((0, 0, wd * ss - 1, ht * ss - 1), 56 * ss, fill=(255, 255, 255, 248))
-        d.rounded_rectangle((0, 0, wd * ss - 1, 100 * ss), 56 * ss, fill=(22, 22, 26, 255))
-        d.rectangle((0, 60 * ss, wd * ss - 1, 100 * ss), fill=(22, 22, 26, 255))
-        d.text((wd * ss / 2, 52 * ss), "HARGA PROMO", font=F("ExtraBold", 40 * ss), fill=GOLD, anchor="mm")
-        d.text((wd * ss / 2, 230 * ss), "RM37.90", font=F("Black", 150 * ss), fill=(218, 30, 70), anchor="mm")
-        # harga asal bergaris
-        f = F("Bold", 50 * ss); txt = "RM59.90"; tw = f.getlength(txt)
-        x = 215 * ss; y = 372 * ss
-        d.text((x, y), txt, font=f, fill=(110, 110, 116), anchor="lm")
-        d.line((x - 8 * ss, y, x + tw + 8 * ss, y), fill=(218, 30, 70), width=7 * ss)
-        d.rounded_rectangle((470 * ss, 340 * ss, 640 * ss, 404 * ss), 30 * ss, fill=(218, 30, 70))
-        d.text((555 * ss, 372 * ss), "-37%", font=F("Black", 42 * ss), fill=WHITE, anchor="mm")
-        d.text((wd * ss / 2, 456 * ss), "Percuma pos  •  Bayar masa terima (COD)", font=F("SemiBold", 34 * ss), fill=(60, 60, 66), anchor="mm")
-    arr = np.asarray(shadow(Image.fromarray(sprite_from(dr, wd, ht)), 22, 12, 110)); cache[key] = arr; return arr
 
 def arrow_sprite():
     key = ("arrow",)
@@ -382,53 +274,69 @@ def arrow_sprite():
                    (85 * ss, 50 * ss), (120 * ss, 50 * ss)], fill=GOLD, outline=(10, 10, 12), width=5 * ss)
     arr = np.asarray(shadow(Image.fromarray(sprite_from(dr, wd, ht)), 8, 5, 140)); cache[key] = arr; return arr
 
+def draw_simple(f, t):
+    # hook ringkas
+    if t < 3.9:
+        k = 1 - clamp((t - 3.5) / 0.4)
+        s, a = pop(t, 0.25, 0.5)
+        blit(f, text_sprite("SANDAL MESH", 112, WHITE, "Black", 10), W // 2, 960, s, a * k)
+        s2, a2 = pop(t, 0.5, 0.5)
+        blit(f, text_sprite("GOLD CHAIN", 130, GOLD, "Black", 10), W // 2, 1085, s2, a2 * k)
+    # saiz: satu kad bersih
+    if 50.6 <= t < 55.2:
+        k = ease_out((t - 50.6) / 0.35) * (1 - clamp((t - 54.8) / 0.4))
+        blit(f, pill("CUTTING KECIL  •  AMBIL UP 1 SIZE", 40, fill=DARK, fg=GOLD, h=92, padx=44),
+             W // 2, 930, ease_back((t - 50.6) / 0.45), k)
+        gap = 128; x0 = W // 2 - gap * 2.5
+        for i, sz in enumerate(SIZES):
+            sc, al = pop(t, 51.0 + i * 0.1, 0.45)
+            hl = (sz == 37 and t < 52.8) or (sz == 38 and t >= 52.8)
+            blit(f, size_chip(sz, hl), x0 + i * gap, 1040, sc * (1.15 if hl else 1), al * k)
+        if t > 53.0:
+            blit(f, pill("Kaki lebar: UP 2 SIZE", 38, fill=DARK, fg=WHITE, h=84, padx=40), W // 2, 1150,
+                 ease_back((t - 53.0) / 0.45), k)
+    # CTA
+    if t >= 60.9:
+        s = ease_back((t - 60.95) / 0.5)
+        blit(f, pill("KLIK BEG KUNING", 64, fill=GOLD + (255,), fg=INK, h=140, padx=64), W // 2, 1010, s, 1)
+        bob = 18 * math.sin((t - 61) * 7)
+        blit(f, arrow_sprite(), W // 2, 1150 + bob, ease_back((t - 61.2) / 0.5), 1)
+
 # ---------- main render ----------
 def main():
-    # sumber
     T0, T1 = (float(x) for x in os.environ.get("PREVIEW", f"0,{TOTAL}").split(","))
     pm = reader(MAIN, T0, T1 - T0, False)
     photos = {k: load_photo(v) for k, v in PHOTO.items()}
-    active_clip = {"key": None, "p": None, "buf": []}
     enc = sp.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS),
-                    "-i", "-", "-an", "-c:v", "libx264", "-preset", os.environ.get("PRESET", "slow"), "-crf", "17", "-pix_fmt", "yuv420p",
-                    "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
+                    "-i", "-", "-an", "-c:v", "libx264", "-preset", os.environ.get("PRESET", "slow"), "-crf", "17",
+                    "-pix_fmt", "yuv420p", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
                     "-profile:v", "high", "-movflags", "+faststart", OUT + ".noaudio.mp4"], stdin=sp.PIPE)
-    clip_readers = {}
+    readers = {}
     for i in range(int(T0 * FPS), int(T1 * FPS)):
         t = i / FPS
         m = read_frame(pm)
-        if m is None: m = np.zeros((H, W, 3), np.uint8)
-        frame = np.array(m)  # salinan boleh tulis
-        # ZOOM halus pada video utama (punch-in hook)
-        c, ca = cut_alpha(t)
-        if c is not None:
-            kind, src, prm = c[2], c[3], c[4]
-            lt = t - c[0]; dur = c[1] - c[0]
-            if kind == "clip":
-                key = (src, c[0])
-                if key not in clip_readers:
-                    clip_readers[key] = reader(CLIP[src], prm + max(0.0, T0 - c[0]) if False else prm, dur + 0.3, True)
-                b = read_frame(clip_readers[key])
-                if b is None: b = frame
-                z = 1.0 + 0.07 * (lt / dur)
-                b = zoom(b, z) if z > 1.001 else b
-            else:
-                z0, z1, cx, cy = prm
-                z = z0 + (z1 - z0) * ease_io(lt / dur)
-                b = photo_frame(photos[src], z, cx, cy)
-            # whip: bawa sedikit zoom punch masa transisi
-            a = ca
-            frame = (frame.astype(np.float32) * (1 - a) + b.astype(np.float32) * a).astype(np.uint8)
-        draw_overlay(frame, t, (c, ca))
-        # subtitle
+        frame = np.array(m) if m is not None else np.zeros((H, W, 3), np.uint8)
+        draw_simple(frame, t)
+        for idx, p in enumerate(POLS):
+            if p[0] <= t < p[1]:
+                kind, src = p[4][0], p[4][1]
+                if kind == "clip":
+                    if idx not in readers:
+                        readers[idx] = reader(CLIP[src], p[4][2], p[1] - p[0] + 0.3, True)
+                    b = read_frame(readers[idx])
+                    if b is None: b = np.zeros((H, W, 3), np.uint8)
+                    img = zoom(b, p[4][3], p[4][4], p[4][5])
+                else:
+                    lt = (t - p[0]) / (p[1] - p[0])
+                    img = zoom(photos[src], p[4][2] + (p[4][3] - p[4][2]) * lt, p[4][4], p[4][5])
+                draw_polaroid(frame, t, p, pol_content(img, p))
         for (a0, a1, tx, hi) in SUBS:
             if a0 <= t < a1:
                 sc = ease_back((t - a0) / 0.22, 1.4) if t - a0 < 0.22 else 1.0
                 blit(frame, sub_sprite(tx, hi), W // 2, 1395, 0.9 + 0.1 * sc, clamp((t - a0) / 0.08))
                 break
         enc.stdin.write(frame.tobytes())
-        if i % 150 == 0: print(f"frame {i}/{NF}", flush=True)
+        if i % 150 == 0: print(f"frame {i}/{int(T1*FPS)}", flush=True)
     enc.stdin.close(); enc.wait()
-    pm.stdout.close()
 if __name__ == "__main__":
     main()
