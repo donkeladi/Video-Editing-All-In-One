@@ -16,3 +16,8 @@ Flow: https://elevenlabs.io/app/flows/KrSx4LWx7e75OGJbjl6C
 
 Fail audio belum dimuat turun: host elevenlabsusercontent.com disekat oleh rangkaian sesi ini (403).
 Jangan jana semula baris yang sudah siap; hanya L3, L4, L9 yang belum ada.
+
+## Kemas kini: VO akhir (setempat)
+ElevenLabs Free Tier dinyahaktifkan, jadi VO akhir dijana setempat dengan facebook/mms-tts-zlm (kadar 1.12), satu suara untuk kesemua 9 baris. Lesen model CC-BY-NC 4.0 (bukan komersial). Audio ElevenLabs yang siap sebahagian tidak digunakan.
+Alat: tools/vo_build.py (pilih take ikut ASR), tools/align.py (masa perkataan), tools/timeline.py, tools/audio.py. Ejaan sebutan TTS sahaja: docs/vo-tts-variants.json.
+Perlu didengar manusia: "mesej" (L1), "lif"/"skrin" (L6), "bosan" (L5), "video" (L9), sebutan "spontaneous smartphone checking" (L3).
