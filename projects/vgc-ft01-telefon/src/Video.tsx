@@ -8,7 +8,7 @@ import {S5} from './scenes/S5'; import {S6} from './scenes/S6'; import {S7} from
 
 const COMP = [S1, S2, S3, S4, S5, S6, S7, S8];
 
-const useFonts = () => {
+export const useFonts = () => {
   const [h] = useState(() => delayRender('fonts'));
   useEffect(() => {
     const faces = [
