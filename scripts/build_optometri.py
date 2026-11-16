@@ -21,7 +21,8 @@ f = lambda p, s: ImageFont.truetype(p, s)
 
 # ---- bahagian yang dikekalkan (saat dalam video asal) ----
 KEEP = [(1.95, 4.95), (5.30, 14.14), (14.76, 16.48), (17.01, 22.61),
-        (23.12, 27.22), (30.39, 32.08), (32.47, 34.08), (34.63, 37.30)]
+        (23.12, 27.22), (30.39, 32.08), (32.47, 34.08), (34.63, 40.87),
+        (41.09, 42.70), (42.96, 44.22)]
 KEEP = [(a - 0.08, b + 0.14) for a, b in KEEP]
 starts, t = [], 0.0
 for a, b in KEEP:
@@ -48,7 +49,11 @@ SUBS = [
  ("Tiga benda yang Mak ayah boleh buat:", 30.39, 32.08),
  ("Bagi anak rehat daripada skrin,", 32.47, 34.08),
  ("Bawa main di luar,", 34.63, 35.8),
- ("cek mata setahun sekali.", 35.88, 37.30),
+ ("cek mata setahun sekali,", 35.88, 37.14),
+ ("ataupun ambil produk {\\c&HB0B512&}Eye Care{\\c&HFFFFFF&}", 37.14, 39.0),
+ ("dan amalkan setiap hari.", 39.13, 40.87),
+ ("So jumpa korang,", 41.09, 42.70),
+ ("bye bye, Assalamualaikum.", 42.96, 44.22),
 ]
 def ts(x, ass=False):
     h, m, s = int(x // 3600), int(x % 3600 // 60), x % 60
@@ -59,7 +64,7 @@ for i, (txt, a, b) in enumerate(SUBS, 1):
     oa, ob = omap(a), omap(b) + 0.12
     if i < len(SUBS):
         na = omap(SUBS[i][1])
-        if 0 < na - ob < 0.6: ob = na
+        if na - ob < 0.6: ob = na   # tiada bertindih, sambung ke baris seterusnya
     ob = min(ob, TOTAL)
     plain = re.sub(r"\{[^}]*\}", "", txt)
     srt.append(f"{i}\n{ts(oa)} --> {ts(ob)}\n{plain}\n")
@@ -143,6 +148,14 @@ def card_x4(d, t, t0):
     ctr(d, (540, 890), f"{v:.0f}×", F(FX, 150), WHITE)
     ctr(d, (540, 1005), "BILANGAN BUDAK RABUN", F(FB, 36), WHITE)
 
+def card_eye(d, t, t0):
+    rr(d, (50, 760, 1030, 1020), 36, NAVY + (255,), AQUA, 5)
+    eye(d, 190, 890, 70, AQUA)
+    d.text((310, 850), "EYE CARE", font=F(FX, 72), fill=WHITE, anchor="lm")
+    d.text((310, 925), "Amalkan setiap hari", font=F(FB, 44), fill=(170, 225, 232), anchor="lm")
+    p = out3(prog(t, t0 + 0.6, 0.5))
+    d.rounded_rectangle((310, 965, 310 + 560 * p, 975), 5, fill=AQUA)
+
 TIPS = ["Rehat dari skrin", "Bawa main di luar", "Check mata setahun sekali"]
 def card_tips(d, t, t0, ts_):
     rr(d, (50, 720, 1030, 810), 30, TEAL + (255,))
@@ -173,7 +186,8 @@ CARDS = [
  (o(14.9), o(19.84) + 0.1, lambda d, t, a: card_punca(d, t, a)),
  (o(21.14), o(25.2) - 0.05, lambda d, t, a: card_tahun(d, t, a)),
  (o(25.2), o(27.22) + 0.2, lambda d, t, a: card_x4(d, t, a)),
- (o(30.39), TOTAL, lambda d, t, a: card_tips(d, t, a, [o(32.47), o(34.63), o(35.88)])),
+ (o(30.39), o(37.14) + 0.3, lambda d, t, a: card_tips(d, t, a, [o(32.47), o(34.63), o(35.88)])),
+ (o(37.78), o(40.87) + 0.15, lambda d, t, a: card_eye(d, t, a)),
 ]
 IN, OUTD = 0.5, 0.35
 
