@@ -5,32 +5,142 @@ PlayResY: 1920
 WrapStyle: 0
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
-Style: Sub,Inter,66,&H00FFFFFF,&H00FFFFFF,&H66401E0A,&H00000000,1,0,0,0,100,100,0,0,3,18,0,2,80,80,600,1
+Style: Sub,Inter,68,&H00FFFFFF,&H00FFFFFF,&H66401E0A,&H00000000,1,0,0,0,100,100,0,0,3,18,0,2,70,70,600,1
 Style: Tag,Inter,32,&H00FFFFFF,&H00FFFFFF,&H66401E0A,&H00000000,1,0,0,0,100,100,1,0,3,12,0,8,40,40,70,1
-Style: Big,Inter,150,&H00B6C42E,&H00FFFFFF,&H00401E0A,&H00000000,1,0,0,0,100,100,0,0,1,6,0,8,40,40,260,1
-Style: Small,Inter,42,&H00FFFFFF,&H00FFFFFF,&H00401E0A,&H00000000,1,0,0,0,100,100,2,0,1,4,0,8,40,40,430,1
+Style: Ov,Inter,50,&H00FFFFFF,&H00FFFFFF,&H00401E0A,&H00000000,1,0,0,0,100,100,0,0,1,0,0,5,0,0,0,1
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
-Dialogue: 0,0:00:00.00,0:00:43.77,Tag,,0,0,0,,DS PHARMA EYE CARE  ·  MAL22076147T
-Dialogue: 1,0:00:00.00,0:00:00.84,Sub,,0,0,0,,{\fad(80,60)}Korang tahu tak,
-Dialogue: 1,0:00:00.86,0:00:03.98,Sub,,0,0,0,,{\fad(80,60)}purata orang Malaysia online {\c&HB6C42E&}8 jam{\c&HFFFFFF&} sehari.
-Dialogue: 1,0:00:04.00,0:00:05.58,Sub,,0,0,0,,{\fad(80,60)}Itu belum lagi kita tengok TV,
-Dialogue: 1,0:00:05.94,0:00:07.88,Sub,,0,0,0,,{\fad(80,60)}tengok TikTok online.
-Dialogue: 1,0:00:08.32,0:00:10.80,Sub,,0,0,0,,{\fad(80,60)}So, tolak {\c&HB6C42E&}24 jam{\c&HFFFFFF&},
-Dialogue: 1,0:00:10.82,0:00:12.30,Sub,,0,0,0,,{\fad(80,60)}tolak {\c&HB6C42E&}8 jam{\c&HFFFFFF&} sehari,
-Dialogue: 1,0:00:12.32,0:00:14.64,Sub,,0,0,0,,{\fad(80,60)}kita masih lagi berbaki {\c&HB6C42E&}16 jam{\c&HFFFFFF&}.
-Dialogue: 1,0:00:14.66,0:00:16.84,Sub,,0,0,0,,{\fad(80,60)}Jadi, means {\c&HB6C42E&}8 jam{\c&HFFFFFF&} kita tengok social
-Dialogue: 1,0:00:16.86,0:00:20.50,Sub,,0,0,0,,{\fad(80,60)}media, dah separuh hari kita tengok depan
-Dialogue: 1,0:00:20.52,0:00:20.90,Sub,,0,0,0,,{\fad(80,60)}skrin.
-Dialogue: 1,0:00:20.92,0:00:24.72,Sub,,0,0,0,,{\fad(80,60)}Jadi, {\c&HB6C42E&}masalah mata{\c&HFFFFFF&} akan jadi sangat-sangat
-Dialogue: 1,0:00:24.74,0:00:28.18,Sub,,0,0,0,,{\fad(80,60)}teruk disebabkan cahaya {\c&HB6C42E&}blue light{\c&HFFFFFF&} daripada
-Dialogue: 1,0:00:28.20,0:00:29.48,Sub,,0,0,0,,{\fad(80,60)}social media.
-Dialogue: 1,0:00:29.50,0:00:31.02,Sub,,0,0,0,,{\fad(80,60)}Daripada screen time tu lah.
-Dialogue: 1,0:00:31.04,0:00:35.44,Sub,,0,0,0,,{\fad(80,60)}Jadi, saya amalkan konsep {\c&HB6C42E&}20-20-20{\c&HFFFFFF&} yang mana
-Dialogue: 1,0:00:35.46,0:00:36.92,Sub,,0,0,0,,{\fad(80,60)}setiap {\c&HB6C42E&}20 minit{\c&HFFFFFF&},
-Dialogue: 1,0:00:36.94,0:00:39.60,Sub,,0,0,0,,{\fad(80,60)}tengok sejauh {\c&HB6C42E&}20 kaki{\c&HFFFFFF&},
-Dialogue: 1,0:00:39.62,0:00:40.94,Sub,,0,0,0,,{\fad(80,60)}{\c&HB6C42E&}20 saat{\c&HFFFFFF&}.
-Dialogue: 1,0:00:40.98,0:00:42.54,Sub,,0,0,0,,{\fad(80,60)}Mata ada sepasang je.
-Dialogue: 1,0:00:42.56,0:00:43.70,Sub,,0,0,0,,{\fad(80,60)}{\c&HB6C42E&}Jaga elok-elok{\c&HFFFFFF&}.
-Dialogue: 2,0:00:31.04,0:00:40.94,Big,,0,0,0,,{\fad(150,150)\t(0,200,\fscx100\fscy100)\fscx70\fscy70}20-20-20
-Dialogue: 2,0:00:31.34,0:00:40.94,Small,,0,0,0,,{\fad(150,150)}20 minit  •  20 kaki  •  20 saat
+Dialogue: 0,0:00:00.00,0:00:48.77,Tag,,0,0,0,,DS PHARMA EYE CARE  ·  MAL22076147T
+Dialogue: 1,0:00:00.00,0:00:00.40,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Korang{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}tahu {\c&HFFFFFF&}tak,
+Dialogue: 1,0:00:00.40,0:00:00.56,Sub,,0,0,0,,{}{\c&HFFFFFF&}Korang {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tahu{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}tak,
+Dialogue: 1,0:00:00.56,0:00:00.84,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}Korang {\c&HFFFFFF&}tahu {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tak,{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:00.86,0:00:01.20,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}purata{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}orang {\c&HFFFFFF&}Malaysia {\c&HFFFFFF&}online {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}sehari.
+Dialogue: 1,0:00:01.20,0:00:01.44,Sub,,0,0,0,,{}{\c&HFFFFFF&}purata {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}orang{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}Malaysia {\c&HFFFFFF&}online {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}sehari.
+Dialogue: 1,0:00:01.44,0:00:01.90,Sub,,0,0,0,,{}{\c&HFFFFFF&}purata {\c&HFFFFFF&}orang {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Malaysia{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}online {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}sehari.
+Dialogue: 1,0:00:01.90,0:00:02.30,Sub,,0,0,0,,{}{\c&HFFFFFF&}purata {\c&HFFFFFF&}orang {\c&HFFFFFF&}Malaysia {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}online{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}sehari.
+Dialogue: 1,0:00:02.30,0:00:02.78,Sub,,0,0,0,,{}{\c&HFFFFFF&}purata {\c&HFFFFFF&}orang {\c&HFFFFFF&}Malaysia {\c&HFFFFFF&}online {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}8{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}jam {\c&HFFFFFF&}sehari.
+Dialogue: 1,0:00:02.78,0:00:03.32,Sub,,0,0,0,,{}{\c&HFFFFFF&}purata {\c&HFFFFFF&}orang {\c&HFFFFFF&}Malaysia {\c&HFFFFFF&}online {\c&HB6C42E&}8 {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}jam{\c&HB6C42E&\fscx100\fscy100} {\c&HFFFFFF&}sehari.
+Dialogue: 1,0:00:03.32,0:00:03.98,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}purata {\c&HFFFFFF&}orang {\c&HFFFFFF&}Malaysia {\c&HFFFFFF&}online {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}sehari.{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:04.00,0:00:04.16,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Itu{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}belum {\c&HFFFFFF&}lagi {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}TV,
+Dialogue: 1,0:00:04.16,0:00:04.36,Sub,,0,0,0,,{}{\c&HFFFFFF&}Itu {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}belum{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}lagi {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}TV,
+Dialogue: 1,0:00:04.36,0:00:04.62,Sub,,0,0,0,,{}{\c&HFFFFFF&}Itu {\c&HFFFFFF&}belum {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}lagi{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}TV,
+Dialogue: 1,0:00:04.62,0:00:04.86,Sub,,0,0,0,,{}{\c&HFFFFFF&}Itu {\c&HFFFFFF&}belum {\c&HFFFFFF&}lagi {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}kita{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}tengok {\c&HFFFFFF&}TV,
+Dialogue: 1,0:00:04.86,0:00:05.18,Sub,,0,0,0,,{}{\c&HFFFFFF&}Itu {\c&HFFFFFF&}belum {\c&HFFFFFF&}lagi {\c&HFFFFFF&}kita {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tengok{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}TV,
+Dialogue: 1,0:00:05.18,0:00:05.58,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}Itu {\c&HFFFFFF&}belum {\c&HFFFFFF&}lagi {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}TV,{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:05.94,0:00:06.56,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tengok{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}TikTok {\c&HFFFFFF&}online.
+Dialogue: 1,0:00:06.56,0:00:06.92,Sub,,0,0,0,,{}{\c&HFFFFFF&}tengok {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}TikTok{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}online.
+Dialogue: 1,0:00:06.92,0:00:07.88,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}tengok {\c&HFFFFFF&}TikTok {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}online.{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:08.32,0:00:09.22,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}So,{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}tolak {\c&HB6C42E&}24 {\c&HB6C42E&}jam,
+Dialogue: 1,0:00:09.22,0:00:09.90,Sub,,0,0,0,,{}{\c&HFFFFFF&}So, {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tolak{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}24 {\c&HB6C42E&}jam,
+Dialogue: 1,0:00:09.90,0:00:10.16,Sub,,0,0,0,,{}{\c&HFFFFFF&}So, {\c&HFFFFFF&}tolak {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}24{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}jam,
+Dialogue: 1,0:00:10.16,0:00:10.80,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}So, {\c&HFFFFFF&}tolak {\c&HB6C42E&}24 {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}jam,{\c&HB6C42E&\fscx100\fscy100}
+Dialogue: 1,0:00:10.82,0:00:11.16,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tolak{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}sehari,
+Dialogue: 1,0:00:11.16,0:00:11.42,Sub,,0,0,0,,{}{\c&HFFFFFF&}tolak {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}8{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}jam {\c&HFFFFFF&}sehari,
+Dialogue: 1,0:00:11.42,0:00:11.94,Sub,,0,0,0,,{}{\c&HFFFFFF&}tolak {\c&HB6C42E&}8 {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}jam{\c&HB6C42E&\fscx100\fscy100} {\c&HFFFFFF&}sehari,
+Dialogue: 1,0:00:11.94,0:00:12.30,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}tolak {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}sehari,{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:12.32,0:00:12.44,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}kita{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}masih {\c&HFFFFFF&}lagi {\c&HFFFFFF&}berbaki {\c&HB6C42E&}16 {\c&HB6C42E&}jam.
+Dialogue: 1,0:00:12.44,0:00:12.70,Sub,,0,0,0,,{}{\c&HFFFFFF&}kita {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}masih{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}lagi {\c&HFFFFFF&}berbaki {\c&HB6C42E&}16 {\c&HB6C42E&}jam.
+Dialogue: 1,0:00:12.70,0:00:12.92,Sub,,0,0,0,,{}{\c&HFFFFFF&}kita {\c&HFFFFFF&}masih {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}lagi{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}berbaki {\c&HB6C42E&}16 {\c&HB6C42E&}jam.
+Dialogue: 1,0:00:12.92,0:00:13.48,Sub,,0,0,0,,{}{\c&HFFFFFF&}kita {\c&HFFFFFF&}masih {\c&HFFFFFF&}lagi {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}berbaki{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}16 {\c&HB6C42E&}jam.
+Dialogue: 1,0:00:13.48,0:00:13.90,Sub,,0,0,0,,{}{\c&HFFFFFF&}kita {\c&HFFFFFF&}masih {\c&HFFFFFF&}lagi {\c&HFFFFFF&}berbaki {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}16{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}jam.
+Dialogue: 1,0:00:13.90,0:00:14.64,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}kita {\c&HFFFFFF&}masih {\c&HFFFFFF&}lagi {\c&HFFFFFF&}berbaki {\c&HB6C42E&}16 {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}jam.{\c&HB6C42E&\fscx100\fscy100}
+Dialogue: 1,0:00:14.66,0:00:14.92,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Jadi,{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}means {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}social
+Dialogue: 1,0:00:14.92,0:00:15.26,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}means{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}social
+Dialogue: 1,0:00:15.26,0:00:15.62,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}means {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}8{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}jam {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}social
+Dialogue: 1,0:00:15.62,0:00:16.12,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}means {\c&HB6C42E&}8 {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}jam{\c&HB6C42E&\fscx100\fscy100} {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}social
+Dialogue: 1,0:00:16.12,0:00:16.34,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}means {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}kita{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}tengok {\c&HFFFFFF&}social
+Dialogue: 1,0:00:16.34,0:00:16.66,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}means {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}kita {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tengok{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}social
+Dialogue: 1,0:00:16.66,0:00:16.84,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}means {\c&HB6C42E&}8 {\c&HB6C42E&}jam {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}social{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:16.86,0:00:17.50,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}media,{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}dah {\c&HFFFFFF&}separuh {\c&HFFFFFF&}hari {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}depan
+Dialogue: 1,0:00:17.50,0:00:17.80,Sub,,0,0,0,,{}{\c&HFFFFFF&}media, {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}dah{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}separuh {\c&HFFFFFF&}hari {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}depan
+Dialogue: 1,0:00:17.80,0:00:18.94,Sub,,0,0,0,,{}{\c&HFFFFFF&}media, {\c&HFFFFFF&}dah {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}separuh{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}hari {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}depan
+Dialogue: 1,0:00:18.94,0:00:19.24,Sub,,0,0,0,,{}{\c&HFFFFFF&}media, {\c&HFFFFFF&}dah {\c&HFFFFFF&}separuh {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}hari{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HFFFFFF&}depan
+Dialogue: 1,0:00:19.24,0:00:19.62,Sub,,0,0,0,,{}{\c&HFFFFFF&}media, {\c&HFFFFFF&}dah {\c&HFFFFFF&}separuh {\c&HFFFFFF&}hari {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}kita{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}tengok {\c&HFFFFFF&}depan
+Dialogue: 1,0:00:19.62,0:00:19.98,Sub,,0,0,0,,{}{\c&HFFFFFF&}media, {\c&HFFFFFF&}dah {\c&HFFFFFF&}separuh {\c&HFFFFFF&}hari {\c&HFFFFFF&}kita {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tengok{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}depan
+Dialogue: 1,0:00:19.98,0:00:20.50,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}media, {\c&HFFFFFF&}dah {\c&HFFFFFF&}separuh {\c&HFFFFFF&}hari {\c&HFFFFFF&}kita {\c&HFFFFFF&}tengok {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}depan{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:20.52,0:00:20.90,Sub,,0,0,0,,{\fad(90,70)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}skrin.{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:20.92,0:00:21.42,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Jadi,{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}masalah {\c&HB6C42E&}mata {\c&HFFFFFF&}akan {\c&HFFFFFF&}jadi {\c&HFFFFFF&}sangat-sangat
+Dialogue: 1,0:00:21.42,0:00:22.16,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}masalah{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}mata {\c&HFFFFFF&}akan {\c&HFFFFFF&}jadi {\c&HFFFFFF&}sangat-sangat
+Dialogue: 1,0:00:22.16,0:00:22.52,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HB6C42E&}masalah {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}mata{\c&HB6C42E&\fscx100\fscy100} {\c&HFFFFFF&}akan {\c&HFFFFFF&}jadi {\c&HFFFFFF&}sangat-sangat
+Dialogue: 1,0:00:22.52,0:00:23.18,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HB6C42E&}masalah {\c&HB6C42E&}mata {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}akan{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}jadi {\c&HFFFFFF&}sangat-sangat
+Dialogue: 1,0:00:23.18,0:00:23.58,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HB6C42E&}masalah {\c&HB6C42E&}mata {\c&HFFFFFF&}akan {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}jadi{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}sangat-sangat
+Dialogue: 1,0:00:23.58,0:00:24.72,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}Jadi, {\c&HB6C42E&}masalah {\c&HB6C42E&}mata {\c&HFFFFFF&}akan {\c&HFFFFFF&}jadi {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}sangat-sangat{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:24.74,0:00:25.12,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}teruk{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}disebabkan {\c&HFFFFFF&}cahaya {\c&HB6C42E&}blue {\c&HB6C42E&}light {\c&HFFFFFF&}daripada
+Dialogue: 1,0:00:25.12,0:00:26.16,Sub,,0,0,0,,{}{\c&HFFFFFF&}teruk {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}disebabkan{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}cahaya {\c&HB6C42E&}blue {\c&HB6C42E&}light {\c&HFFFFFF&}daripada
+Dialogue: 1,0:00:26.16,0:00:26.94,Sub,,0,0,0,,{}{\c&HFFFFFF&}teruk {\c&HFFFFFF&}disebabkan {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}cahaya{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}blue {\c&HB6C42E&}light {\c&HFFFFFF&}daripada
+Dialogue: 1,0:00:26.94,0:00:27.28,Sub,,0,0,0,,{}{\c&HFFFFFF&}teruk {\c&HFFFFFF&}disebabkan {\c&HFFFFFF&}cahaya {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}blue{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}light {\c&HFFFFFF&}daripada
+Dialogue: 1,0:00:27.28,0:00:27.64,Sub,,0,0,0,,{}{\c&HFFFFFF&}teruk {\c&HFFFFFF&}disebabkan {\c&HFFFFFF&}cahaya {\c&HB6C42E&}blue {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}light{\c&HB6C42E&\fscx100\fscy100} {\c&HFFFFFF&}daripada
+Dialogue: 1,0:00:27.64,0:00:28.18,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}teruk {\c&HFFFFFF&}disebabkan {\c&HFFFFFF&}cahaya {\c&HB6C42E&}blue {\c&HB6C42E&}light {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}daripada{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:28.20,0:00:28.94,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}social{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}media.
+Dialogue: 1,0:00:28.94,0:00:29.48,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}social {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}media.{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:29.50,0:00:29.98,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Daripada{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}screen {\c&HFFFFFF&}time {\c&HFFFFFF&}tu {\c&HFFFFFF&}lah.
+Dialogue: 1,0:00:29.98,0:00:30.30,Sub,,0,0,0,,{}{\c&HFFFFFF&}Daripada {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}screen{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}time {\c&HFFFFFF&}tu {\c&HFFFFFF&}lah.
+Dialogue: 1,0:00:30.30,0:00:30.66,Sub,,0,0,0,,{}{\c&HFFFFFF&}Daripada {\c&HFFFFFF&}screen {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}time{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}tu {\c&HFFFFFF&}lah.
+Dialogue: 1,0:00:30.66,0:00:30.84,Sub,,0,0,0,,{}{\c&HFFFFFF&}Daripada {\c&HFFFFFF&}screen {\c&HFFFFFF&}time {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tu{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}lah.
+Dialogue: 1,0:00:30.84,0:00:31.02,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}Daripada {\c&HFFFFFF&}screen {\c&HFFFFFF&}time {\c&HFFFFFF&}tu {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}lah.{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:31.04,0:00:32.10,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Jadi,{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}saya {\c&HFFFFFF&}amalkan {\c&HFFFFFF&}konsep {\c&HB6C42E&}20-20-20 {\c&HFFFFFF&}yang {\c&HFFFFFF&}mana
+Dialogue: 1,0:00:32.10,0:00:32.44,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}saya{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}amalkan {\c&HFFFFFF&}konsep {\c&HB6C42E&}20-20-20 {\c&HFFFFFF&}yang {\c&HFFFFFF&}mana
+Dialogue: 1,0:00:32.44,0:00:33.30,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}saya {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}amalkan{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}konsep {\c&HB6C42E&}20-20-20 {\c&HFFFFFF&}yang {\c&HFFFFFF&}mana
+Dialogue: 1,0:00:33.30,0:00:33.92,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}saya {\c&HFFFFFF&}amalkan {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}konsep{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}20-20-20 {\c&HFFFFFF&}yang {\c&HFFFFFF&}mana
+Dialogue: 1,0:00:33.92,0:00:34.74,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}saya {\c&HFFFFFF&}amalkan {\c&HFFFFFF&}konsep {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}20-20-20{\c&HB6C42E&\fscx100\fscy100} {\c&HFFFFFF&}yang {\c&HFFFFFF&}mana
+Dialogue: 1,0:00:34.74,0:00:35.20,Sub,,0,0,0,,{}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}saya {\c&HFFFFFF&}amalkan {\c&HFFFFFF&}konsep {\c&HB6C42E&}20-20-20 {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}yang{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}mana
+Dialogue: 1,0:00:35.20,0:00:35.44,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}Jadi, {\c&HFFFFFF&}saya {\c&HFFFFFF&}amalkan {\c&HFFFFFF&}konsep {\c&HB6C42E&}20-20-20 {\c&HFFFFFF&}yang {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}mana{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:35.46,0:00:36.26,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}setiap{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}20 {\c&HB6C42E&}minit,
+Dialogue: 1,0:00:36.26,0:00:36.42,Sub,,0,0,0,,{}{\c&HFFFFFF&}setiap {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}20{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}minit,
+Dialogue: 1,0:00:36.42,0:00:36.92,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}setiap {\c&HB6C42E&}20 {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}minit,{\c&HB6C42E&\fscx100\fscy100}
+Dialogue: 1,0:00:36.94,0:00:37.56,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}tengok{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}sejauh {\c&HB6C42E&}20 {\c&HB6C42E&}kaki,
+Dialogue: 1,0:00:37.56,0:00:38.36,Sub,,0,0,0,,{}{\c&HFFFFFF&}tengok {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}sejauh{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}20 {\c&HB6C42E&}kaki,
+Dialogue: 1,0:00:38.36,0:00:38.74,Sub,,0,0,0,,{}{\c&HFFFFFF&}tengok {\c&HFFFFFF&}sejauh {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}20{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}kaki,
+Dialogue: 1,0:00:38.74,0:00:39.60,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}tengok {\c&HFFFFFF&}sejauh {\c&HB6C42E&}20 {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}kaki,{\c&HB6C42E&\fscx100\fscy100}
+Dialogue: 1,0:00:39.62,0:00:40.14,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}20{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}saat.
+Dialogue: 1,0:00:40.14,0:00:40.94,Sub,,0,0,0,,{\fad(0,70)}{\c&HB6C42E&}20 {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}saat.{\c&HB6C42E&\fscx100\fscy100}
+Dialogue: 1,0:00:40.98,0:00:41.44,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Mata{\c&HFFFFFF&\fscx100\fscy100} {\c&HFFFFFF&}ada {\c&HB6C42E&}sepasang {\c&HFFFFFF&}je.
+Dialogue: 1,0:00:41.44,0:00:41.58,Sub,,0,0,0,,{}{\c&HFFFFFF&}Mata {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}ada{\c&HFFFFFF&\fscx100\fscy100} {\c&HB6C42E&}sepasang {\c&HFFFFFF&}je.
+Dialogue: 1,0:00:41.58,0:00:42.30,Sub,,0,0,0,,{}{\c&HFFFFFF&}Mata {\c&HFFFFFF&}ada {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}sepasang{\c&HB6C42E&\fscx100\fscy100} {\c&HFFFFFF&}je.
+Dialogue: 1,0:00:42.30,0:00:42.54,Sub,,0,0,0,,{\fad(0,70)}{\c&HFFFFFF&}Mata {\c&HFFFFFF&}ada {\c&HB6C42E&}sepasang {\c&HD9E86B&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}je.{\c&HFFFFFF&\fscx100\fscy100}
+Dialogue: 1,0:00:42.56,0:00:43.24,Sub,,0,0,0,,{\fad(90,0)\fscx92\fscy92\t(0,130,\fscx100\fscy100)}{\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}Jaga{\c&HB6C42E&\fscx100\fscy100} {\c&HB6C42E&}elok-elok.
+Dialogue: 1,0:00:43.24,0:00:43.70,Sub,,0,0,0,,{\fad(0,70)}{\c&HB6C42E&}Jaga {\c&HB6C42E&\t(0,90,\fscx114\fscy114)\t(90,190,\fscx100\fscy100)}elok-elok.{\c&HB6C42E&\fscx100\fscy100}
+Dialogue: 3,0:00:02.30,0:00:04.15,Ov,,0,0,0,,{\an5\pos(540,250)\fad(0,160)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 332 0 332 82 0 82
+Dialogue: 4,0:00:02.30,0:00:04.15,Ov,,0,0,0,,{\an5\pos(540,250)\fad(0,160)\p1\bord19\1c&H401E0A&\3c&H401E0A&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 332 0 332 82 0 82
+Dialogue: 5,0:00:02.30,0:00:04.15,Ov,,0,0,0,,{\an5\pos(540,236)\fad(0,160)\fs62\b1\1c&HFFFFFF&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}8 JAM
+Dialogue: 5,0:00:02.30,0:00:04.15,Ov,,0,0,0,,{\an5\pos(540,280)\fad(0,160)\fs28\b1\fsp3\1c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}ONLINE SEHARI
+Dialogue: 3,0:00:09.90,0:00:14.75,Ov,,0,0,0,,{\an5\pos(235,250)\fad(0,160)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 252 0 252 82 0 82
+Dialogue: 4,0:00:09.90,0:00:14.75,Ov,,0,0,0,,{\an5\pos(235,250)\fad(0,160)\p1\bord19\1c&H401E0A&\3c&H401E0A&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 252 0 252 82 0 82
+Dialogue: 5,0:00:09.90,0:00:14.75,Ov,,0,0,0,,{\an5\pos(235,236)\fad(0,160)\fs50\b1\1c&HFFFFFF&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}24 JAM
+Dialogue: 5,0:00:09.90,0:00:14.75,Ov,,0,0,0,,{\an5\pos(235,280)\fad(0,160)\fs28\b1\fsp3\1c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}SEHARI
+Dialogue: 3,0:00:11.16,0:00:14.75,Ov,,0,0,0,,{\an5\pos(540,250)\fad(0,160)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 252 0 252 82 0 82
+Dialogue: 4,0:00:11.16,0:00:14.75,Ov,,0,0,0,,{\an5\pos(540,250)\fad(0,160)\p1\bord19\1c&H401E0A&\3c&H401E0A&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 252 0 252 82 0 82
+Dialogue: 5,0:00:11.16,0:00:14.75,Ov,,0,0,0,,{\an5\pos(540,236)\fad(0,160)\fs50\b1\1c&HFFFFFF&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}– 8 JAM
+Dialogue: 5,0:00:11.16,0:00:14.75,Ov,,0,0,0,,{\an5\pos(540,280)\fad(0,160)\fs28\b1\fsp3\1c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}TOLAK
+Dialogue: 3,0:00:13.48,0:00:14.75,Ov,,0,0,0,,{\an5\pos(845,250)\fad(0,160)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 252 0 252 82 0 82
+Dialogue: 4,0:00:13.48,0:00:14.75,Ov,,0,0,0,,{\an5\pos(845,250)\fad(0,160)\p1\bord19\1c&H401E0A&\3c&H401E0A&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 252 0 252 82 0 82
+Dialogue: 5,0:00:13.48,0:00:14.75,Ov,,0,0,0,,{\an5\pos(845,236)\fad(0,160)\fs50\b1\1c&HFFFFFF&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}= 16 JAM
+Dialogue: 5,0:00:13.48,0:00:14.75,Ov,,0,0,0,,{\an5\pos(845,280)\fad(0,160)\fs28\b1\fsp3\1c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}BAKI
+Dialogue: 3,0:00:15.26,0:00:20.60,Ov,,0,0,0,,{\an5\pos(540,250)\fad(0,160)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 472 0 472 82 0 82
+Dialogue: 4,0:00:15.26,0:00:20.60,Ov,,0,0,0,,{\an5\pos(540,250)\fad(0,160)\p1\bord19\1c&H401E0A&\3c&H401E0A&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 472 0 472 82 0 82
+Dialogue: 5,0:00:15.26,0:00:20.60,Ov,,0,0,0,,{\an5\pos(540,236)\fad(0,160)\fs62\b1\1c&HFFFFFF&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}8 JAM
+Dialogue: 5,0:00:15.26,0:00:20.60,Ov,,0,0,0,,{\an5\pos(540,280)\fad(0,160)\fs28\b1\fsp3\1c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}DI DEPAN SKRIN
+Dialogue: 5,0:00:33.92,0:00:41.00,Ov,,0,0,0,,{\an5\pos(540,215)\fad(0,200)\fs150\b1\1c&HB6C42E&\3c&H401E0A&\bord7\blur1.5\fscx0\fscy0\t(0,200,\fscx132\fscy132)\t(200,340,\fscx100\fscy100)}20-20-20
+Dialogue: 3,0:00:36.26,0:00:41.00,Ov,,0,0,0,,{\an5\pos(195,395)\fad(0,160)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 272 0 272 72 0 72
+Dialogue: 4,0:00:36.26,0:00:41.00,Ov,,0,0,0,,{\an5\pos(195,395)\fad(0,160)\p1\bord19\1c&H401E0A&\3c&H401E0A&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 272 0 272 72 0 72
+Dialogue: 5,0:00:36.26,0:00:41.00,Ov,,0,0,0,,{\an5\pos(195,381)\fad(0,160)\fs46\b1\1c&HFFFFFF&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}20 MINIT
+Dialogue: 5,0:00:36.26,0:00:41.00,Ov,,0,0,0,,{\an5\pos(195,425)\fad(0,160)\fs26\b1\fsp3\1c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}SETIAP
+Dialogue: 3,0:00:38.36,0:00:41.00,Ov,,0,0,0,,{\an5\pos(540,395)\fad(0,160)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 272 0 272 72 0 72
+Dialogue: 4,0:00:38.36,0:00:41.00,Ov,,0,0,0,,{\an5\pos(540,395)\fad(0,160)\p1\bord19\1c&H401E0A&\3c&H401E0A&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 272 0 272 72 0 72
+Dialogue: 5,0:00:38.36,0:00:41.00,Ov,,0,0,0,,{\an5\pos(540,381)\fad(0,160)\fs46\b1\1c&HFFFFFF&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}20 KAKI
+Dialogue: 5,0:00:38.36,0:00:41.00,Ov,,0,0,0,,{\an5\pos(540,425)\fad(0,160)\fs26\b1\fsp3\1c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}TENGOK JAUH
+Dialogue: 3,0:00:39.62,0:00:41.00,Ov,,0,0,0,,{\an5\pos(885,395)\fad(0,160)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 272 0 272 72 0 72
+Dialogue: 4,0:00:39.62,0:00:41.00,Ov,,0,0,0,,{\an5\pos(885,395)\fad(0,160)\p1\bord19\1c&H401E0A&\3c&H401E0A&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}m 0 0 l 272 0 272 72 0 72
+Dialogue: 5,0:00:39.62,0:00:41.00,Ov,,0,0,0,,{\an5\pos(885,381)\fad(0,160)\fs46\b1\1c&HFFFFFF&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}20 SAAT
+Dialogue: 5,0:00:39.62,0:00:41.00,Ov,,0,0,0,,{\an5\pos(885,425)\fad(0,160)\fs26\b1\fsp3\1c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx112\fscy112)\t(150,270,\fscx100\fscy100)}TEMPOH
+Dialogue: 5,0:00:44.67,0:00:48.77,Ov,,0,0,0,,{\an5\pos(540,1300)\fad(250,0)\move(540,1325,540,1300,0,300)\fs46\b1\fsp2\1c&HFFFFFF&\3c&H401E0A&\bord4}Jaga mata dari sekarang
+Dialogue: 3,0:00:44.47,0:00:48.77,Ov,,0,0,0,,{\an5\pos(540,1430)\p1\bord24\1c&HB6C42E&\3c&HB6C42E&\fscx0\fscy0\t(0,150,\fscx116\fscy116)\t(150,270,\fscx100\fscy100)\t(1200,1650,\fscx106\fscy106)\t(1650,2100,\fscx100\fscy100)\t(2100,2550,\fscx106\fscy106)\t(2550,3000,\fscx100\fscy100)\t(3000,3450,\fscx106\fscy106)\t(3450,3900,\fscx100\fscy100)\t(3900,4350,\fscx106\fscy106)\t(4350,4800,\fscx100\fscy100)}m 0 0 l 752 0 752 92 0 92
+Dialogue: 5,0:00:44.47,0:00:48.77,Ov,,0,0,0,,{\an5\pos(540,1430)\fs46\b1\fsp1\1c&H401E0A&\fscx0\fscy0\t(0,150,\fscx116\fscy116)\t(150,270,\fscx100\fscy100)\t(1200,1650,\fscx106\fscy106)\t(1650,2100,\fscx100\fscy100)\t(2100,2550,\fscx106\fscy106)\t(2550,3000,\fscx100\fscy100)\t(3000,3450,\fscx106\fscy106)\t(3450,3900,\fscx100\fscy100)\t(3900,4350,\fscx106\fscy106)\t(4350,4800,\fscx100\fscy100)}DAPATKAN DI TIKTOK SHOP
+Dialogue: 5,0:00:45.07,0:00:45.67,Ov,,0,0,0,,{\an5\move(540,1522,540,1546)\p1\bord3\1c&HB6C42E&\3c&HB6C42E&}m -22 -12 l 22 -12 0 14
+Dialogue: 5,0:00:45.67,0:00:46.27,Ov,,0,0,0,,{\an5\move(540,1522,540,1546)\p1\bord3\1c&HB6C42E&\3c&HB6C42E&}m -22 -12 l 22 -12 0 14
+Dialogue: 5,0:00:46.27,0:00:46.87,Ov,,0,0,0,,{\an5\move(540,1522,540,1546)\p1\bord3\1c&HB6C42E&\3c&HB6C42E&}m -22 -12 l 22 -12 0 14
+Dialogue: 5,0:00:46.87,0:00:47.47,Ov,,0,0,0,,{\an5\move(540,1522,540,1546)\p1\bord3\1c&HB6C42E&\3c&HB6C42E&}m -22 -12 l 22 -12 0 14
+Dialogue: 5,0:00:47.47,0:00:48.07,Ov,,0,0,0,,{\an5\move(540,1522,540,1546)\p1\bord3\1c&HB6C42E&\3c&HB6C42E&}m -22 -12 l 22 -12 0 14
+Dialogue: 5,0:00:48.07,0:00:48.67,Ov,,0,0,0,,{\an5\move(540,1522,540,1546)\p1\bord3\1c&HB6C42E&\3c&HB6C42E&}m -22 -12 l 22 -12 0 14
+Dialogue: 5,0:00:45.27,0:00:48.77,Ov,,0,0,0,,{\an8\fad(300,0)\move(540,1640,540,1620,0,350)\fs32\b1\1c&HFFFFFF&\3c&H401E0A&\bord3}Ambil 1 tablet, 2 kali sehari, 30 minit sebelum makan,\Nmengikut arahan pada label produk.
+Dialogue: 5,0:00:45.77,0:00:48.77,Ov,,0,0,0,,{\an8\fad(300,0)\pos(540,1760)\fs25\1c&HE6E6E6&\3c&H401E0A&\bord3}Gunakan mengikut arahan pada label produk. Jika mempunyai masalah\Nmata atau sedang mengambil ubat lain, dapatkan nasihat profesional\Nkesihatan sebelum menggunakannya.
