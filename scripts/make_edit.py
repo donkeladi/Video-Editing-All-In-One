@@ -107,29 +107,53 @@ def a_subject(a, b, z):
     m = (((hs[..., 0] > 165) | (hs[..., 0] < 6)) & (hs[..., 1] > 110) & (hs[..., 2] > 40))[:130].mean()
     return 1.0 if m > .12 else 0.0 if m < .025 else .5
 
-POS = {"L": (.22, .37), "R": (.78, .37)}     # L = baju putih (Pija), R = baju merah (Hasha)
-# lulus 1: tetapkan kamera (silih ganti) dan ukur masa A bagi setiap orang
-plan = []; cam = "A"; nA = 0; acc = {"L": 0.0, "R": 0.0}
+# L = baju putih (Pija), R = baju merah (Hasha). Video B (utama, tiada suara) = shot lebar TANPA zoom.
+# Video A (kedua, bergerak, ada suara) = boleh zoom, diarahkan ke orang melalui pengesanan muka.
+import os as _os
+_casc = cv2.CascadeClassifier(_os.path.join(cv2.data.haarcascades, "haarcascade_frontalface_default.xml"))
+def faces_A(a, b):
+    """Kesan muka Pija(L)/Hasha(R) dalam A pada 3 titik shot; kekalkan yang muncul >=2 kali. -> {L:(cx,cy),R:(cx,cy)} (0..1)"""
+    seen = []
+    for fr in (.2, .5, .8):
+        _capA.set(cv2.CAP_PROP_POS_MSEC, (a + (b - a) * fr) * 1000); ok, f = _capA.read()
+        if not ok: continue
+        f = cv2.resize(f, (540, 960)); g = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY); hs = cv2.cvtColor(f, cv2.COLOR_BGR2HSV)
+        for (x, y, w, h) in _casc.detectMultiScale(g, 1.1, 6, minSize=(55, 55)):
+            if y + h / 2 > 960 * .72: continue
+            x0, x1, y0, y1 = max(int(x - .3 * w), 0), min(int(x + 1.3 * w), 540), max(int(y - .5 * h), 0), min(int(y + h), 960)
+            r = hs[y0:y1, x0:x1]
+            red = (((r[..., 0] > 165) | (r[..., 0] < 6)) & (r[..., 1] > 110) & (r[..., 2] > 40)).mean()
+            seen.append(("R" if red > .15 else "L", (x + w / 2) / 540, (y + h / 2) / 960))
+    out = {}
+    for lab in "LR":
+        pts = [(cx, cy) for l, cx, cy in seen if l == lab]
+        if len(pts) >= 3:
+            xs = sorted(p[0] for p in pts); mx = xs[len(xs) // 2]
+            good = [p for p in pts if abs(p[0] - mx) < .08]
+            if len(good) >= 3: out[lab] = (float(np.median([p[0] for p in good])), float(np.median([p[1] for p in good])))
+    return out
+
+# lulus 1: kamera silih ganti. Momen kelakar (F) -> zoom pada A.
+plan = []; cam = "A"
 for a, b, kind in shots:
-    d = b - a
-    if kind == "F": plan.append(("B", a, b, "F")); cam = "A"; continue
-    if cam == "A":
-        nA += 1; share = a_subject(a, b, 1.0); acc["R"] += d * share; acc["L"] += d * (1 - share)
-        plan.append(("A", a, b, nA)); cam = "B"
-    else:
-        plan.append(("B", a, b, "N")); cam = "A"
-# lulus 2: shot B zoom ke orang yang kurang masa (seimbang 50/50)
-edl = []; nB = 0
+    if kind == "F": plan.append(("A", a, b, "F")); cam = "B"; continue
+    plan.append((cam, a, b, "N")); cam = "B" if cam == "A" else "A"
+# lulus 2: A zoom ke orang yang kurang masa (seimbang 50/50); B = lebar, tiada zoom
+edl = []; acc = {"L": 0.0, "R": 0.0}; nz = 0
 for c, a, b, tag in plan:
     d = b - a
-    if c == "A":
-        edl.append(dict(t0=a, t1=b, cam="A", z=1.0, cx=.5, cy=.42)); continue
-    nB += 1
-    if tag == "N" and nB % 5 == 0:                        # sesekali shot lebar (kedua-duanya)
+    if c == "B":
         acc["L"] += d / 2; acc["R"] += d / 2
         edl.append(dict(t0=a, t1=b, cam="B", z=1.0, cx=.5, cy=.5)); continue
-    sd = "L" if acc["L"] <= acc["R"] else "R"; acc[sd] += d; cx, cy = POS[sd]
-    edl.append(dict(t0=a, t1=b, cam="B", z=1.45 if tag == "F" else 1.3, cx=cx, cy=cy + (.02 if tag == "F" else 0), who=sd))
+    fa = faces_A(a, b)
+    if fa:
+        sd = min(fa, key=lambda k: acc[k]); acc[sd] += d; z = 1.55 if tag == "F" else 1.4; nz += 1
+        cx, cy = fa[sd]
+        edl.append(dict(t0=a, t1=b, cam="A", z=z, cx=cx, cy=cy + .15 / z, who=sd))
+    else:                                              # muka tak pasti -> jangan zoom
+        share = a_subject(a, b, 1.0); acc["R"] += d * share; acc["L"] += d * (1 - share)
+        edl.append(dict(t0=a, t1=b, cam="A", z=1.0, cx=.5, cy=.5))
+print("shot A di-zoom:", nz)
 print("masa fokus  Pija(putih)=%.1fs  Hasha(merah)=%.1fs" % (acc["L"], acc["R"]))
 prev_t1 = None; prev_f1 = None   # sempadan bingkai mutlak; shot bersebelahan berkongsi sempadan (tiada klik/drift)
 for e in edl:
