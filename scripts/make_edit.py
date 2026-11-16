@@ -58,26 +58,40 @@ for a, b in keep:
         if end - t < .3: t = end; continue
         shots.append((t, end, "N")); t = end
 
-def side(a, b):
-    seg = M[int(a * 30):max(int(b * 30), int(a * 30) + 2)]
-    l, r = seg[:, 2].mean() + 1e-6, seg[:, 3].mean() + 1e-6
-    return ("L" if l > r else "R"), max(l, r) / min(l, r)
+import cv2
+_capA = cv2.VideoCapture("input/A.mp4")
+def a_subject(a, b, z):
+    """Anggar siapa dalam bingkai A: share merah (0..1) ikut jumlah piksel hijab/baju merah."""
+    _capA.set(cv2.CAP_PROP_POS_MSEC, (a + b) / 2 * 1000); ok, f = _capA.read()
+    if not ok: return .5
+    r = cv2.resize(f, (108, 192)); hs = cv2.cvtColor(r, cv2.COLOR_BGR2HSV)
+    m = (((hs[..., 0] > 165) | (hs[..., 0] < 6)) & (hs[..., 1] > 110) & (hs[..., 2] > 40))[:130].mean()
+    return 1.0 if m > .12 else 0.0 if m < .025 else .5
 
-POS = {"L": (.22, .37), "R": (.78, .37)}
-edl = []; cam = "A"; nA = 0; lastside = None
+POS = {"L": (.22, .37), "R": (.78, .37)}     # L = baju putih (Pija), R = baju merah (Hasha)
+# lulus 1: tetapkan kamera (silih ganti) dan ukur masa A bagi setiap orang
+plan = []; cam = "A"; nA = 0; acc = {"L": 0.0, "R": 0.0}
 for a, b, kind in shots:
-    if kind == "F":
-        sd, _ = side(a, b); cx, cy = POS[sd]
-        edl.append(dict(t0=a, t1=b, cam="B", z=1.9, cx=cx, cy=cy + .02)); cam = "A"; continue
-    if cam == "B":
-        sd, ratio = side(a, b)
-        if ratio < 1.12: edl.append(dict(t0=a, t1=b, cam="B", z=1.0, cx=.5, cy=.5))
-        else:
-            cx, cy = POS[sd]; edl.append(dict(t0=a, t1=b, cam="B", z=1.65, cx=cx, cy=cy))
-        cam = "A"
+    d = b - a
+    if kind == "F": plan.append(("B", a, b, "F")); cam = "A"; continue
+    if cam == "A":
+        nA += 1; share = a_subject(a, b, 1.0); acc["R"] += d * share; acc["L"] += d * (1 - share)
+        plan.append(("A", a, b, nA)); cam = "B"
     else:
-        nA += 1
-        edl.append(dict(t0=a, t1=b, cam="A", z=1.3 if nA % 3 == 0 else 1.0, cx=.5, cy=.42)); cam = "B"
+        plan.append(("B", a, b, "N")); cam = "A"
+# lulus 2: shot B zoom ke orang yang kurang masa (seimbang 50/50)
+edl = []; nB = 0
+for c, a, b, tag in plan:
+    d = b - a
+    if c == "A":
+        edl.append(dict(t0=a, t1=b, cam="A", z=1.3 if tag % 3 == 0 else 1.0, cx=.5, cy=.42)); continue
+    nB += 1
+    if tag == "N" and nB % 5 == 0:                        # sesekali shot lebar (kedua-duanya)
+        acc["L"] += d / 2; acc["R"] += d / 2
+        edl.append(dict(t0=a, t1=b, cam="B", z=1.0, cx=.5, cy=.5)); continue
+    sd = "L" if acc["L"] <= acc["R"] else "R"; acc[sd] += d; cx, cy = POS[sd]
+    edl.append(dict(t0=a, t1=b, cam="B", z=1.9 if tag == "F" else 1.65, cx=cx, cy=cy + (.02 if tag == "F" else 0), who=sd))
+print("masa fokus  Pija(putih)=%.1fs  Hasha(merah)=%.1fs" % (acc["L"], acc["R"]))
 for e in edl:  # kunci tempoh kepada gandaan 1/30s supaya video & audio tak melarat
     e["t0"] = round(e["t0"], 3); e["t1"] = round(e["t0"] + round((e["t1"] - e["t0"]) * 30) / 30, 4)
 json.dump(edl, open("work/edl.json", "w"), indent=1)
@@ -114,7 +128,7 @@ for a, b, tx in ((24.6, 28.9, "Kita ada warna"), (125.4, 126.5, "Okey, kita try 
                  (160.7, 162.4, "Oh, closing lah!")): span_words(a, b, tx)
 A2W = [w for w in A2W if not (62.7 <= w["s"] < 124.5)] + [w for w in A1W if 62.7 <= w["s"] < 124.5]  # pusingan permainan: transkrip pertama lebih tepat
 SUBW = sorted(A2W, key=lambda w: w["s"])
-FIX = {"syah": "Hasha", "aisyah": "Hasha", "okay": "Okey", "ok": "Okey", "hishan": "Hasha"}
+FIX = {"bijak": "Pija", "syah": "Hasha", "aisyah": "Hasha", "okay": "Okey", "ok": "Okey", "hishan": "Hasha"}
 FILLER = {"okey", "hmm", "ahai", "aduh"}
 def clean(w):
     w = w.strip()
