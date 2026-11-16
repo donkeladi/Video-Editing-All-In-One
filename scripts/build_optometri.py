@@ -79,130 +79,137 @@ Style: Sub,Inter,58,&H00FFFFFF,&H00FFFFFF,&H00442F0A,&H00000000,1,0,0,0,100,100,
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
 """ + "\n".join(ass) + "\n")
 
-# ---- overlay PNG ----
+# ---- overlay beranimasi (dilukis frame demi frame, dihantar ke ffmpeg) ----
+import math
+FPS = 30
 def rr(d, box, r, fill, outline=None, w=0):
     d.rounded_rectangle(box, r, fill=fill, outline=outline, width=w)
-
 def eye(d, cx, cy, s, col):
-    d.ellipse((cx - s, cy - s * .55, cx + s, cy + s * .55), outline=col, width=max(3, s // 7))
+    d.ellipse((cx - s, cy - s * .55, cx + s, cy + s * .55), outline=col, width=max(3, int(s // 7)))
     d.ellipse((cx - s * .32, cy - s * .32, cx + s * .32, cy + s * .32), fill=col)
+def ctr(d, xy, txt, font, fill): d.text(xy, txt, font=font, fill=fill, anchor="mm")
+def clamp(x): return max(0.0, min(1.0, x))
+def prog(t, a, d): return clamp((t - a) / d)
+def out3(x): return 1 - (1 - x) ** 3
+def back(x, k=1.5):
+    x = clamp(x) - 1; return 1 + (k + 1) * x ** 3 + k * x ** 2
+_fc = {}
+def F(p, sz):
+    if (p, sz) not in _fc: _fc[(p, sz)] = ImageFont.truetype(p, sz)
+    return _fc[(p, sz)]
+DJ = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-def cross(d, cx, cy, s, col):
-    d.rectangle((cx - s, cy - s // 3, cx + s, cy + s // 3), fill=col)
-    d.rectangle((cx - s // 3, cy - s, cx + s // 3, cy + s), fill=col)
+def card_stat(d, t, t0, t1, t2):
+    """t0 muncul, t1 mula bar 7%, t2 mula bar 30%"""
+    y0 = 720
+    rr(d, (50, y0, 1030, y0 + 520), 36, WHITE + (255,), TEAL, 6)
+    d.text((90, y0 + 50), "RABUN JAUH DALAM KALANGAN KANAK-KANAK", font=F(FX, 30), fill=TEAL, anchor="lm")
+    track = (90, 940)
+    # Darjah 1
+    d.text((90, y0 + 130), "Darjah 1", font=F(FB, 38), fill=NAVY, anchor="lm")
+    rr(d, (90, y0 + 165, 930, y0 + 225), 18, MINT)
+    p1 = out3(prog(t, t1, 0.9))
+    if p1 > 0: rr(d, (90, y0 + 165, 90 + max(36, 840 * 0.07 / 0.30 * p1), y0 + 225), 18, AQUA)
+    d.text((90 + 840 * 0.07 / 0.30 + 24, y0 + 195), f"{7 * p1:.0f}%", font=F(FX, 56), fill=AQUA, anchor="lm")
+    # Form 1
+    d.text((90, y0 + 305), "Sekolah menengah (Form 1)", font=F(FB, 38), fill=NAVY, anchor="lm")
+    rr(d, (90, y0 + 340, 930, y0 + 410), 18, MINT)
+    p2 = out3(prog(t, t2, 1.2))
+    if p2 > 0: rr(d, (90, y0 + 340, 90 + max(36, 840 * p2), y0 + 410), 18, RED)
+    if p2 > 0.02:
+        x = 90 + 840 * p2
+        d.text((min(x - 20, 920), y0 + 375), f"{30 * p2:.0f}%", font=F(FX, 56), fill=WHITE, anchor="rm")
+    if t > t2 + 1.2:
+        k = back(prog(t, t2 + 1.2, 0.45))
+        ctr(d, (540, y0 + 468), "Rabun jauh makin meningkat", F(FB, int(30 * max(k, .01))), TEAL)
 
-def center(d, xy, txt, font, fill):
-    d.text(xy, txt, font=font, fill=fill, anchor="mm")
+def card_punca(d, t, t0):
+    rr(d, (50, 800, 1030, 1060), 36, NAVY + (255,), AQUA, 5)
+    d.text((90, 850), "PUNCA UTAMA", font=F(FX, 30), fill=AQUA, anchor="lm")
+    d.text((90, 925), "Skrin melampau", font=F(FX, 60), fill=WHITE, anchor="lm")
+    d.text((90, 1000), "+ kurang main di luar", font=F(FB, 46), fill=(170, 225, 232), anchor="lm")
+    eye(d, 900, 925, 70, AQUA)
+    p = out3(prog(t, t0 + 0.5, 0.5))
+    d.line((830, 880, 830 + 140 * p, 880 + 90 * p), fill=RED, width=10)
 
-def new():
-    im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); return im, ImageDraw.Draw(im)
+def card_tahun(d, t, t0):
+    rr(d, (290, 820, 790, 990), 36, WHITE + (255,), TEAL, 6)
+    ctr(d, (540, 875), "DALAM", F(FB, 28), TEAL)
+    ctr(d, (540, 935), "6 TAHUN SAHAJA", F(FX, 50), NAVY)
 
-# header sentiasa ada
-im, d = new()
-rr(d, (0, 0, W, 150), 0, NAVY + (235,))
-d.rectangle((0, 150, W, 158), fill=AQUA)
-rr(d, (40, 30, 130, 120), 45, WHITE); eye(d, 85, 75, 32, TEAL)
-d.text((155, 55), "KESIHATAN MATA ANAK", font=f(FX, 42), fill=WHITE, anchor="lm")
-d.text((155, 100), "Panduan klinik optometri untuk ibu bapa", font=f(FM, 26), fill=(170, 225, 232), anchor="lm")
-cross(d, 985, 75, 26, AQUA)
-im.save("work/ov/header.png")
+def card_x4(d, t, t0):
+    rr(d, (170, 760, 910, 1060), 40, RED + (255,), WHITE, 6)
+    v = 1 + 3 * out3(prog(t, t0 + 0.1, 0.8))
+    ctr(d, (540, 890), f"{v:.0f}×", F(FX, 150), WHITE)
+    ctr(d, (540, 1005), "BILANGAN BUDAK RABUN", F(FB, 36), WHITE)
 
-# kad statistik 7% -> 30%
-def stat(stage):
-    im, d = new()
-    y0 = 690
-    rr(d, (50, y0, 1030, y0 + 530), 36, WHITE + (245,), TEAL, 6)
-    d.text((90, y0 + 50), "RABUN JAUH DALAM KALANGAN KANAK-KANAK", font=f(FX, 30), fill=TEAL, anchor="lm")
-    # baris Darjah 1
-    d.text((90, y0 + 135), "Darjah 1", font=f(FB, 38), fill=NAVY, anchor="lm")
-    rr(d, (90, y0 + 165, 90 + int(840 * .07 / .30 * 1), y0 + 225), 18, AQUA)
-    d.text((90 + int(840 * .07 / .30) + 20, y0 + 195), "~7%", font=f(FX, 54), fill=AQUA, anchor="lm")
-    if stage >= 2:
-        d.text((90, y0 + 305), "Sekolah menengah (Form 1)", font=f(FB, 38), fill=NAVY, anchor="lm")
-        rr(d, (90, y0 + 335, 90 + 650, y0 + 405), 18, RED)
-        d.text((90 + 650 + 20, y0 + 370), "30%", font=f(FX, 64), fill=RED, anchor="lm")
-        d.text((540, y0 + 470), "▲ naik hampir 4 kali ganda", font=f(FB, 32), fill=NAVY, anchor="mm") if False else None
-        center(d, (540, y0 + 475), "Rabun jauh makin meningkat", f(FB, 30), TEAL)
-    im.save(f"work/ov/stat{stage}.png")
-stat(1); stat(2)
+TIPS = ["Rehat dari skrin", "Bawa main di luar", "Check mata setahun sekali"]
+def card_tips(d, t, t0, ts_):
+    rr(d, (50, 720, 1030, 810), 30, TEAL + (255,))
+    ctr(d, (540, 765), "3 PERKARA IBU BAPA BOLEH BUAT", F(FX, 38), WHITE)
+    for i in range(3):
+        y = 830 + i * 130
+        p = out3(prog(t, ts_[i], 0.5))
+        if p <= 0: continue
+        dx = (1 - p) * -300
+        rr(d, (50 + dx, y, 1030 + dx, y + 112), 28, WHITE + (int(255 * min(1, p * 2)),), AQUA, 5)
+        rr(d, (75 + dx, y + 18, 150 + dx, y + 93), 37, TEAL)
+        ctr(d, (112 + dx, y + 56), str(i + 1), F(FX, 44), WHITE)
+        d.text((180 + dx, y + 56), TIPS[i], font=F(FX, 50 if i < 2 else 44), fill=NAVY, anchor="lm")
+        c = clamp((t - ts_[i] - 0.3) / 0.35)
+        if c > 0:
+            pts = [(930, y + 56), (950, y + 76), (985, y + 36)]
+            seg = [pts[0], pts[1]] if c < .5 else pts
+            if c < .5:
+                m = c / .5; seg = [pts[0], (pts[0][0] + (pts[1][0] - pts[0][0]) * m, pts[0][1] + (pts[1][1] - pts[0][1]) * m)]
+            else:
+                m = (c - .5) / .5; seg = [pts[0], pts[1], (pts[1][0] + (pts[2][0] - pts[1][0]) * m, pts[1][1] + (pts[2][1] - pts[1][1]) * m)]
+            d.line([(x + dx, y_) for x, y_ in seg], fill=AQUA, width=11, joint="curve")
 
-# punca
-im, d = new()
-rr(d, (50, 900, 1030, 1160), 36, NAVY + (240,), AQUA, 5)
-d.text((90, 950), "PUNCA UTAMA", font=f(FX, 30), fill=AQUA, anchor="lm")
-d.text((90, 1030), "Skrin melampau", font=f(FX, 60), fill=WHITE, anchor="lm")
-d.text((90, 1105), "+ kurang main di luar", font=f(FB, 46), fill=(170, 225, 232), anchor="lm")
-eye(d, 900, 1030, 70, AQUA)
-d.line((820, 975, 980, 1085), fill=RED, width=10)
-im.save("work/ov/punca.png")
-
-# 6 tahun
-im, d = new()
-rr(d, (300, 900, 780, 1060), 36, WHITE + (245,), TEAL, 6)
-center(d, (540, 955), "DALAM", f(FB, 28), TEAL)
-center(d, (540, 1015), "6 TAHUN SAHAJA", f(FX, 50), NAVY)
-im.save("work/ov/tahun.png")
-
-# 4x
-im, d = new()
-rr(d, (180, 880, 900, 1180), 40, RED + (245,), WHITE, 6)
-center(d, (540, 1000), "4×", f(FX, 150), WHITE)
-center(d, (540, 1120), "BILANGAN BUDAK RABUN", f(FB, 36), WHITE)
-im.save("work/ov/x4.png")
-
-# 3 tips
-TIPS = [("1", "Rehat dari skrin"), ("2", "Bawa main di luar"), ("3", "Check mata setahun sekali")]
-def tips(n):
-    im, d = new()
-    rr(d, (50, 790, 1030, 1000 - 0 + 330), 36, WHITE + (0,))
-    rr(d, (50, 790, 1030, 880), 30, TEAL + (245,))
-    center(d, (540, 835), "3 PERKARA IBU BAPA BOLEH BUAT", f(FX, 38), WHITE)
-    for i in range(n):
-        y = 900 + i * 135
-        rr(d, (50, y, 1030, y + 115), 28, WHITE + (245,), AQUA, 5)
-        rr(d, (75, y + 20, 150, y + 95), 37, TEAL)
-        center(d, (112, y + 58), TIPS[i][0], f(FX, 44), WHITE)
-        d.text((180, y + 58), TIPS[i][1], font=f(FX, 50 if i < 2 else 44), fill=NAVY, anchor="lm")
-        d.text((985, y + 58), "✓", font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 54), fill=AQUA, anchor="mm")
-    im.save(f"work/ov/tips{n}.png")
-for n in (1, 2, 3): tips(n)
-
-# ---- jadual overlay (masa output) ----
 o = omap
-OVS = [
- ("stat1", o(8.0), o(14.14)),       # stat2 dilukis atas stat1 (bertindih, tiada kelipan)
- ("stat2", o(10.86), o(14.14)),
- ("punca", o(14.9), o(19.84)),
- ("tahun", o(21.14), o(25.2)),
- ("x4", o(25.2), o(27.22)),
- ("tips1", o(30.39), TOTAL),        # tip 2 & 3 bertindih atas tip 1
- ("tips2", o(34.63), TOTAL),
- ("tips3", o(35.88), TOTAL),
+# (nama, mula, tamat, fungsi) -- satu kad pada satu masa, tiada bertindih
+CARDS = [
+ (o(7.5), o(14.14) + 0.1, lambda d, t, a: card_stat(d, t, a, o(8.0), o(10.86))),
+ (o(14.9), o(19.84) + 0.1, lambda d, t, a: card_punca(d, t, a)),
+ (o(21.14), o(25.2) - 0.05, lambda d, t, a: card_tahun(d, t, a)),
+ (o(25.2), o(27.22) + 0.2, lambda d, t, a: card_x4(d, t, a)),
+ (o(30.39), TOTAL, lambda d, t, a: card_tips(d, t, a, [o(32.47), o(34.63), o(35.88)])),
 ]
+IN, OUTD = 0.5, 0.35
+
+def frames():
+    n = int(math.ceil(TOTAL * FPS))
+    for i in range(n):
+        t = i / FPS
+        canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        for a, b, fn in CARDS:
+            if a <= t <= b:
+                layer = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(layer)
+                fn(d, t, a)
+                pin = prog(t, a, IN); pout = prog(t, b - OUTD, OUTD) if b < TOTAL else 0
+                al = out3(pin) * (1 - pout)
+                dy = 80 + int(70 * (1 - back(pin, 0.9))) + int(30 * pout ** 2)
+                layer.putalpha(layer.getchannel("A").point(lambda v, al=al: int(v * al)))
+                canvas.alpha_composite(layer, (0, 0)) if dy == 0 else canvas.alpha_composite(layer.crop((0, 0, W, H - dy)) if dy > 0 else layer, (0, dy) if dy > 0 else (0, 0))
+        yield canvas.tobytes()
 
 # ---- ffmpeg ----
 fc, vparts, aparts = [], "", ""
-for i, ((a, b), ) in enumerate(zip(KEEP)):
-    zoom = 1.0
-    zf = f",scale={int(W*zoom)}:{int(H*zoom)},crop={W}:{H}" if zoom != 1 else ""
-    fc.append(f"[0:v]trim={a}:{b},setpts=PTS-STARTPTS{zf}[v{i}]")
+for i, (a, b) in enumerate(KEEP):
+    fc.append(f"[0:v]trim={a}:{b},setpts=PTS-STARTPTS[v{i}]")
     fc.append(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS,afade=t=in:d=0.02,afade=t=out:st={b-a-0.03:.3f}:d=0.03[a{i}]")
     vparts += f"[v{i}]"; aparts += f"[a{i}]"
 n = len(KEEP)
 fc.append(f"{vparts}concat=n={n}:v=1:a=0[vc]")
 fc.append(f"{aparts}concat=n={n}:v=0:a=1,loudnorm=I=-14:TP=-1.5:LRA=11[aout]")
-inputs = ["-i", SRC]
-cur = "vc"
-for k, (name, a, b) in enumerate(OVS):
-    inputs += ["-loop", "1", "-i", f"work/ov/{name}.png"]
-    nxt = f"o{k}"
-    fc.append(f"[{k+1}:v]format=rgba,fade=t=in:st={a:.2f}:d=0.45:alpha=1,fade=t=out:st={b-0.35:.2f}:d=0.35:alpha=1[p{k}]")
-    ye = f"if(lt(t,{a+0.5:.2f}),60*pow(1-(t-{a:.2f})/0.5,3),0)"
-    fc.append(f"[{cur}][p{k}]overlay=0:'{ye}':enable='between(t,{a:.2f},{b:.2f})':eval=frame:shortest=1[{nxt}]")
-    cur = nxt
-fc.append(f"[{cur}]subtitles=work/video.ass:fontsdir=/usr/share/fonts/opentype/inter,fade=t=out:st={TOTAL-0.3:.2f}:d=0.3[vout]")
-cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc), "-map", "[vout]", "-map", "[aout]",
+fc.append("[vc][1:v]overlay=0:0:format=auto:shortest=1[vo]")
+fc.append(f"[vo]subtitles=work/video.ass:fontsdir=/usr/share/fonts/opentype/inter,fade=t=out:st={TOTAL-0.3:.2f}:d=0.3[vout]")
+cmd = ["ffmpeg", "-y", "-v", "error", "-i", SRC, "-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
+       "-filter_complex", ";".join(fc), "-map", "[vout]", "-map", "[aout]",
        "-t", f"{TOTAL:.2f}", "-c:v", "libx264", "-crf", "18", "-preset", "medium", "-pix_fmt", "yuv420p",
        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", OUT]
-subprocess.run(cmd, check=True)
-print(OUT, f"{TOTAL:.2f}s")
+pr = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+for fr in frames():
+    pr.stdin.write(fr)
+pr.stdin.close(); pr.wait()
+print(OUT, f"{TOTAL:.2f}s", "rc", pr.returncode)
