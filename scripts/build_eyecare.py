@@ -143,7 +143,7 @@ sh("ffmpeg", "-y", "-v", "error", "-i", V, "-vf", vf, "-af", "highpass=f=80,afft
 ease = "(1-pow(1-min(t/0.75,1),3))"
 fc = ("[0:v]scale=w='trunc(1080*(1.18+0.025*t)/2)*2':h='trunc(1920*(1.18+0.025*t)/2)*2':eval=frame,crop=1080:1920,boxblur=40:6,eq=brightness=-0.10[bg0];"
       "[0:v]scale=1080:-2[fg];"
-      f"[bg0][fg]overlay=x=0:y='150+(1-{ease})*900'[v1];[v1]fade=t=in:d=0.25,fps=60,format=yuv420p[v]")
+      f"[bg0][fg]overlay=x=0:y='150+(1-{ease})*900'[v1];[v1]fade=t=in:d=0.25,setsar=1,fps=60,format=yuv420p[v]")
 sh("ffmpeg", "-y", "-v", "error", "-loop", "1", "-t", str(END), "-i", "assets/eyecare/ingredients_card.jpg", "-filter_complex", fc, "-map", "[v]", "-c:v", "libx264", "-crf", "16", "work/eyecare_end.mp4")
 # ---------- gabung + overlay + audio ----------
 ins = ["-i", "work/eyecare_main.mp4", "-i", "work/eyecare_end.mp4", "-i", "work/pop.wav", "-i", "work/whoosh.wav"]
@@ -155,7 +155,7 @@ for i, t in enumerate(pops):
     fa.append(f"[p{i}]adelay={int(t * 1000)}|{int(t * 1000)}[d{i}]"); mix.append(f"[d{i}]")
 fa.append(f"[3:a]adelay={int(T0 * 1000)}|{int(T0 * 1000)}[wh]"); mix.append("[wh]")
 fa.append("".join(mix) + f"amix=inputs={len(mix)}:normalize=0:duration=first,loudnorm=I=-14:TP=-1.5:LRA=11,volume=0.2dB,alimiter=limit=0.89[a]")
-fcx = ";".join(["[0:v][1:v]concat=n=2:v=1:a=0[c];[c]ass=work/eyecare.ass[v]"] + fa)
+fcx = ";".join(["[0:v][1:v]concat=n=2:v=1:a=0[c0];[c0]setsar=1[c];[c]ass=work/eyecare.ass,setsar=1,format=yuv420p[v]"] + fa)
 sh("ffmpeg", "-y", "-v", "error", *ins, "-filter_complex", fcx, "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-crf", "18", "-preset", "medium",
    "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "output/eyecare_final.mp4")
 print("siap", TOT)
