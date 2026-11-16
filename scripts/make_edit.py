@@ -8,6 +8,25 @@ rms = np.load("work/rmsA.npy")          # 0.25s
 M = np.load("work/motion_B.npy")        # 30fps: [kiriBadan, kananBadan, kiriKepala, kananKepala]
 DUR = 187.5
 words = [w for s in S for w in s["words"]]
+import os, re
+A2W = [w for sg in json.load(open("work/A2.json")) for w in sg["words"]]
+A1W = words
+def span_words(a, b, text):   # ganti perkataan dalam [a,b) dengan teks baru, masa diagih sekata
+    global A2W
+    rm = [w for w in A2W if a <= w["s"] < b]
+    A2W = [w for w in A2W if not (a <= w["s"] < b)]
+    if not text or not rm: return
+    t0, t1 = rm[0]["s"], rm[-1]["e"]; toks = text.split(); d = (t1 - t0) / len(toks)
+    A2W += [dict(w=tk, s=t0 + i * d, e=t0 + (i + 1) * d, k=1) for i, tk in enumerate(toks)]
+for a, b in ((0, 1.2), (54.3, 54.9), (149.1, 152.3), (152.9, 154.4), (177.5, 178.3)): span_words(a, b, "")      # tak pasti -> buang
+for a, b, tx in ((24.6, 28.9, "Kita ada warna"), (125.4, 126.5, "Okey, kita try lah"), (139.4, 141.3, "Lagi, lagi, lagi"),
+                 (142.7, 144.3, "Kenapa bagi sekarang?"), (145.1, 145.9, "Kenapa nak retake?"),
+                 (146.1, 147.4, "Kenapa tak boleh retake?"), (154.5, 156.1, "Okey lah, boleh lah"),
+                 (160.7, 162.4, "Oh, closing lah!")): span_words(a, b, tx)
+A2W = [w for w in A2W if not (62.7 <= w["s"] < 124.5)] + [w for w in A1W if 62.7 <= w["s"] < 124.5]  # pusingan permainan: transkrip pertama lebih tepat
+SUBW = sorted(A2W, key=lambda w: w["s"])
+FIX = {"bijak": "Pija", "syah": "Hasha", "aisyah": "Hasha", "okay": "Okey", "ok": "Okey", "hishan": "Hasha"}
+FILLER = {"okey", "hmm", "ahai", "aduh", "so"}   # tak dipaparkan dalam subtitle
 
 # ---- 1. julat disimpan: buang senyap panjang (>4.2s) tapi tinggalkan 1.5s tiap hujung
 def has_word(t): return any(w["s"] - .1 <= t <= w["e"] + .1 for w in words)
@@ -25,6 +44,26 @@ keep = []; p = 0.0
 for a, b in cuts: keep.append((p, a)); p = b
 keep.append((p, DUR))
 print("senyap dibuang:", [(round(a, 1), round(b, 1)) for a, b in cuts])
+
+# ---- 1b. buang perkataan pengisi (okey/ok/hmm/so) dari audio + video
+CUTW = {"okey", "ok", "okay", "hmm", "so"}
+def core(w): return w["w"].strip().strip(".,?!…").lstrip("-").lower().replace("-", "")
+fc = sorted((w["s"] - .03, w["e"] + .04) for w in SUBW if core(w) in CUTW and not w.get("k") and w["e"] - w["s"] <= 1.2)
+mc = []
+for a, b in fc:
+    if mc and a - mc[-1][1] < .25: mc[-1] = (mc[-1][0], max(b, mc[-1][1]))
+    else: mc.append((a, b))
+print("filler dibuang: %d potongan, %.1fs" % (len(mc), sum(b - a for a, b in mc)))
+json.dump([(round(a, 2), round(b, 2)) for a, b in mc], open("work/filler_cuts.json", "w"))
+nk = []
+for a, b in keep:
+    t = a
+    for ca, cb in mc:
+        if cb <= t or ca >= b: continue
+        if ca - t >= .25: nk.append((t, ca))
+        t = max(t, cb)
+    if b - t >= .25: nk.append((t, b))
+keep = nk
 
 # ---- 2. momen kelakar (ketawa) -> sticker + sfx
 FUN = [(34.2, "haha", "boing"), (54.2, "serius", "scratch"), (73.2, "bruh", "boom"), (76.8, "ngapa", "boing"),
@@ -84,16 +123,20 @@ edl = []; nB = 0
 for c, a, b, tag in plan:
     d = b - a
     if c == "A":
-        edl.append(dict(t0=a, t1=b, cam="A", z=1.3 if tag % 3 == 0 else 1.0, cx=.5, cy=.42)); continue
+        edl.append(dict(t0=a, t1=b, cam="A", z=1.2 if tag % 3 == 0 else 1.0, cx=.5, cy=.42)); continue
     nB += 1
     if tag == "N" and nB % 5 == 0:                        # sesekali shot lebar (kedua-duanya)
         acc["L"] += d / 2; acc["R"] += d / 2
         edl.append(dict(t0=a, t1=b, cam="B", z=1.0, cx=.5, cy=.5)); continue
     sd = "L" if acc["L"] <= acc["R"] else "R"; acc[sd] += d; cx, cy = POS[sd]
-    edl.append(dict(t0=a, t1=b, cam="B", z=1.9 if tag == "F" else 1.65, cx=cx, cy=cy + (.02 if tag == "F" else 0), who=sd))
+    edl.append(dict(t0=a, t1=b, cam="B", z=1.6 if tag == "F" else 1.45, cx=cx, cy=cy + (.02 if tag == "F" else 0), who=sd))
 print("masa fokus  Pija(putih)=%.1fs  Hasha(merah)=%.1fs" % (acc["L"], acc["R"]))
-for e in edl:  # kunci tempoh kepada gandaan 1/30s supaya video & audio tak melarat
-    e["t0"] = round(e["t0"], 3); e["t1"] = round(e["t0"] + round((e["t1"] - e["t0"]) * 30) / 30, 4)
+prev_t1 = None; prev_f1 = None   # sempadan bingkai mutlak; shot bersebelahan berkongsi sempadan (tiada klik/drift)
+for e in edl:
+    f0 = prev_f1 if (prev_t1 is not None and abs(e["t0"] - prev_t1) < 1e-6) else round(e["t0"] * 30)
+    f1 = max(round(e["t1"] * 30), f0 + 1)
+    prev_t1, prev_f1 = e["t1"], f1
+    e["f0"], e["f1"] = f0, f1; e["t0"], e["t1"] = f0 / 30, f1 / 30
 json.dump(edl, open("work/edl.json", "w"), indent=1)
 
 # ---- 4. masa asal -> masa output
@@ -111,25 +154,6 @@ for t, st, sf in FUN:   # sticker dibuang -> SFX sahaja
 json.dump(fx, open("work/fx.json", "w"), indent=1)
 
 # ---- 5. subtitle ASS: ayat-ayat bersih, perkataan aktif diserlahkan (kuning)
-import os, re
-A2W = [w for sg in json.load(open("work/A2.json")) for w in sg["words"]]
-A1W = words
-def span_words(a, b, text):   # ganti perkataan dalam [a,b) dengan teks baru, masa diagih sekata
-    global A2W
-    rm = [w for w in A2W if a <= w["s"] < b]
-    A2W = [w for w in A2W if not (a <= w["s"] < b)]
-    if not text or not rm: return
-    t0, t1 = rm[0]["s"], rm[-1]["e"]; toks = text.split(); d = (t1 - t0) / len(toks)
-    A2W += [dict(w=tk, s=t0 + i * d, e=t0 + (i + 1) * d, k=1) for i, tk in enumerate(toks)]
-for a, b in ((0, 1.2), (54.3, 54.9), (149.1, 152.3), (152.9, 154.4), (177.5, 178.3)): span_words(a, b, "")      # tak pasti -> buang
-for a, b, tx in ((24.6, 28.9, "Kita ada warna"), (125.4, 126.5, "Okey, kita try lah"), (139.4, 141.3, "Lagi, lagi, lagi"),
-                 (142.7, 144.3, "Kenapa bagi sekarang?"), (145.1, 145.9, "Kenapa nak retake?"),
-                 (146.1, 147.4, "Kenapa tak boleh retake?"), (154.5, 156.1, "Okey lah, boleh lah"),
-                 (160.7, 162.4, "Oh, closing lah!")): span_words(a, b, tx)
-A2W = [w for w in A2W if not (62.7 <= w["s"] < 124.5)] + [w for w in A1W if 62.7 <= w["s"] < 124.5]  # pusingan permainan: transkrip pertama lebih tepat
-SUBW = sorted(A2W, key=lambda w: w["s"])
-FIX = {"bijak": "Pija", "syah": "Hasha", "aisyah": "Hasha", "okay": "Okey", "ok": "Okey", "hishan": "Hasha"}
-FILLER = {"okey", "hmm", "ahai", "aduh"}
 def clean(w):
     w = w.strip()
     core = w.strip(".,?!…").lstrip("-")
