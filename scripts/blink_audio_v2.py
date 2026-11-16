@@ -55,7 +55,7 @@ def notif(): return np.concatenate([pop(880,.12)*.9,np.zeros(int(.05*SR)),pop(11
 # ---- garis masa v2 (halus, klinikal) ----
 def soft(f=700,d=.12): t=t_(d); return np.sin(2*np.pi*f*t)*np.exp(-t*30)*.7
 def whisper_(d=.35,f0=500,f1=2500): return whoosh(d,f0,f1)*.5
-for tt in (.05,3.12,6.85,13.3,19.4,24.0,28.95,35.8): put(tt, soft(620,.14), .35); put(tt, whisper_(), .18)
+for tt in (3.12,7.65,13.0,26.3): put(tt, soft(620,.14), .35); put(tt, whisper_(), .18)
 for i in range(18): put(4.3+i*.06, tick(1100+i*40,.03), .22)
 put(5.45, bell(1046,.9), .3)
 put(9.2, soft(520), .35)
