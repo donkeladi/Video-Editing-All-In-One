@@ -1,0 +1,36 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Sub,Inter,66,&H00FFFFFF,&H00FFFFFF,&H66401E0A,&H00000000,1,0,0,0,100,100,0,0,3,18,0,2,80,80,600,1
+Style: Tag,Inter,32,&H00FFFFFF,&H00FFFFFF,&H66401E0A,&H00000000,1,0,0,0,100,100,1,0,3,12,0,8,40,40,70,1
+Style: Big,Inter,150,&H00B6C42E,&H00FFFFFF,&H00401E0A,&H00000000,1,0,0,0,100,100,0,0,1,6,0,8,40,40,260,1
+Style: Small,Inter,42,&H00FFFFFF,&H00FFFFFF,&H00401E0A,&H00000000,1,0,0,0,100,100,2,0,1,4,0,8,40,40,430,1
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.00,0:00:43.77,Tag,,0,0,0,,DS PHARMA EYE CARE  ·  MAL22076147T
+Dialogue: 1,0:00:00.00,0:00:00.84,Sub,,0,0,0,,{\fad(80,60)}Korang tahu tak,
+Dialogue: 1,0:00:00.86,0:00:03.98,Sub,,0,0,0,,{\fad(80,60)}purata orang Malaysia online {\c&HB6C42E&}8 jam{\c&HFFFFFF&} sehari.
+Dialogue: 1,0:00:04.00,0:00:05.58,Sub,,0,0,0,,{\fad(80,60)}Itu belum lagi kita tengok TV,
+Dialogue: 1,0:00:05.94,0:00:07.88,Sub,,0,0,0,,{\fad(80,60)}tengok TikTok online.
+Dialogue: 1,0:00:08.32,0:00:10.80,Sub,,0,0,0,,{\fad(80,60)}So, tolak {\c&HB6C42E&}24 jam{\c&HFFFFFF&},
+Dialogue: 1,0:00:10.82,0:00:12.30,Sub,,0,0,0,,{\fad(80,60)}tolak {\c&HB6C42E&}8 jam{\c&HFFFFFF&} sehari,
+Dialogue: 1,0:00:12.32,0:00:14.64,Sub,,0,0,0,,{\fad(80,60)}kita masih lagi berbaki {\c&HB6C42E&}16 jam{\c&HFFFFFF&}.
+Dialogue: 1,0:00:14.66,0:00:16.84,Sub,,0,0,0,,{\fad(80,60)}Jadi, means {\c&HB6C42E&}8 jam{\c&HFFFFFF&} kita tengok social
+Dialogue: 1,0:00:16.86,0:00:20.50,Sub,,0,0,0,,{\fad(80,60)}media, dah separuh hari kita tengok depan
+Dialogue: 1,0:00:20.52,0:00:20.90,Sub,,0,0,0,,{\fad(80,60)}skrin.
+Dialogue: 1,0:00:20.92,0:00:24.72,Sub,,0,0,0,,{\fad(80,60)}Jadi, {\c&HB6C42E&}masalah mata{\c&HFFFFFF&} akan jadi sangat-sangat
+Dialogue: 1,0:00:24.74,0:00:28.18,Sub,,0,0,0,,{\fad(80,60)}teruk disebabkan cahaya {\c&HB6C42E&}blue light{\c&HFFFFFF&} daripada
+Dialogue: 1,0:00:28.20,0:00:29.48,Sub,,0,0,0,,{\fad(80,60)}social media.
+Dialogue: 1,0:00:29.50,0:00:31.02,Sub,,0,0,0,,{\fad(80,60)}Daripada screen time tu lah.
+Dialogue: 1,0:00:31.04,0:00:35.44,Sub,,0,0,0,,{\fad(80,60)}Jadi, saya amalkan konsep {\c&HB6C42E&}20-20-20{\c&HFFFFFF&} yang mana
+Dialogue: 1,0:00:35.46,0:00:36.92,Sub,,0,0,0,,{\fad(80,60)}setiap {\c&HB6C42E&}20 minit{\c&HFFFFFF&},
+Dialogue: 1,0:00:36.94,0:00:39.60,Sub,,0,0,0,,{\fad(80,60)}tengok sejauh {\c&HB6C42E&}20 kaki{\c&HFFFFFF&},
+Dialogue: 1,0:00:39.62,0:00:40.94,Sub,,0,0,0,,{\fad(80,60)}{\c&HB6C42E&}20 saat{\c&HFFFFFF&}.
+Dialogue: 1,0:00:40.98,0:00:42.54,Sub,,0,0,0,,{\fad(80,60)}Mata ada sepasang je.
+Dialogue: 1,0:00:42.56,0:00:43.70,Sub,,0,0,0,,{\fad(80,60)}{\c&HB6C42E&}Jaga elok-elok{\c&HFFFFFF&}.
+Dialogue: 2,0:00:31.04,0:00:40.94,Big,,0,0,0,,{\fad(150,150)\t(0,200,\fscx100\fscy100)\fscx70\fscy70}20-20-20
+Dialogue: 2,0:00:31.34,0:00:40.94,Small,,0,0,0,,{\fad(150,150)}20 minit  •  20 kaki  •  20 saat

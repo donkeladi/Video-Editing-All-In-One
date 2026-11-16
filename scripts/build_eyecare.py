@@ -1,52 +1,33 @@
 #!/usr/bin/env python3
 """Bina video DS Pharma Eye Care (gaya clinical). Guna: build_eyecare.py
-Subtitle ditimingkan secara anggaran (skrip + pause senyap) - ganti dengan transkrip ASR bila ada."""
+Subtitle ikut transkrip ASR bertimestamp (work/words.json)."""
 import re, subprocess, os
 V="output/eyecare_raw_cut.mp4"
-TEAL=r"{\c&HB6C42E&}"; WHITE=r"{\c&HFFFFFF&}"
-# (teks, ...) ; *..* = serlah teal
-CH=["Korang tau tak,","purata orang Malaysia online *8 jam* sehari?","Tu belum kira tengok TV lagi tau.",
-"Cuba fikir.","Tolak *8 jam* tidur,","separuh masa kita bangun,","mata ni asyik tenung skrin je.",
-"Mata ni tak reti complain…","tiba-tiba je petang dah rasa","*pedih, kering, kabur-kabur.*",
-"Tu tanda mata korang dah *penat gila.*","Senang je, try *20-20-20.*","Setiap *20 minit,*","tengok jauh *20 kaki,*","*20 saat.*",
-"Mata ada sepasang je.","*Jaga elok-elok.*"]
-# pause (start,dur) dalam video _cut
-P=[(0,.297),(2.816,.19),(4.004,.183),(6.076,.263),(6.854,.216),(7.303,.219),(9.329,.323),(18.218,.192),(25.904,.215),
-(28.443,.382),(31.045,.381),(35.729,.284),(36.944,.344),(37.574,.217),(39.706,.341),(42.556,.225)]
 dur=float(subprocess.check_output(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",V]))
-gaps=[(a,a+d) for a,d in P[1:]]
-segs=[];t=P[0][0]+P[0][1]
-for a,e in gaps: segs.append((t,a)); t=e
-segs.append((t,dur))
-tot=sum(b-a for a,b in segs)
-def at(x):  # kedudukan masa ucapan kumulatif -> masa video
-    for a,b in segs:
-        if x<=b-a: return a+x
-        x-=b-a
-    return segs[-1][1]
-# sejajarkan ikut suku kata: puncak tenaga suara (work/syl.py) <-> suku kata skrip
-SP=["Korang tau tak,","purata orang Malaysia online lapan jam sehari?","Tu belum kira tengok TV lagi tau.","Cuba fikir.",
-"Tolak lapan jam tidur,","separuh masa kita bangun,","mata ni asyik tenung skrin je.","Mata ni tak reti complain","tiba-tiba je petang dah rasa",
-"pedih, kering, kabur-kabur.","Tu tanda mata korang dah penat gila.","Senang je, try dua puluh dua puluh dua puluh.","Setiap dua puluh minit,",
-"tengok jauh dua puluh kaki,","dua puluh saat.","Mata ada sepasang je.","Jaga elok-elok."]
+TEAL=r"{\c&HB6C42E&}"; WHITE=r"{\c&HFFFFFF&}"
 import json
-pk=json.load(open("work/peaks.json")); sy=[len(re.findall(r"[aeiou]+",t.lower())) for t in SP]; N=sum(sy); r=len(pk)/N
-PZ=[(a_,b_) for a_,b_ in gaps]
-cntb=[sum(1 for q in pk if q<a_) for a_,b_ in PZ]   # bilangan suku kata sebelum tiap pause
-st=[max(pk[0]-.18,0)];en=[];k=0
-for n in sy[:-1]:
-    k+=n; idx=k*r
-    j=min(range(len(PZ)),key=lambda j:abs(cntb[j]-idx))
-    if abs(cntb[j]-idx)<=2.5: en.append(PZ[j][0]+.05); st.append(PZ[j][1]-.05)   # snap ke pause
-    else:
-        t=(pk[min(int(idx)-1,len(pk)-1)]+pk[min(int(idx),len(pk)-1)])/2; en.append(t); st.append(t)
-en.append(dur-.05)
-# gabung chunk pendek (<0.9s) ke chunk seterusnya
-i=0
-while i<len(CH)-1:
-    if en[i]-st[i]<.9 and i!=3:
-        CH[i+1]=CH[i]+" "+CH[i+1]; st[i+1]=st[i]; del CH[i],st[i],en[i]
-    else: i+=1
+
+# subtitle daripada transkrip ASR bertimestamp (scripts/transcribe_local.py -> work/words.json)
+raw=json.load(open("work/words.json"))
+W=[]
+for a_,b_,t in raw:
+    if t.startswith("-") and W: W[-1][2]+=t; W[-1][1]=b_
+    else: W.append([a_,b_,t])
+CH=[];st=[];en=[];cur=[]
+def flush():
+    global cur
+    if cur:
+        CH.append(" ".join(w[2] for w in cur)); st.append(cur[0][0]); en.append(cur[-1][1]+.12); cur=[]
+for i,w in enumerate(W):
+    cur.append(w)
+    gap=(W[i+1][0]-w[1]) if i+1<len(W) else 9
+    if w[2][-1] in ".?!" or (w[2][-1]=="," and len(cur)>=3) or len(cur)>=7 or gap>.45 or sum(len(x[2])+1 for x in cur)>40: flush()
+flush()
+for i in range(len(CH)-1):
+    if en[i]>st[i+1]-.02: en[i]=st[i+1]-.02
+en[-1]=min(en[-1],dur-.05); st[0]=max(st[0],0)
+HL=["8 jam","24 jam","16 jam","blue light","20-20-20","20 minit","20 kaki","20 saat","Jaga elok-elok","masalah mata"]
+CH=[re.sub("("+"|".join(re.escape(h) for h in HL)+")",r"*\1*",c) for c in CH]
 def ts(x):
     h=int(x//3600);m=int(x%3600//60);s=x%60
     return f"{h}:{m:02d}:{s:05.2f}"
