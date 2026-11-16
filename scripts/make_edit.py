@@ -92,28 +92,52 @@ def to_out(t):
     return None
 
 fx = {"memes": [], "sfx": [], "mute": []}
-for t, st, sf in FUN:
-    fx["memes"].append(dict(t=t, d=1.5, png=f"assets/memes/{st}.png", w=760, y=230))
-    fx["sfx"] += [dict(t=t, file="assets/sfx/pop.wav", vol=.5), dict(t=t + .05, file=f"assets/sfx/{sf}.wav", vol=.75)]
+for t, st, sf in FUN:   # sticker dibuang -> SFX sahaja
+    fx["sfx"].append(dict(t=t, file=f"assets/sfx/{sf}.wav", vol=.75))
 json.dump(fx, open("work/fx.json", "w"), indent=1)
 
-# ---- 5. subtitle ASS
-FIX = {"Hishan": "Hasha", "hishan": "Hasha"}
+# ---- 5. subtitle ASS: ayat-ayat bersih, perkataan aktif diserlahkan (kuning)
+import os, re
+A2W = [w for sg in json.load(open("work/A2.json")) for w in sg["words"]]
+A1W = words
+def span_words(a, b, text):   # ganti perkataan dalam [a,b) dengan teks baru, masa diagih sekata
+    global A2W
+    rm = [w for w in A2W if a <= w["s"] < b]
+    A2W = [w for w in A2W if not (a <= w["s"] < b)]
+    if not text or not rm: return
+    t0, t1 = rm[0]["s"], rm[-1]["e"]; toks = text.split(); d = (t1 - t0) / len(toks)
+    A2W += [dict(w=tk, s=t0 + i * d, e=t0 + (i + 1) * d, k=1) for i, tk in enumerate(toks)]
+for a, b in ((0, 1.2), (54.3, 54.9), (149.1, 152.3), (152.9, 154.4), (177.5, 178.3)): span_words(a, b, "")      # tak pasti -> buang
+for a, b, tx in ((24.6, 28.9, "Kita ada warna"), (125.4, 126.5, "Okey, kita try lah"), (139.4, 141.3, "Lagi, lagi, lagi"),
+                 (142.7, 144.3, "Kenapa bagi sekarang?"), (145.1, 145.9, "Kenapa nak retake?"),
+                 (146.1, 147.4, "Kenapa tak boleh retake?"), (154.5, 156.1, "Okey lah, boleh lah"),
+                 (160.7, 162.4, "Oh, closing lah!")): span_words(a, b, tx)
+A2W = [w for w in A2W if not (62.7 <= w["s"] < 124.5)] + [w for w in A1W if 62.7 <= w["s"] < 124.5]  # pusingan permainan: transkrip pertama lebih tepat
+SUBW = sorted(A2W, key=lambda w: w["s"])
+FIX = {"syah": "Hasha", "aisyah": "Hasha", "okay": "Okey", "ok": "Okey", "hishan": "Hasha"}
+FILLER = {"okey", "hmm", "ahai", "aduh"}
 def clean(w):
-    w = FIX.get(w.strip(" .,"), w.strip())
-    return w.rstrip(".,")
+    w = w.strip()
+    core = w.strip(".,?!…").lstrip("-")
+    core = FIX.get(core.lower().replace("-", ""), core)
+    return core + ("?" if w.endswith("?") else "!" if w.endswith("!") else "")
 groups = []; cur = []
-for w in words:
+def flush():
+    global cur
+    if cur: groups.append(cur)
+    cur = []
+for w in SUBW:
     txt = clean(w["w"])
-    if not txt: continue
-    if cur and (w["s"] - cur[-1]["e"] > .45 or len(cur) >= 3 or sum(len(c["t"]) for c in cur) + len(txt) > 13):
-        groups.append(cur); cur = []
+    if not txt or (txt.strip("?!").lower() in FILLER and not w.get("k")): continue
+    if cur and (w["s"] - cur[-1]["e"] > .5 or len(cur) >= 4 or sum(len(c["t"]) + 1 for c in cur) + len(txt) > 20): flush()
     cur.append(dict(t=txt, s=w["s"], e=w["e"]))
-    if txt.endswith(("?", "!")): groups.append(cur); cur = []
-if cur: groups.append(cur)
+    raw = w["w"].strip()
+    if raw.endswith((".", "?", "!", "…")) or (raw.endswith(",") and len(cur) >= 2): flush()
+flush()
+for g in groups: g[0]["t"] = g[0]["t"][:1].upper() + g[0]["t"][1:]
 def ts(x):
-    h = int(x // 3600); m = int(x % 3600 // 60); s = x % 60
-    return f"{h}:{m:02d}:{s:05.2f}"
+    h = int(x // 3600); m = int(x % 3600 // 60); sec = x % 60
+    return f"{h}:{m:02d}:{sec:05.2f}"
 hdr = """[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -122,17 +146,22 @@ WrapStyle: 2
 
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
-Style: Default,Inter Black,96,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,8,2,2,60,60,470,1
+Style: Default,Inter ExtraBold,80,&H00FFFFFF,&H000000FF,&H00101010,&H96000000,0,0,0,0,100,100,0,0,1,7,3,2,70,70,430,1
 
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
 """
+YEL = r"{\c&H00E6FF&\fscx108\fscy108}"; WHT = r"{\c&HFFFFFF&\fscx100\fscy100}"
 ev = []
 for g in groups:
-    a, b = to_out(g[0]["s"]), to_out(g[-1]["e"])
-    if a is None or b is None or b <= a: continue
-    b = max(b, a + .45)
-    txt = " ".join(x["t"] for x in g).upper()
-    ev.append(f"Dialogue: 0,{ts(a)},{ts(b + .05)},Default,,0,0,0,,{{\\fscx88\\fscy88\\t(0,90,\\fscx100\\fscy100)}}{txt}")
+    for k, w in enumerate(g):
+        a = to_out(w["s"]); nxt = g[k + 1]["s"] if k + 1 < len(g) else None
+        e_src = (nxt if nxt is not None and nxt - w["e"] < .35 else w["e"] + .12)
+        b = to_out(e_src) if to_out(e_src) is not None else None
+        if a is None or b is None: continue
+        if k == 0 and False: pass
+        b = max(b, a + .12)
+        line = " ".join((YEL + x["t"] + WHT) if j == k else x["t"] for j, x in enumerate(g))
+        ev.append(f"Dialogue: 0,{ts(a)},{ts(b)},Default,,0,0,0,,{line}")
 open("work/subs.ass", "w").write(hdr + "\n".join(ev) + "\n")
-print(f"shots={len(edl)} jumlah={TOTAL:.1f}s sticker={len(fx['memes'])} sub={len(ev)}")
+print(f"shots={len(edl)} jumlah={TOTAL:.1f}s sfx={len(fx['sfx'])} baris_sub={len(groups)} acara={len(ev)}")
