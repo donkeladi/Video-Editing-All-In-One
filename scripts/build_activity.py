@@ -39,9 +39,9 @@ for i, e in enumerate(edl):
     if ch > sh: ch = sh; cw = ch * W / H
     cx = min(max(e["cx"] * sw - cw / 2, 0), sw - cw); cy = min(max(e["cy"] * sh - ch / 2, 0), sh - ch)
     lab = f"s{cam}{idx[cam].index(i)}"
-    sharp = ",unsharp=5:5:0.35:5:5:0.0" if z > 1.0 else ""     # sedikit ketajaman bila di-zoom
-    fc.append(f"[{lab}]trim=start_frame={e['f0']}:end_frame={e['f1']},setpts=PTS-STARTPTS,"
-              f"crop={round(cw)}:{round(ch)}:{round(cx)}:{round(cy)},scale={W}:{H}:flags=lanczos{sharp},setsar=1[v{i}]")
+    dn = "hqdn3d=1.5:1.2:3:2.5," if z > 1.0 else ""            # denoise ringan sebelum naik skala (kurangkan blok)
+    fc.append(f"[{lab}]trim=start_frame={e['f0']}:end_frame={e['f1']},setpts=PTS-STARTPTS,{dn}"
+              f"crop={round(cw)}:{round(ch)}:{round(cx)}:{round(cy)},scale={W}:{H}:flags=lanczos,setsar=1[v{i}]")
 fc.append("".join(f"[v{i}]" for i in range(N)) + f"concat=n={N}:v=1:a=0[vc]")
 vlast = "[vc]"
 if os.path.exists("work/subs.ass"):

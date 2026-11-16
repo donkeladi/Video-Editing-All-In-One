@@ -26,7 +26,7 @@ for a, b, tx in ((24.6, 28.9, "Kita ada warna"), (125.4, 126.5, "Okey, kita try 
 A2W = [w for w in A2W if not (62.7 <= w["s"] < 124.5)] + [w for w in A1W if 62.7 <= w["s"] < 124.5]  # pusingan permainan: transkrip pertama lebih tepat
 SUBW = sorted(A2W, key=lambda w: w["s"])
 FIX = {"bijak": "Pija", "syah": "Hasha", "aisyah": "Hasha", "okay": "Okey", "ok": "Okey", "hishan": "Hasha"}
-FILLER = {"okey", "hmm", "ahai", "aduh", "so"}   # tak dipaparkan dalam subtitle
+FILLER = {"okey", "okay", "ok", "hmm", "ahai", "aduh", "so"}   # tak dipaparkan dalam subtitle
 
 # ---- 1. julat disimpan: buang senyap panjang (>4.2s) tapi tinggalkan 1.5s tiap hujung
 def has_word(t): return any(w["s"] - .1 <= t <= w["e"] + .1 for w in words)
@@ -123,13 +123,13 @@ edl = []; nB = 0
 for c, a, b, tag in plan:
     d = b - a
     if c == "A":
-        edl.append(dict(t0=a, t1=b, cam="A", z=1.2 if tag % 3 == 0 else 1.0, cx=.5, cy=.42)); continue
+        edl.append(dict(t0=a, t1=b, cam="A", z=1.0, cx=.5, cy=.42)); continue
     nB += 1
     if tag == "N" and nB % 5 == 0:                        # sesekali shot lebar (kedua-duanya)
         acc["L"] += d / 2; acc["R"] += d / 2
         edl.append(dict(t0=a, t1=b, cam="B", z=1.0, cx=.5, cy=.5)); continue
     sd = "L" if acc["L"] <= acc["R"] else "R"; acc[sd] += d; cx, cy = POS[sd]
-    edl.append(dict(t0=a, t1=b, cam="B", z=1.6 if tag == "F" else 1.45, cx=cx, cy=cy + (.02 if tag == "F" else 0), who=sd))
+    edl.append(dict(t0=a, t1=b, cam="B", z=1.45 if tag == "F" else 1.3, cx=cx, cy=cy + (.02 if tag == "F" else 0), who=sd))
 print("masa fokus  Pija(putih)=%.1fs  Hasha(merah)=%.1fs" % (acc["L"], acc["R"]))
 prev_t1 = None; prev_f1 = None   # sempadan bingkai mutlak; shot bersebelahan berkongsi sempadan (tiada klik/drift)
 for e in edl:
@@ -164,14 +164,22 @@ def flush():
     global cur
     if cur: groups.append(cur)
     cur = []
-for w in SUBW:
-    txt = clean(w["w"])
-    if not txt or (txt.strip("?!").lower() in FILLER and not w.get("k")): continue
+SUBT = json.load(open("work/subw.json"))     # konsensus 3 transkrip; yang tak jelas dikosongkan
+for w in SUBT:
+    txt = w["t"].strip()
+    if not txt or txt.strip("?!").lower() in FILLER: continue
     if cur and (w["s"] - cur[-1]["e"] > .5 or len(cur) >= 4 or sum(len(c["t"]) + 1 for c in cur) + len(txt) > 20): flush()
     cur.append(dict(t=txt, s=w["s"], e=w["e"]))
     raw = w["w"].strip()
     if raw.endswith((".", "?", "!", "…")) or (raw.endswith(",") and len(cur) >= 2): flush()
 flush()
+# buang baris terlalu pendek/lemah (satu perkataan <5 huruf, atau nama sendirian)
+KEEP1 = {"api", "next", "kayu", "pokok", "kereta", "warna", "merah", "hari"}
+def okgrp(g):
+    j = " ".join(x["t"] for x in g).strip("?!")
+    if len(g) == 1: return j.lower() in KEEP1 or (len(j) >= 5 and j.lower() not in ("hasha", "pija"))
+    return True
+groups = [g for g in groups if okgrp(g)]
 for g in groups: g[0]["t"] = g[0]["t"][:1].upper() + g[0]["t"][1:]
 def ts(x):
     h = int(x // 3600); m = int(x % 3600 // 60); sec = x % 60
