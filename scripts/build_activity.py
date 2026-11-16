@@ -37,6 +37,7 @@ fx = json.load(open("work/fx.json")) if os.path.exists("work/fx.json") else {}
 
 # 1. render tiap shot (video dari kamera dipilih, audio dari A)
 parts = []
+REUSE = "--reuse" in sys.argv
 for i, s in enumerate(edl):
     sw, sh = SIZE[s["cam"]]
     z = s.get("z", 1.0)
@@ -50,15 +51,15 @@ for i, s in enumerate(edl):
     out = f"{SEG}/{i:03d}.mp4"
     d = s["t1"] - s["t0"]
     vf = f"crop={cw:.0f}:{ch:.0f}:{cx:.0f}:{cy:.0f},scale={W}:{H}:flags=lanczos,fps={FPS},setsar=1,format=yuv420p"
-    run("ffmpeg", "-y", "-ss", f"{s['t0']:.3f}", "-t", f"{d:.3f}", "-i", f"input/{s['cam']}.mp4",
-        "-ss", f"{s['t0']:.3f}", "-t", f"{d:.3f}", "-i", "input/A.mp4",
-        "-map", "0:v", "-map", "1:a", "-vf", vf, "-c:v", "libx264", "-crf", "16", "-preset", "fast",
-        "-c:a", "aac", "-b:a", "192k", "-ar", "44100", "-ac", "2", out)
+    if not REUSE:
+        run("ffmpeg", "-y", "-ss", f"{s['t0']:.3f}", "-t", f"{d:.3f}", "-i", f"input/{s['cam']}.mp4",
+            "-an", "-frames:v", str(round(d * FPS)), "-vf", vf, "-c:v", "libx264", "-crf", "16", "-preset", "fast", out)
     parts.append(out)
 
 lst = f"{SEG}/list.txt"
 open(lst, "w").write("".join(f"file '{os.path.abspath(p)}'\n" for p in parts))
-run("ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", "work/base.mp4")
+if not REUSE:
+    run("ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", "work/base.mp4")
 
 # peta masa asal -> masa output (untuk letak meme/sfx/mute)
 tmap = []
@@ -76,10 +77,10 @@ def to_out(t):
 
 
 # 2. overlay meme + subtitle
-inputs = ["-i", "work/base.mp4"]
+inputs = ["-i", "work/base.mp4", "-i", "input/A.mp4"]
 chain = []
 last = "[0:v]"
-n = 1
+n = 2
 for m in fx.get("memes", []):
     ot = to_out(m["t"])
     if ot is None:
@@ -97,8 +98,9 @@ if os.path.exists("work/subs.ass"):
     last = "[vout]"
 
 # 3. audio: mute videographer + sfx + loudnorm
-achain = []
-a_last = "[0:a]"
+achain = [f"[1:a]atrim={e['t0']:.3f}:{e['t1']:.3f},asetpts=PTS-STARTPTS[p{i}]" for i, e in enumerate(edl)]
+achain.append("".join(f"[p{i}]" for i in range(len(edl))) + f"concat=n={len(edl)}:v=0:a=1[abase]")
+a_last = "[abase]"
 mutes = [to_out(a) for a, b in fx.get("mute", [])]
 for (a, b) in fx.get("mute", []):
     oa, ob = to_out(a), to_out(b)
@@ -120,8 +122,8 @@ for sfx in fx.get("sfx", []):
 achain.append("".join(amix_in) + f"amix=inputs={len(amix_in)}:normalize=0:duration=first,"
               "loudnorm=I=-14:TP=-1.5:LRA=11[aout]")
 
-fc = ";".join(chain + achain)
-cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", fc, "-map", last, "-map", "[aout]",
+open("work/fc.txt", "w").write(";".join(chain + achain))
+cmd = ["ffmpeg", "-y", *inputs, "-filter_complex_script", "work/fc.txt", "-map", last, "-map", "[aout]",
        "-c:v", "libx264", "-crf", "18", "-preset", "medium", "-pix_fmt", "yuv420p",
        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "output/aktiviti_tiktok.mp4"]
 run(*cmd)
