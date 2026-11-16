@@ -22,6 +22,7 @@ f = lambda p, s: ImageFont.truetype(p, s)
 # ---- bahagian yang dikekalkan (saat dalam video asal) ----
 KEEP = [(1.95, 4.95), (5.30, 14.14), (14.76, 16.48), (17.01, 22.61),
         (23.12, 27.22), (30.39, 32.08), (32.47, 34.08), (34.63, 37.30)]
+KEEP = [(a - 0.08, b + 0.14) for a, b in KEEP]
 starts, t = [], 0.0
 for a, b in KEEP:
     starts.append(t); t += b - a
@@ -55,10 +56,14 @@ def ts(x, ass=False):
 import re
 srt, ass = [], []
 for i, (txt, a, b) in enumerate(SUBS, 1):
-    oa, ob = omap(a), omap(b)
+    oa, ob = omap(a), omap(b) + 0.12
+    if i < len(SUBS):
+        na = omap(SUBS[i][1])
+        if 0 < na - ob < 0.6: ob = na
+    ob = min(ob, TOTAL)
     plain = re.sub(r"\{[^}]*\}", "", txt)
     srt.append(f"{i}\n{ts(oa)} --> {ts(ob)}\n{plain}\n")
-    ass.append(f"Dialogue: 0,{ts(oa,True)},{ts(ob,True)},Sub,,0,0,0,,{txt}")
+    ass.append(f"Dialogue: 0,{ts(oa,True)},{ts(ob,True)},Sub,,0,0,0,,{{\\fad(140,120)}}{txt}")
 open("work/video.srt", "w").write("\n".join(srt))
 open("work/video.ass", "w").write(f"""[Script Info]
 ScriptType: v4.00+
@@ -165,24 +170,20 @@ for n in (1, 2, 3): tips(n)
 # ---- jadual overlay (masa output) ----
 o = omap
 OVS = [
- ("header", 0, TOTAL),
- ("stat1", o(8.0), o(10.86)),
+ ("stat1", o(8.0), o(14.14)),       # stat2 dilukis atas stat1 (bertindih, tiada kelipan)
  ("stat2", o(10.86), o(14.14)),
  ("punca", o(14.9), o(19.84)),
  ("tahun", o(21.14), o(25.2)),
  ("x4", o(25.2), o(27.22)),
- ("tips1", o(30.39), o(34.08)),
- ("tips2", o(34.63), o(35.88)),
+ ("tips1", o(30.39), TOTAL),        # tip 2 & 3 bertindih atas tip 1
+ ("tips2", o(34.63), TOTAL),
  ("tips3", o(35.88), TOTAL),
 ]
-# tips1 hingga akhir segmen, tips2 dari "main di luar"
-OVS[6] = ("tips1", o(30.39), o(34.63))
-OVS[7] = ("tips2", o(34.63), o(35.88))
 
 # ---- ffmpeg ----
 fc, vparts, aparts = [], "", ""
 for i, ((a, b), ) in enumerate(zip(KEEP)):
-    zoom = 1.07 if i % 2 else 1.0
+    zoom = 1.0
     zf = f",scale={int(W*zoom)}:{int(H*zoom)},crop={W}:{H}" if zoom != 1 else ""
     fc.append(f"[0:v]trim={a}:{b},setpts=PTS-STARTPTS{zf}[v{i}]")
     fc.append(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS,afade=t=in:d=0.02,afade=t=out:st={b-a-0.03:.3f}:d=0.03[a{i}]")
@@ -195,8 +196,9 @@ cur = "vc"
 for k, (name, a, b) in enumerate(OVS):
     inputs += ["-loop", "1", "-i", f"work/ov/{name}.png"]
     nxt = f"o{k}"
-    fc.append(f"[{k+1}:v]format=rgba,fade=t=in:st={a:.2f}:d=0.2:alpha=1[p{k}]")
-    fc.append(f"[{cur}][p{k}]overlay=0:0:enable='between(t,{a:.2f},{b:.2f})':shortest=1[{nxt}]")
+    fc.append(f"[{k+1}:v]format=rgba,fade=t=in:st={a:.2f}:d=0.45:alpha=1,fade=t=out:st={b-0.35:.2f}:d=0.35:alpha=1[p{k}]")
+    ye = f"if(lt(t,{a+0.5:.2f}),60*pow(1-(t-{a:.2f})/0.5,3),0)"
+    fc.append(f"[{cur}][p{k}]overlay=0:'{ye}':enable='between(t,{a:.2f},{b:.2f})':eval=frame:shortest=1[{nxt}]")
     cur = nxt
 fc.append(f"[{cur}]subtitles=work/video.ass:fontsdir=/usr/share/fonts/opentype/inter,fade=t=out:st={TOTAL-0.3:.2f}:d=0.3[vout]")
 cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc), "-map", "[vout]", "-map", "[aout]",
