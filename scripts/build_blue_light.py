@@ -4,7 +4,7 @@ Overlay (kad, carta, tip) + subtitle + SFX + muzik latar (ducking) + punch-in zo
 Guna:  python3 scripts/build_blue_light.py [--preview t1,t2,...]
 Timeline di bawah ialah masa dalam video ASAL (input/main.mov); OFF dibuang di depan.
 """
-import subprocess as sp, numpy as np, os, wave, math, re, sys
+import subprocess as sp, numpy as np, os, wave, math, re, sys, json
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 SRC = "input/main.mov"; OUT = "output/blue_light_awareness.mp4"
@@ -20,35 +20,21 @@ FD="/usr/share/fonts/opentype/inter/Inter-%s.otf"
 def F(w,s): return ImageFont.truetype(FD % w, int(s*SS))
 
 # ---------- ucapan: segmen speech (dari silencedetect) + teks ----------
-REGIONS = [
- ([(0.76,3.99)], "Ramai ingat blue light dari phone yang rosakkan mata kan?"),
- ([(4.33,9.86),(10.05,11.04)], "Menurut American Academy of Ophthalmology, tak ada bukti saintifik yang blue light dari gajet rosakkan mata."),
- ([(11.42,13.35)], "Masalah sebenar, kita lupa berkelip."),
- ([(13.54,17.79)], "Satu kajian dalam jurnal Clinical and Experimental Optometry"),
- ([(18.17,22.49)], "jumpa kelip mata jatuh dari 18 kali ke lebih kurang 4 kali seminit masa guna gajet."),
- ([(22.84,26.43),(27.29,30.62),(31.25,31.70),(32.45,34.51)], "Tapi Harvard Health cakap blue light memang paling mengganggu waktu malam, sebab dia kacau jam badan dan tidur kita."),
- ([(34.86,39.92),(40.67,45.15),(45.54,47.30)], "So rajin berkelip, rehat setiap 20 minit, letak phone sebelum tidur."),
- ([(48.04,49.28),(49.76,50.95),(51.17,53.15)], "Saya tambah satu rutin, DS Pharma Eye Care. Ada lobak merah,"),
- ([(53.48,58.59),(58.79,63.91)], "goji, avokado dan Eyebright, digunakan secara tradisional"),
- ([(64.36,65.34),(66.10,67.63)], "untuk kesihatan mata."),
-]
-NUMSYL={"18":4,"20":4,"4":2}
-def syl(w):
-    c=re.sub(r"[^\w]","",w).lower()
-    if c in NUMSYL: return NUMSYL[c]
-    return max(1,len(re.findall(r"[aeiou]+",c)))
+SIL=[(0.07,0.76),(3.99,4.33),(9.86,10.05),(11.04,11.42),(13.35,13.54),(17.79,18.17),(22.49,22.84),(26.43,27.29),(30.62,31.25),(31.70,32.45),(34.51,34.86),(39.92,40.67),(45.15,45.54),(47.30,48.04),(49.28,49.76),(50.95,51.17),(53.15,53.48),(58.59,58.79),(63.91,64.36),(65.34,66.10),(67.63,67.96)]
+FIX={"journal":"jurnal","gadget":"gajet","gadget,":"gajet,"}
 def word_times():
-    out=[]
-    for segs,text in REGIONS:
-        ws=text.split(); wt=[syl(w) for w in ws]; tot=sum(wt)
-        total=sum(b-a for a,b in segs); acc=0.0
-        def at(x):   # x dalam saat-pertuturan -> masa mutlak
-            for a,b in segs:
-                if x<=b-a+1e-9: return a+x
-                x-=b-a
-            return segs[-1][1]
-        for w,s in zip(ws,wt):
-            a=at(acc/tot*total); acc+=s; b=at(acc/tot*total); out.append((w,a,b))
+    raw=json.load(open("notes/blue_light_words.json")); out=[]; i=0
+    while i<len(raw):
+        w,a,b=raw[i]
+        if w=="eye" and i+1<len(raw) and raw[i+1][0]=="bright": w,b=("Eyebright",raw[i+1][2]); i+=1
+        elif w=="se" and i+1<len(raw) and raw[i+1][0]=="minit.": w,b=("seminit.",raw[i+1][2]); i+=1
+        w=FIX.get(w,w)
+        for x,y in SIL:
+            if x<a<y: a=y
+            if x<b<y: b=x
+        b=max(b,a+0.12); out.append((w,a,b)); i+=1
+    for k in range(len(out)-1):          # elak bertindih
+        w,a,b=out[k]; out[k]=(w,a,min(b,out[k+1][1]))
     return out
 WORDS=word_times()
 def chunks():
@@ -139,22 +125,30 @@ def myth(prog):   # kad "mitos" dgn garis coret + silang
         k=min((prog-0.5)/0.3,1); ic_badge(d,p+w-62,p+h/2,int(40*(0.6+0.4*k)),RED,ic_cross)
     d.text(((p+44)*SS,(p+152)*SS),"Tiada bukti saintifik",font=F("ExtraBold",34),fill=(*AMBER,255) if prog>0.5 else (0,0,0,0),anchor="lm")
     return finish(im)
-def chart(prog):  # 18 -> ~4 kali seminit
+def chart(lt):  # 18 -> 4 kali seminit; lt = saat sejak kad muncul
     w,h=860,400; im,d,p=card_bg(w,h,38,NAVY+(240,),accent=CYAN)
     d.text(((p+46)*SS,(p+50)*SS),"KELIP MATA SEMINIT",font=F("Bold",28),fill=CYAN,anchor="lm")
     d.text(((p+w-46)*SS,(p+50)*SS),"Clin Exp Optom",font=F("Medium",24),fill=MUTE,anchor="rm")
     e=lambda x:1-(1-min(max(x,0),1))**3
-    rows=[("Biasa",18,GREEN,0.0),("Guna gajet",4,AMBER,0.45)]
-    for i,(lab,v,col,dl) in enumerate(rows):
-        y=p+150+i*120; k=e((prog-dl)/0.45); x0=p+46
+    rows=[("Biasa",18,GREEN,0.9,0.0,0.9),("Guna gajet",4,AMBER,8.6,3.2,0.7)]  # label,v,col,anim mula,tunjuk mula,tempoh
+    for i,(lab,v,col,dl,show,du) in enumerate(rows):
+        if lt<show: continue
+        y=p+150+i*120; k=e((lt-dl)/du); x0=p+46
         d.text((x0*SS,(y-40)*SS),lab,font=F("SemiBold",28),fill=WHITE,anchor="lm")
         rr(d,(x0,y-12,x0+w-92-150,y+26),19,NAVY2+(255,))
         bw=(w-92-150)*(v/18)*k
         if bw>10: rr(d,(x0,y-12,x0+bw,y+26),19,col+(255,))
-        num=int(round(v*k)) if i==0 else int(round(18-(18-v)*k)) if k>0 else 18
-        if i==1: num=int(round(v*k)) if k>0 else 0
-        d.text(((p+w-46)*SS,(y+6)*SS),("~" if i==1 and k>0.99 else "")+str(num),font=F("ExtraBold",64),fill=col,anchor="rm")
+        num=int(round(v*k)); txt=("~" if i==1 and k>0.99 else "")+(str(num) if k>0 else "?")
+        d.text(((p+w-46)*SS,(y+6)*SS),txt,font=F("ExtraBold",64),fill=col,anchor="rm")
     return finish(im)
+def ic_user(d,cx,cy,s,col):
+    cx*=SS;cy*=SS;s*=SS
+    d.ellipse((cx-s*0.28,cy-s*0.7,cx+s*0.28,cy-s*0.14),fill=col); d.pieslice((cx-s*0.6,cy+s*0.02,cx+s*0.6,cy+s*1.2),180,360,fill=col)
+def ic_cart(d,cx,cy,s,col):
+    cx*=SS;cy*=SS;s*=SS
+    d.line((cx-s*0.75,cy-s*0.55,cx-s*0.45,cy-s*0.55,cx-s*0.25,cy+s*0.25,cx+s*0.5,cy+s*0.25),fill=col,width=int(s*0.14),joint="curve")
+    d.polygon([(cx-s*0.42,cy-s*0.38),(cx+s*0.62,cy-s*0.38),(cx+s*0.5,cy+s*0.08),(cx-s*0.3,cy+s*0.08)],fill=col)
+    for xx in(-0.1,0.4): d.ellipse((cx+s*xx-s*0.1,cy+s*0.48,cx+s*xx+s*0.1,cy+s*0.68),fill=col)
 def tip(n,text,icon,col):
     f=F("ExtraBold",44); w=max(tw(f,text)+200,700); h=112
     im,d,p=card_bg(w,h,34,NAVY+(240,),accent=col)
@@ -194,7 +188,7 @@ def footer(t):
     f=F("SemiBold",29); w=tw(f,t)+70; h=70
     im,d,p=card_bg(w,h,h/2,(0,0,0,150),pad=20)
     d.text(((p+w/2)*SS,(p+h/2)*SS),t,font=f,fill=WHITE,anchor="mm"); return finish(im)
-ACC={"18","4","berkelip","harvard","health","ds","pharma","eye","care","eyebright","goji","avokado","lobak"}
+ACC={"18","4","empat","kuning","profile","beg","berkelip","harvard","health","ds","pharma","eye","care","eyebright","goji","avokado","lobak"}
 def subtitle(ws):
     f=F("ExtraBold",56); sp=14
     ww=[tw(f,w) for w in ws]; w=sum(ww)+sp*(len(ws)-1)+40; h=100
@@ -208,35 +202,38 @@ def subtitle(ws):
 EV=[]  # dict(a,b,sprite|fn,cx,cy,anim,sfx)
 def ev(a,b,spr,cx,cy,anim="up",sfx=None,dyn=False): EV.append(dict(a=a,b=b,spr=spr,cx=cx,cy=cy,anim=anim,sfx=sfx,dyn=dyn))
 TOP1,TOP2,LOW=150,300,1090
-ev(0.95,3.95,chip("MITOS ATAU FAKTA?"),W//2,170,"pop","pop")
-ev(1.15,3.95,headline(["Blue light rosakkan mata?"],size=56),W//2,300,"up","whoosh")
-ev(4.4,9.8,source("SUMBER","American Academy of Ophthalmology",None,ic_eye),W//2,255,"up","whoosh")
-ev(9.9,13.3,myth,W//2,1120,"up","thunk",dyn=True)
-ev(11.5,17.9,chip("MASALAH SEBENAR",CYAN),W//2,170,"pop","pop")
-ev(11.7,17.9,headline(["Kita lupa berkelip"],size=62),W//2,300,"up","impact")
-ev(13.7,18.0,source("KAJIAN","Clin Exp Optom · 2019","Clinical and Experimental Optometry",ic_eye),W//2,LOW+30,"up","tick")
-ev(18.2,22.6,chart,W//2,1180,"up","count",dyn=True)
-ev(22.9,34.5,chip("HARVARD HEALTH",CYAN),W//2,170,"pop","whoosh")
-ev(23.1,34.5,headline(["Blue light paling mengganggu","waktu malam"],size=48),W//2,320,"up","pop")
-ev(27.4,34.5,tip("","Kacau jam badan & tidur",lambda d,x,y,s,c:ic_moon(d,x,y,s,c,AMBER),AMBER),W//2,LOW+30,"up","shimmer")
-ev(34.9,47.4,chip("3 TIP MUDAH",GREEN),W//2,170,"pop","pop")
-ev(35.0,47.4,tip(1,"Rajin berkelip",ic_eye,GREEN),W//2,1000,"up","ding1")
-ev(40.7,47.4,tip(2,"Rehat setiap 20 minit",ic_clock,CYAN),W//2,1140,"up","ding2")
-ev(45.6,47.4,tip(3,"Letak phone sebelum tidur",ic_phone,AMBER),W//2,1280,"up","ding3")
-ev(48.1,49.7,chip("SAYA TAMBAH SATU RUTIN",AMBER),W//2,170,"pop","pop")
-ev(49.8,64.0,lowerthird("RUTIN TAMBAHAN","DS Pharma Eye Care"),W//2,300,"up","whoosh")
-ev(49.9,51.15,photo(IMG+"produk_depan.jpg",None,640,350,crop=(0,780,1512,1600),col=AMBER),W//2,1160,"up","pop")
-for t,t2,f_,lab,col in [(51.2,53.45,"lobak.webp","Lobak merah",(255,138,61)),(53.5,55.35,"goji.webp","Goji",RED),(55.4,57.15,"avokado.webp","Avokado",(132,204,22)),(57.2,58.85,"eyebright.jpg","Eyebright",(168,130,255))]:
+ev(0.95,4.1,chip("MITOS ATAU FAKTA?"),W//2,170,"pop","pop")
+ev(1.15,4.1,headline(["Blue light rosakkan mata?"],size=56),W//2,300,"up","whoosh")
+ev(4.35,11.2,source("SUMBER","American Academy of Ophthalmology",None,ic_eye),W//2,255,"up","whoosh")
+ev(6.95,11.2,myth,W//2,1120,"up","thunk",dyn=True)
+ev(11.45,18.6,chip("MASALAH SEBENAR",CYAN),W//2,170,"pop","pop")
+ev(12.2,18.6,headline(["Kita lupa berkelip"],size=62),W//2,300,"up","impact")
+ev(13.5,19.3,source("KAJIAN","Clin Exp Optom · 2019","Clinical and Experimental Optometry",ic_eye),W//2,LOW+30,"up","tick")
+ev(19.5,31.6,chart,W//2,1180,"up","count",dyn=True)
+ev(33.3,40.4,chip("HARVARD HEALTH",CYAN),W//2,170,"pop","whoosh")
+ev(34.6,40.4,headline(["Blue light paling mengganggu","waktu malam"],size=48),W//2,320,"up","pop")
+ev(37.8,40.4,tip("","Kacau jam badan & tidur",lambda d,x,y,s,c:ic_moon(d,x,y,s,c,AMBER),AMBER),W//2,LOW+30,"up","shimmer")
+ev(41.5,47.6,chip("3 TIP MUDAH",GREEN),W//2,170,"pop","pop")
+ev(42.1,47.6,tip(1,"Rajin berkelip",ic_eye,GREEN),W//2,1000,"up","ding1")
+ev(43.2,47.6,tip(2,"Rehat setiap 20 minit",ic_clock,CYAN),W//2,1140,"up","ding2")
+ev(45.5,47.6,tip(3,"Letak phone sebelum tidur",ic_phone,AMBER),W//2,1280,"up","ding3")
+ev(48.0,49.7,chip("SAYA TAMBAH SATU RUTIN",AMBER),W//2,170,"pop","pop")
+ev(49.8,58.8,lowerthird("RUTIN TAMBAHAN","DS Pharma Eye Care"),W//2,300,"up","whoosh")
+ev(49.9,51.9,photo(IMG+"produk_depan.jpg",None,640,350,crop=(0,780,1512,1600),col=AMBER),W//2,1160,"up","pop")
+for t,t2,f_,lab,col in [(52.0,53.5,"lobak.webp","Lobak merah",(255,138,61)),(53.5,54.3,"goji.webp","Goji",RED),(54.3,55.05,"avokado.webp","Avokado",(132,204,22)),(55.05,56.4,"eyebright.jpg","Eyebright",(168,130,255))]:
     ev(t,t2,photo(IMG+f_,lab,600,400,col=col),W//2,1160,"up","pop2")
-ev(59.6,64.2,photo(IMG+"produk_belakang.jpg",None,780,260,crop=(170,800,745,990),col=CYAN),W//2,1160,"up","tick")
-ev(58.9,64.2,chip("DIGUNAKAN SECARA TRADISIONAL",CYAN,size=29),W//2,450,"pop","tick")
-ev(64.4,68.7,footer("Sumber: AAO · Clin Exp Optom 2019 · Harvard Health"),W//2,1450,"up","chime")
+ev(55.6,58.8,chip("DIGUNAKAN SECARA TRADISIONAL",CYAN,size=29),W//2,450,"pop","tick")
+ev(56.5,60.2,photo(IMG+"produk_belakang.jpg",None,780,260,crop=(170,800,745,990),col=CYAN),W//2,1160,"up","tick")
+ev(60.5,64.0,tip("","Pergi ke Profil",ic_user,CYAN),W//2,1060,"up","ding1")
+ev(62.7,64.0,tip("","Beg Kuning",ic_cart,AMBER),W//2,1200,"up","ding2")
+ev(64.3,68.7,footer("Sumber: AAO · Clin Exp Optom 2019 · Harvard Health"),W//2,1450,"up","chime")
+ev(66.1,68.7,lowerthird("JUMPA DI","DS Pharma Eye Care"),W//2,300,"up","whoosh")
 SUBS=[dict(a=a,b=b+0.1,spr=subtitle(ws)) for a,b,ws in CHUNKS]
 
 # ---------- animasi ----------
 def back(x,c=1.6): x=min(max(x,0),1); return 1+(c+1)*(x-1)**3+c*(x-1)**2
 def zoom(t):
-    beats=[0.95,4.4,11.5,18.2,22.9,34.9,49.8]; z=0
+    beats=[0.95,4.35,11.45,19.5,22.8,33.3,42.1,49.9,60.5]; z=0
     for b in beats:
         x=t-b
         if x<0 or x>3.6: continue
@@ -338,8 +335,7 @@ def render_frame(fr,t):   # t = masa asal
     for e in EV:
         if not(e["a"]<=t<e["b"]): continue
         lt=t-e["a"]; k=back(lt/0.32); al=min(lt/0.18,1)*min((e["b"]-t)/0.22,1)
-        s=e["spr"](min(lt/0.9,1)) if e["dyn"] else e["spr"]
-        if e["dyn"] and e["spr"] is chart: s=chart(min(lt/1.0,1))
+        s=(e["spr"](lt) if e["spr"] is chart else e["spr"](min(lt/0.9,1))) if e["dyn"] else e["spr"]
         sc=0.88+0.12*k if e["anim"]!="left" else 1.0
         s=scale(s,sc); dy=(1-min(lt/0.32,1))**2*40 if e["anim"]!="left" else 0
         dx=-(1-min(lt/0.3,1))**2*260 if e["anim"]=="left" else 0
