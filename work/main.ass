@@ -1,0 +1,25 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Main,Inter,68,&H00FFFFFF,&H00FFFFFF,&H00301810,&H80000000,-1,0,0,0,100,100,0,0,1,6,2,2,60,60,300,1
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.13,0:00:02.17,Main,,0,0,0,,{\fad(60,40)}KERJA DALAM OFIS {\C&H3FD2FF&}AIRCOND,{\C&HFFFFFF&}
+Dialogue: 0,0:00:02.17,0:00:04.49,Main,,0,0,0,,{\fad(60,40)}MATA CEPAT {\C&H3FD2FF&}KERING?{\C&HFFFFFF&} SATU
+Dialogue: 0,0:00:04.49,0:00:06.29,Main,,0,0,0,,{\fad(60,40)}KAJIAN PEKERJA PEJABAT
+Dialogue: 0,0:00:06.29,0:00:08.45,Main,,0,0,0,,{\fad(60,40)}{\C&H3FD2FF&}UITM{\C&HFFFFFF&} PUNCAK ALAM JUMPA,
+Dialogue: 0,0:00:08.45,0:00:10.01,Main,,0,0,0,,{\fad(60,40)}SIMPTOM MATA {\C&H3FD2FF&}KERING{\C&HFFFFFF&}
+Dialogue: 0,0:00:10.01,0:00:12.39,Main,,0,0,0,,{\fad(60,40)}PALING KETARA DALAM BILIK
+Dialogue: 0,0:00:12.39,0:00:14.56,Main,,0,0,0,,{\fad(60,40)}{\C&H3FD2FF&}AIRCOND.{\C&HFFFFFF&} TAMBAH PULAK
+Dialogue: 0,0:00:14.56,0:00:16.74,Main,,0,0,0,,{\fad(60,40)}MENGHADAP SKRIN {\C&H3FD2FF&}8{\C&HFFFFFF&} {\C&H3FD2FF&}JAM.{\C&HFFFFFF&}
+Dialogue: 0,0:00:16.74,0:00:18.62,Main,,0,0,0,,{\fad(60,40)}PATUTLAH MATA PENAT! NI
+Dialogue: 0,0:00:18.62,0:00:20.19,Main,,0,0,0,,{\fad(60,40)}DS PHARMA EYE CARE,
+Dialogue: 0,0:00:20.19,0:00:21.99,Main,,0,0,0,,{\fad(60,40)}TABLET KUNYAH YANG
+Dialogue: 0,0:00:21.99,0:00:24.27,Main,,0,0,0,,{\fad(60,40)}DIGUNAKAN SECARA {\C&H3FD2FF&}TRADISIONAL{\C&HFFFFFF&}
+Dialogue: 0,0:00:24.27,0:00:26.96,Main,,0,0,0,,{\fad(60,40)}UNTUK KESIHATAN MATA.
+Dialogue: 0,0:00:26.96,0:00:28.76,Main,,0,0,0,,{\fad(60,40)}SENANG BAWA DALAM BEG.
+Dialogue: 0,0:00:28.76,0:00:30.64,Main,,0,0,0,,{\fad(60,40)}ADA {\C&H3FD2FF&}MAL{\C&HFFFFFF&} DENGAN {\C&H3FD2FF&}HOLOGRAM{\C&HFFFFFF&}
+Dialogue: 0,0:00:30.64,0:00:32.56,Main,,0,0,0,,{\fad(60,40)}{\C&H3FD2FF&}KKM.{\C&HFFFFFF&} TEKAN BEG {\C&H3FD2FF&}KUNING!{\C&HFFFFFF&}
