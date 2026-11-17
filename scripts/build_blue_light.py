@@ -172,6 +172,24 @@ def pill(text,dot):
     im,d,p=card_bg(w,h,h/2,(255,255,255,240),pad=26)
     r=17*SS; cy=(p+h/2)*SS; d.ellipse(((p+34)*SS-r,cy-r,(p+34)*SS+r,cy+r),fill=dot+(255,))
     d.text(((p+66)*SS,cy),text,font=f,fill=NAVY,anchor="lm"); return finish(im)
+
+def photo(path,label,w=600,h=400,crop=None,col=CYAN,sub=None):
+    im0=Image.open(path).convert("RGB")
+    if crop: im0=im0.crop(crop)
+    tw_,th_=int(w*SS),int(h*SS); k=max(tw_/im0.width,th_/im0.height)
+    im0=im0.resize((int(im0.width*k)+1,int(im0.height*k)+1),Image.LANCZOS)
+    x0=(im0.width-tw_)//2; y0=(im0.height-th_)//2; im0=im0.crop((x0,y0,x0+tw_,y0+th_))
+    im,d,p=card_bg(w,h,34,NAVY+(255,),accent=None)
+    m=Image.new("L",(tw_,th_),0); ImageDraw.Draw(m).rounded_rectangle((0,0,tw_-1,th_-1),int(34*SS),fill=255)
+    im.paste(im0,(int(p*SS),int(p*SS)),m)
+    if label:
+        f=F("ExtraBold",44); lw=tw(f,label)+70; lh=84
+        rr(d,(p+22,p+h-lh-22,p+22+lw,p+h-22),lh/2,NAVY+(238,))
+        r=13*SS; cy=(p+h-22-lh/2)*SS; d.ellipse(((p+22+34)*SS-r,cy-r,(p+22+34)*SS+r,cy+r),fill=col+(255,))
+        d.text(((p+22+58)*SS,cy),label,font=f,fill=WHITE,anchor="lm")
+    rr(d,(p,p,p+w,p+h),34,None,outline=(255,255,255,90),width=2)
+    return finish(im)
+IMG="input/img/"
 def footer(t):
     f=F("SemiBold",29); w=tw(f,t)+70; h=70
     im,d,p=card_bg(w,h,h/2,(0,0,0,150),pad=20)
@@ -207,8 +225,10 @@ ev(40.7,47.4,tip(2,"Rehat setiap 20 minit",ic_clock,CYAN),W//2,1140,"up","ding2"
 ev(45.6,47.4,tip(3,"Letak phone sebelum tidur",ic_phone,AMBER),W//2,1280,"up","ding3")
 ev(48.1,49.7,chip("SAYA TAMBAH SATU RUTIN",AMBER),W//2,170,"pop","pop")
 ev(49.8,64.0,lowerthird("RUTIN TAMBAHAN","DS Pharma Eye Care"),W//2,300,"up","whoosh")
-for t,(lab,col) in zip([51.2,53.5,55.4,57.2],[("Lobak merah",(255,138,61)),("Goji",RED),("Avokado",(132,204,22)),("Eyebright",(168,130,255))]):
-    ev(t,64.0,pill(lab,col),230,1070+[51.2,53.5,55.4,57.2].index(t)*100,"left","pop2")
+ev(49.9,51.15,photo(IMG+"produk_depan.jpg",None,640,350,crop=(0,780,1512,1600),col=AMBER),W//2,1160,"up","pop")
+for t,t2,f_,lab,col in [(51.2,53.45,"lobak.webp","Lobak merah",(255,138,61)),(53.5,55.35,"goji.webp","Goji",RED),(55.4,57.15,"avokado.webp","Avokado",(132,204,22)),(57.2,58.85,"eyebright.jpg","Eyebright",(168,130,255))]:
+    ev(t,t2,photo(IMG+f_,lab,600,400,col=col),W//2,1160,"up","pop2")
+ev(59.6,64.2,photo(IMG+"produk_belakang.jpg",None,780,260,crop=(170,800,745,990),col=CYAN),W//2,1160,"up","tick")
 ev(58.9,64.2,chip("DIGUNAKAN SECARA TRADISIONAL",CYAN,size=29),W//2,450,"pop","tick")
 ev(64.4,68.7,footer("Sumber: AAO · Clin Exp Optom 2019 · Harvard Health"),W//2,1450,"up","chime")
 SUBS=[dict(a=a,b=b+0.1,spr=subtitle(ws)) for a,b,ws in CHUNKS]
