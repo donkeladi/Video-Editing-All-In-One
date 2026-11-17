@@ -41,7 +41,7 @@ PlayResX: {W}
 PlayResY: {H}
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
-Style: Sub,Inter,50,&H00FFFFFF,&H00FFFFFF,&H0045250B,&H00452500,1,0,0,0,100,100,0,0,3,16,0,2,70,70,290,1
+Style: Sub,Inter,50,&H00FFFFFF,&H00FFFFFF,&H0045250B,&H00452500,1,0,0,0,100,100,0,0,3,16,0,2,70,70,685,1
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
 """
@@ -237,10 +237,10 @@ fg = [f"[0:v]trim={T0}:{T1},setpts=PTS-STARTPTS,eq=contrast=1.04:saturation=1.06
 cur = "v0"; i = 1
 for name, a in inputs:
     fg.append(f"[{i}:v]format=rgba,setpts=PTS+{tm(a):.3f}/TB[p{i}]")
-    fg.append(f"[{cur}][p{i}]overlay=x=60:y={1650 - 20}:eof_action=pass:enable='gte(t,{tm(a):.3f})'[v{i}]"); cur = f"v{i}"; i += 1
+    fg.append(f"[{cur}][p{i}]overlay=x=60:y={1250 - 20}:eof_action=pass:enable='gte(t,{tm(a):.3f})'[v{i}]"); cur = f"v{i}"; i += 1
 for name, a, b in CHIPS:
     fg.append(f"[{i}:v]format=rgba,fade=t=in:st={tm(a):.2f}:d=0.3:alpha=1,fade=t=out:st={tm(b) - .3:.2f}:d=0.3:alpha=1[p{i}]")
-    fg.append(f"[{cur}][p{i}]overlay=x=48:y=118:enable='between(t,{tm(a):.2f},{tm(b):.2f})'[v{i}]"); cur = f"v{i}"; i += 1
+    fg.append(f"[{cur}][p{i}]overlay=x=48:y=140:enable='between(t,{tm(a):.2f},{tm(b):.2f})'[v{i}]"); cur = f"v{i}"; i += 1
 fg.append(f"[{cur}]subtitles={os.path.join(WORK, 'main_v2.ass')}:fontsdir=/usr/share/fonts/opentype/inter[vout]")
 af = f"atrim={T0}:{T1},asetpts=PTS-STARTPTS,highpass=f=80,loudnorm=I=-14:TP=-1.5:LRA=11"
 cmd += ["-filter_complex", ";".join(fg), "-af", af, "-map", "[vout]", "-map", "0:a", "-t", f"{T1 - T0:.2f}",
