@@ -8,7 +8,7 @@ IMG=dict(label_back=U+"22ade47d-image.jpg", label_front=U+"5e43e111-image.jpg", 
 W=1080; SS=2
 F=lambda s,b="Bold":ImageFont.truetype(f"/usr/share/fonts/opentype/inter/Inter-{b}.otf",s*SS)
 NAVY=(14,20,56,235); TEAL=(94,209,181); PURP=(122,76,214); WHITE=(255,255,255); YEL=(255,210,63); GREY=(188,196,230)
-T0,T1=1.2,33.9   # trim senyap awal/akhir
+T0,T1=1.2,34.0   # trim senyap awal/akhir
 
 # ---------- masa perkataan (anggaran dari silencedetect + panjang aksara) ----------
 SCRIPT="Kerja dalam ofis aircond, mata cepat kering? Satu kajian pekerja pejabat UiTM Puncak Alam jumpa, simptom mata kering paling ketara dalam bilik aircond. Tambah pulak menghadap skrin 8 jam. Patutlah mata penat! Ni DS Pharma Eye Care, tablet kunyah yang digunakan secara tradisional untuk kesihatan mata. Senang bawa dalam beg. Ada MAL dengan hologram KKM. Tekan beg kuning!"
@@ -23,6 +23,16 @@ def at(c):  # c = kedudukan kumulatif berat -> saat
 starts=[];c=0
 for w,x in zip(words,wt): starts.append(at(c)); c+=x
 ends=[at(sum(wt[:i+1])) for i in range(len(words))]
+import json
+_w=json.load(open("work/words.json"))
+_fix="Kerja dalam ofis aircond, mata cepat kering? Satu kajian pekerja pejabat UiTM Puncak Alam jumpa, simptom mata kering paling ketara dalam bilik aircond. Tambah pulak menghadap skrin 8 jam. Patutlah mata penat! Ni DS Pharma Eye Care, tablet kunyah yang digunakan secara tradisional untuk kesihatan mata. Senang bawa dalam beg. Ada MAL dengan hologram KKM. Tekan beg kuning! Sekarang untuk dapatkan stok. Dia terhad tau, tak banyak. Siapa cepat dia dapat. Bye bye!".split()
+_st=[];_en=[]
+for a,b,t in _w:
+    if t.upper().startswith("NDS"): m=(a+b)/2 if b-a<0.5 else a+0.26; _st+= [a,m]; _en+=[m,b]
+    else: _st.append(a); _en.append(b)
+assert len(_st)==len(_fix),(len(_st),len(_fix))
+_st[0]=1.33
+words=_fix; starts=_st; ends=[min(e,_st[i+1]) if i+1<len(_st) else e for i,e in enumerate(_en)]
 def widx(txt,after=0):
     t=txt.split(); n=[i for i in range(after,len(words)) if [re.sub(r'[^\w]','',x) for x in words[i:i+len(t)]]==[re.sub(r'[^\w]','',x) for x in t]]
     return n[0]
@@ -114,34 +124,35 @@ im,d=card(200,fill=(250,196,30,245)); d.rounded_rectangle((0,0,14*SS,200*SS),6*S
 text(d,(480,76),"TEKAN BEG KUNING!",F(66),(40,22,80),"mm"); text(d,(480,148),"Dapatkan DS Pharma Eye Care sekarang",F(30,"SemiBold"),(70,40,110),"mm")
 save(im,"cta")
 
+# 8 Stok terhad
+im,d=card(220,fill=(122,76,214,245)); d.rounded_rectangle((0,0,14*SS,220*SS),6*SS,fill=TEAL+(255,))
+text(d,(480,78),"STOK TERHAD",F(66),WHITE,"mm"); text(d,(480,152),"Siapa cepat, dia dapat!",F(40,"SemiBold"),YEL,"mm"); save(im,"stok")
+
 # ---------- timeline overlay: (png, mula, tamat, y) ----------
-a,b=span("Satu kajian","Alam"); a2,b2=span("simptom mata","aircond.")
-a3,b3=span("Tambah pulak","jam.")
-a4,b4=span("Ni DS","kesihatan mata.")   # "Ni DS Pharma ... kesihatan mata."
-a5,b5=span("Senang bawa","beg.")
-a6,b6=span("Ada MAL","KKM.")
-a7,b7=span("Tekan beg","kuning!")
-TL=[("study",a,b2*0+a2+0.0,50),("stat",a2-0.1,b2+0.6,50),("screen",a3,b3+0.9,90),("product",a4,b4+0.2,30),
-    ("carry",a5,b5+0.3,90),("mal",a6,b6+0.8,50),("cta",a7,T1-T0,90)]
-TL[0]=("study",a-0.15,a2-0.05,50)
-TL=[(n,s0,(min(e0,TL[k+1][1]-0.15) if k+1<len(TL) else e0),y) for k,(n,s0,e0,y) in enumerate(TL)]
+def S(w,occ=0): return starts[widx(w)]-T0
+def E(w,after_w): i=widx(after_w); return ends[widx(w,i)]-T0
+TL=[("study",S("Satu kajian")-0.1,E("jumpa,","Satu kajian")+0.3,50),
+    ("stat",S("simptom mata")-0.1,E("aircond.","simptom mata")+0.5,50),
+    ("screen",S("Tambah pulak")-0.1,E("penat!","Patutlah")+0.5,90),
+    ("product",S("Ni DS")-0.1,E("mata.","kesihatan")+0.4,30),
+    ("carry",S("Senang bawa")-0.1,E("beg.","Senang bawa")+0.2,90),
+    ("mal",S("Ada MAL")-0.1,E("KKM.","Ada MAL")+0.5,50),
+    ("cta",S("Tekan beg")-0.1,E("kuning!","Tekan beg")+0.2,90),
+    ("stok",S("Sekarang untuk")-0.1,E("dapat.","Siapa cepat")+0.8,90)]
+TL=[(n,s0,(min(e0,TL[k+1][1]-0.1) if k+1<len(TL) else e0),y) for k,(n,s0,e0,y) in enumerate(TL)]
 print(TL)
 
 # ---------- ASS subtitle ----------
 def ts(t): h=int(t//3600);m=int(t%3600//60);s=t%60; return f"{h}:{m:02d}:{s:05.2f}"
-KEY={"aircond":1,"aircond,":1,"aircond.":1,"kering":1,"kering?":1,"UiTM":1,"8":1,"jam.":1,"KKM.":1,"MAL":1,"kuning!":1,"tradisional":1,"hologram":1}
+KEY={"stok.":1,"terhad":1,"terhad,":1,"aircond":1,"aircond,":1,"aircond.":1,"kering":1,"kering?":1,"UiTM":1,"8":1,"jam.":1,"KKM.":1,"MAL":1,"kuning!":1,"tradisional":1,"hologram":1}
 ev=[];i=0
 while i<len(words):
-    n=3
-    if i+4<=len(words) and sum(len(x) for x in words[i:i+4])<=22: n=4
-    for k in range(n,0,-1):
-        j=min(i+k,len(words)); 
-        if j-i<=n: break
-    j=min(i+n,len(words)); chunk=words[i:j]
-    if j<len(words) and len(words)-j==1: j=len(words); chunk=words[i:j]
-    s=starts[i]-T0; e=min(ends[j-1]-T0+0.12,starts[j]-T0 if j<len(words) else 1e9)
+    j=i+1
+    while j<len(words) and j-i<4 and not words[j-1][-1] in ",.?!" and sum(len(x) for x in words[i:j+1])<=24: j+=1
+    if j<len(words) and len(words)-j==1 and not words[j-1][-1] in ",.?!": j+=1
+    chunk=words[i:j]; s_=starts[i]-T0; e_=min(ends[j-1]-T0+0.15,starts[j]-T0 if j<len(words) else 1e9)
     txt=" ".join(("{\\c&H3FD2FF&}"+w+"{\\c&HFFFFFF&}") if w in KEY else w for w in chunk).upper()
-    ev.append(f"Dialogue: 0,{ts(max(s,0))},{ts(e)},Main,,0,0,0,,{{\\fad(60,40)}}{txt}"); i=j
+    ev.append(f"Dialogue: 0,{ts(max(s_,0))},{ts(e_)},Main,,0,0,0,,{{\\fad(60,40)}}{txt}"); i=j
 ass=f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
