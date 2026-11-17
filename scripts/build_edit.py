@@ -67,15 +67,19 @@ def load():
 load()
 
 # ---------- hero (di belakang orang) ----------
-HERO=[(2.2,5.5,'AWARENESS · KESIHATAN MATA','UNTUK PELAJAR'),
- (5.5,10.3,'PANTAI HOSPITAL · 2026','KAJIAN PELAJAR'),
- (10.3,18.4,'PELAJAR UNIVERSITI MALAYSIA','{pct}'),
- (18.4,22.2,'NEW STRAITS TIMES','RAKYAT ONLINE'),
- (22.2,27.4,'PURATA SEHARI ONLINE','8 JAM'),
- (27.6,31.4,'SIMPTOM MATA PENAT','FAMILIAR TAK?'),
- (31.4,37.3,'TIP MATA SIHAT','20 · 20 · 20'),
- (37.3,42.4,'DS PHARMA','EYE CARE'),
- (42.4,49.6,'DS PHARMA EYE CARE','KUNYAH JE')]
+HERO=[(2.2,5.4,'AWARENESS · KESIHATAN MATA','UNTUK PELAJAR'),
+ (5.4,9.6,'PANTAI HOSPITAL · 2026','KAJIAN PELAJAR'),
+ (9.6,16.7,'PELAJAR UNIVERSITI MALAYSIA','{pct}'),
+ (16.7,19.4,'NEW STRAITS TIMES','RAKYAT ONLINE'),
+ (19.4,23.4,'PURATA SEHARI ONLINE','8 JAM'),
+ (23.4,25.7,'SIMPTOM BIASA','MATA PENAT?'),
+ (25.7,27.2,'SIMPTOM MATA PENAT','FAMILIAR TAK?'),
+ (27.2,33.4,'TIP MATA SIHAT','20 · 20 · 20'),
+ (33.4,37.0,'DS PHARMA','EYE CARE'),
+ (37.0,42.2,'DS PHARMA EYE CARE','KUNYAH JE'),
+ (42.2,44.2,'HOLOGRAM KKM','ADA KKM'),
+ (44.2,47.5,'JANGAN RISAU','SEMAK SENDIRI'),
+ (47.5,49.6,'DS PHARMA','EYE CARE')]
 def hero_layer(t):
     img=Image.new('RGBA',(W,520),(0,0,0,0)); d=ImageDraw.Draw(img)
     for a,b,lab,big in HERO:
@@ -84,7 +88,7 @@ def hero_layer(t):
         pi,al=s
         lay=Image.new('RGBA',(W,520),(0,0,0,0)); dl=ImageDraw.Draw(lay)
         if '{pct}' in big:
-            v=89.9*ease((t-a-0.1)/1.3); big=f'{v:.1f}%'
+            v=89.9*ease((t-a-0.3)/2.0); big=f'{v:.1f}%'
         fl=font('SemiBold',36)
         # label berjarak huruf
         lab2=' '.join(lab) if False else lab
@@ -109,7 +113,7 @@ def panel_content(name,t,a):
     elif name=='p_stat':
         head('KAJIAN PELAJAR UNIVERSITI · MALAYSIA'); P.alpha_composite(A['p_stat'],(40,70))
         by=290; d.rounded_rectangle((40,by,920,by+46),23,fill=(255,255,255,40))
-        f=ease((t-a-0.3)/1.2)*0.899
+        f=ease((t-a-0.4)/2.0)*0.899
         d.rounded_rectangle((40,by,40+int(880*f)+1,by+46),23,fill=TEAL+(255,)) if f>0.01 else None
         d.text((PW/2,by+23),f'{f*100:.1f}%',font=font('ExtraBold',28),fill=DEEP+(255,) if f>0.12 else WHITE+(255,),anchor='mm') if False else None
         d.text((PW/2,372),'≈ 9 daripada 10 pelajar ada sekurang-kurangnya',font=font('Bold',32),fill=WHITE+(255,),anchor='mm')
@@ -120,10 +124,10 @@ def panel_content(name,t,a):
         head('RAKYAT MALAYSIA · PURATA ONLINE SEHARI')
         pw,gap=30,6; x0=(PW-(24*pw+23*gap))//2; y0,ph=120,150
         for k in range(24):
-            lit=k<8 and (t-a-0.25-k*0.11)>0
+            lit=k<8 and (t-a-0.5-k*0.1)>0
             col=TEAL+(255,) if lit else (78,62,128,255)
             if lit: 
-                ge=ease((t-a-0.25-k*0.11)/0.25)
+                ge=ease((t-a-0.5-k*0.1)/0.25)
                 col=(int(111*ge+255*(1-ge)),int(227*ge+255*(1-ge)),int(207*ge+255*(1-ge)),255)
             d.rounded_rectangle((x0+k*(pw+gap),y0,x0+k*(pw+gap)+pw,y0+ph),10,fill=col)
         xe=x0+8*(pw+gap)-gap
@@ -133,7 +137,7 @@ def panel_content(name,t,a):
         d.text((PW/2,392),'Antara pengguna internet paling aktif di Asia Tenggara',font=font('Medium',30),fill=WHITE+(255,),anchor='mm')
     elif name=='symptoms':
         head('SIMPTOM MATA PENAT SEBAB SKRIN')
-        items=[('KERING',AMBER,28.0),('PEDIH',RED,28.8),('KABUR',BLUE,29.6)]
+        items=[('KERING',AMBER,23.9),('PEDIH',RED,24.6),('KABUR',BLUE,25.3)]
         cw,cg=290,45; x0=(PW-(3*cw+2*cg))//2
         for k,(w_,col,ts) in enumerate(items):
             s=seg(t,ts,999,0.35,1)
@@ -153,11 +157,11 @@ def panel_content(name,t,a):
                 for dx in (-30,0,30): di.line((cx+dx,cy+46,cx+dx+6,cy+62),fill=col+(255,),width=6)
             chip.alpha_composite(ic,(0,14)); dc.text((cw/2,198),w_,font=font('ExtraBold',50),fill=WHITE+(255,),anchor='mm')
             al_i=chip.getchannel('A').point(lambda v:int(v*al)); chip.putalpha(al_i); P.alpha_composite(chip,(x,y))
-        s=seg(t,30.2,999,0.3,1)
+        s=seg(t,25.8,999,0.3,1)
         if s: d.text((PW/2,392),'Familiar tak?',font=font('ExtraBold',44),fill=WHITE+(int(255*s[1]),),anchor='mm')
     elif name=='r2020':
         head('PERATURAN 20-20-20 · TIP MATA SIHAT')
-        items=[('20','MINIT','setiap',31.6,33.4),('20','KAKI','pandang jauh',33.8,35.7),('20','SAAT','selama',35.9,37.0)]
+        items=[('20','MINIT','setiap',27.9,29.3),('20','KAKI','pandang jauh',29.6,31.3),('20','SAAT','selama',31.5,33.0)]
         D=220; cg=60; x0=(PW-(3*D+2*cg))//2
         for k,(n,u,l,ts,te) in enumerate(items):
             s=seg(t,ts-0.2,999,0.3,1)
@@ -173,24 +177,33 @@ def panel_content(name,t,a):
             al_i=ring.getchannel('A').point(lambda v:int(v*al)); ring.putalpha(al_i); P.alpha_composite(ring,(x,y))
     elif name=='product':
         head('')
-        pr=A['prod']; P.alpha_composite(pr,(36,(PH-pr.height)//2))
-        x=440
-        if t<42.4+0.0:
+        pr=A['prod'].copy(); py=(PH-pr.height)//2
+        if t>=42.2:
+            hl=Image.new('RGBA',pr.size,(0,0,0,0)); dh=ImageDraw.Draw(hl); pu=3*abs(math.sin((t-42.2)*3))
+            dh.rounded_rectangle((136-pu,16-pu,248+pu,72+pu),10,outline=TEAL+(255,),width=4); pr.alpha_composite(hl)
+        P.alpha_composite(pr,(36,py)); x=440
+        if t<37.0:
             d.text((x,100),'DS PHARMA',font=font('Bold',34),fill=TEAL+(255,),anchor='lm')
             d.text((x,172),'EYE CARE',font=font('Black',76),fill=WHITE+(255,),anchor='lm')
             d.text((x,238),'CHEWABLE TABLET',font=font('SemiBold',36),fill=(225,220,250,255),anchor='lm')
             for j,txt in enumerate(['10 tablet kunyah · 650mg','No. daftar: MAL22076147T']):
                 tl=tw(d,txt,font('SemiBold',26)); yy=300+j*58
                 d.rounded_rectangle((x,yy-24,x+tl+36,yy+24),24,fill=(255,255,255,35)); d.text((x+18,yy),txt,font=font('SemiBold',26),fill=WHITE+(255,),anchor='lm')
-        else:
-            k=ease((t-42.4)/0.35)
+        elif t<42.2:
+            k=ease((t-37.0)/0.35)
             d.text((x,110),'KUNYAH JE',font=font('Black',68),fill=TEAL+(int(255*k),),anchor='lm')
             for j,l in enumerate(['Digunakan secara','tradisional untuk','kesihatan mata']):
                 d.text((x,186+j*46),l,font=font('Bold',38),fill=WHITE+(int(255*k),),anchor='lm')
             for j,l in enumerate(['Sila rujuk ahli farmasi / doktor','sebelum mengambil produk ini.']):
                 d.text((x,342+j*34),l,font=font('Medium',26),fill=(215,210,240,int(255*k)),anchor='lm')
+        else:
+            k=ease((t-42.2)/0.35)
+            d.text((x,100),'SEMAK PADA PEK',font=font('Bold',32),fill=TEAL+(int(255*k),),anchor='lm')
+            for j,l in enumerate(['Hologram KKM','No. daftar MAL22076147T','Rujuk ahli farmasi / doktor']):
+                yy=170+j*70; d.ellipse((x,yy-11,x+22,yy+11),fill=TEAL+(int(255*k),))
+                d.text((x+40,yy),l,font=font('Bold',34 if j<2 else 30),fill=WHITE+(int(255*k),),anchor='lm')
     return P
-PANELS=[('p_head',5.5,10.3),('p_stat',10.3,18.4),('n_head',18.4,22.2),('hours',22.2,27.4),('symptoms',27.6,31.4),('r2020',31.4,37.3),('product',37.3,49.6)]
+PANELS=[('p_head',5.4,9.6),('p_stat',9.6,16.7),('n_head',16.7,19.4),('hours',19.4,23.4),('symptoms',23.4,27.2),('r2020',27.2,33.4),('product',33.4,49.6)]
 def front_layer(t,subs):
     img=Image.new('RGBA',(W,760),(0,0,0,0)); d=ImageDraw.Draw(img)   # y offset 960
     for name,a,b in PANELS:
@@ -214,7 +227,7 @@ def front_layer(t,subs):
                 d.text((x,y),w_,font=f,fill=col,anchor='lm',stroke_width=9,stroke_fill=(20,8,50,255))
                 x+=tw(d,w_+' ',f)
             y+=76
-    if t>=10.3:
+    if t>=9.6:
         d.text((W/2,1648-960),'Sumber: Pantai Hospital, 2026 · NST / Ipsos Digital 2025',font=font('SemiBold',29),fill=(255,255,255,215),anchor='mm',stroke_width=4,stroke_fill=(20,8,50,230))
     return img
 KEY={'pantai','hospital','new','straits','times','nst','eye','care','ds','pharma','tip','student'}
@@ -231,7 +244,7 @@ def make_subs():
         if i+1<len(groups): b=min(b,groups[i+1][0]['start'])
         subs.append((a,b,' '.join(x['w'] for x in g)))
     return subs
-ZOOM_CUTS=[5.4,10.15,18.3,23.7,27.5,31.4,37.0,42.3]
+ZOOM_CUTS=[5.4,9.6,16.7,19.4,23.4,27.2,33.4,37.0,42.2,47.5]
 def zoom_at(t):
     z=1.0
     for c in ZOOM_CUTS:

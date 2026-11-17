@@ -1,0 +1,474 @@
+{
+"words": [
+{
+"w": "Student,",
+"start": 2.4,
+"end": 2.64
+},
+{
+"w": "ni",
+"start": 3.58,
+"end": 4.24
+},
+{
+"w": "untuk",
+"start": 4.24,
+"end": 4.66
+},
+{
+"w": "korang.",
+"start": 4.66,
+"end": 5.16
+},
+{
+"w": "Pantai",
+"start": 5.58048,
+"end": 5.74
+},
+{
+"w": "Hospital",
+"start": 5.74,
+"end": 6.0
+},
+{
+"w": "kongsi",
+"start": 6.0,
+"end": 6.6
+},
+{
+"w": "satu",
+"start": 6.6,
+"end": 7.08
+},
+{
+"w": "kajian",
+"start": 7.08,
+"end": 7.42
+},
+{
+"w": "pelajar",
+"start": 7.42,
+"end": 7.74
+},
+{
+"w": "universiti",
+"start": 7.74,
+"end": 8.54
+},
+{
+"w": "di",
+"start": 8.54,
+"end": 8.82
+},
+{
+"w": "Malaysia",
+"start": 8.82,
+"end": 9.2
+},
+{
+"w": "dalam",
+"start": 9.2,
+"end": 9.74
+},
+{
+"w": "89.9%",
+"start": 9.74,
+"end": 12.2
+},
+{
+"w": "ada",
+"start": 12.32,
+"end": 12.52
+},
+{
+"w": "sekurang-kurangnya",
+"start": 12.52,
+"end": 12.84
+},
+{
+"w": "satu",
+"start": 13.5341,
+"end": 13.94
+},
+{
+"w": "simptom",
+"start": 13.94,
+"end": 14.62
+},
+{
+"w": "mata",
+"start": 14.62,
+"end": 14.94
+},
+{
+"w": "penat",
+"start": 14.94,
+"end": 15.374
+},
+{
+"w": "sebab",
+"start": 15.3738,
+"end": 16.0
+},
+{
+"w": "skrin.",
+"start": 16.0,
+"end": 16.38
+},
+{
+"w": "New",
+"start": 16.9,
+"end": 17.093
+},
+{
+"w": "Straits",
+"start": 17.0931,
+"end": 17.42
+},
+{
+"w": "Times",
+"start": 17.42,
+"end": 17.64
+},
+{
+"w": "pulak",
+"start": 17.64,
+"end": 17.92
+},
+{
+"w": "lapor,",
+"start": 17.92,
+"end": 18.22
+},
+{
+"w": "rakyat",
+"start": 18.22,
+"end": 18.82
+},
+{
+"w": "Malaysia",
+"start": 18.82,
+"end": 19.12
+},
+{
+"w": "online",
+"start": 19.12,
+"end": 19.5
+},
+{
+"w": "purata",
+"start": 19.5,
+"end": 19.96
+},
+{
+"w": "8",
+"start": 19.96,
+"end": 20.5
+},
+{
+"w": "jam",
+"start": 20.5263,
+"end": 20.76
+},
+{
+"w": "sehari",
+"start": 20.76,
+"end": 21.22
+},
+{
+"w": "antara",
+"start": 21.22,
+"end": 21.66
+},
+{
+"w": "paling",
+"start": 21.66,
+"end": 21.98
+},
+{
+"w": "tinggi",
+"start": 21.98,
+"end": 22.54
+},
+{
+"w": "di",
+"start": 22.54,
+"end": 22.72
+},
+{
+"w": "Asia",
+"start": 22.72,
+"end": 22.88
+},
+{
+"w": "Tenggara.",
+"start": 22.88,
+"end": 23.3
+},
+{
+"w": "Mata",
+"start": 23.52,
+"end": 23.938
+},
+{
+"w": "kering,",
+"start": 23.9376,
+"end": 24.58
+},
+{
+"w": "pedih,",
+"start": 24.58,
+"end": 25.26
+},
+{
+"w": "kabur.",
+"start": 25.26,
+"end": 25.66
+},
+{
+"w": "Familiar",
+"start": 25.66,
+"end": 26.16
+},
+{
+"w": "tak?",
+"start": 26.16,
+"end": 26.34
+},
+{
+"w": "So",
+"start": 26.34,
+"end": 27.289
+},
+{
+"w": "tip",
+"start": 27.2894,
+"end": 27.7
+},
+{
+"w": "setiap",
+"start": 27.7023,
+"end": 28.66
+},
+{
+"w": "20",
+"start": 28.66,
+"end": 28.96
+},
+{
+"w": "minit",
+"start": 28.96,
+"end": 29.34
+},
+{
+"w": "pandang",
+"start": 29.5937,
+"end": 29.9
+},
+{
+"w": "jauh",
+"start": 29.9,
+"end": 30.42
+},
+{
+"w": "20",
+"start": 30.42,
+"end": 30.96
+},
+{
+"w": "kaki",
+"start": 30.96,
+"end": 31.48
+},
+{
+"w": "selama",
+"start": 31.5138,
+"end": 32.12
+},
+{
+"w": "20",
+"start": 32.12,
+"end": 32.68
+},
+{
+"w": "saat.",
+"start": 32.68,
+"end": 33.14
+},
+{
+"w": "Saya",
+"start": 33.56,
+"end": 33.827
+},
+{
+"w": "selitkan",
+"start": 33.8271,
+"end": 34.5
+},
+{
+"w": "DS",
+"start": 34.5,
+"end": 34.96
+},
+{
+"w": "Pharma",
+"start": 34.96,
+"end": 35.32
+},
+{
+"w": "Eye",
+"start": 35.32,
+"end": 35.62
+},
+{
+"w": "Care",
+"start": 35.62,
+"end": 35.884
+},
+{
+"w": "dalam",
+"start": 35.8842,
+"end": 36.22
+},
+{
+"w": "rutin.",
+"start": 36.22,
+"end": 36.56
+},
+{
+"w": "Kunyah",
+"start": 37.1788,
+"end": 37.46
+},
+{
+"w": "je",
+"start": 37.46,
+"end": 37.82
+},
+{
+"w": "sebab",
+"start": 37.82,
+"end": 38.5
+},
+{
+"w": "dia",
+"start": 38.5,
+"end": 38.68
+},
+{
+"w": "digunakan",
+"start": 38.68,
+"end": 39.08
+},
+{
+"w": "secara",
+"start": 39.08,
+"end": 39.74
+},
+{
+"w": "tradisional",
+"start": 39.74,
+"end": 40.56
+},
+{
+"w": "untuk",
+"start": 40.56,
+"end": 40.92
+},
+{
+"w": "kesihatan",
+"start": 40.92,
+"end": 41.6
+},
+{
+"w": "mata.",
+"start": 41.6,
+"end": 41.94
+},
+{
+"w": "Ada",
+"start": 42.3567,
+"end": 42.6
+},
+{
+"w": "KKM",
+"start": 42.6,
+"end": 43.12
+},
+{
+"w": "dan",
+"start": 43.12,
+"end": 43.3
+},
+{
+"w": "hologram.",
+"start": 43.3,
+"end": 44.14
+},
+{
+"w": "So",
+"start": 44.3,
+"end": 44.419999999999995
+},
+{
+"w": "jangan",
+"start": 44.4,
+"end": 44.7
+},
+{
+"w": "risau",
+"start": 44.7,
+"end": 45.08
+},
+{
+"w": "boleh",
+"start": 45.08,
+"end": 45.36
+},
+{
+"w": "cek",
+"start": 45.36,
+"end": 45.6
+},
+{
+"w": "sendiri",
+"start": 45.6,
+"end": 45.96
+},
+{
+"w": "dan",
+"start": 45.96,
+"end": 46.22
+},
+{
+"w": "semak",
+"start": 46.22,
+"end": 46.7
+},
+{
+"w": "jika",
+"start": 46.7,
+"end": 46.9
+},
+{
+"w": "perlu.",
+"start": 46.9,
+"end": 47.16
+},
+{
+"w": "Saya",
+"start": 47.56,
+"end": 47.974
+},
+{
+"w": "dapatkan",
+"start": 47.9744,
+"end": 48.44
+},
+{
+"w": "sekarang.",
+"start": 48.44,
+"end": 48.94
+}
+]
+}
