@@ -191,20 +191,21 @@ def card_sources():
 
 # ---------- jadual overlay: (nama, sprite, mula, tamat, y0, animasi) ----------
 S = lambda n, im: (im.save(f"{WORK}/{n}.png"), f"{WORK}/{n}.png")[1]
+# Masa dari transkrip faster-whisper (work/awareness_whisper.json)
 TIMING = [
-    ("hook",   card_hook(),      0.9,  7.3, 175),
-    ("curveA", card_curve(False), 8.0, 17.9, 150),
-    ("curveB", card_curve(True), 14.4, 17.9, 150),
-    ("bp",     card_bp(),        18.8, 25.0, 150),
-    ("bpnote", card_bp_note(),   23.8, 25.0, 565),
-    ("h40",    card_40(),        25.4, 27.8, 175),
-    ("owsley", card_owsley(),    28.0, 41.1, 150),
-    ("macula", card_macula(),    41.9, 51.2, 150),
-    ("global", card_global(),    51.4, 54.4, 150),
-    ("cta",    card_cta(),       54.7, 58.6, 175),
-    ("product", card_product(), 58.9, 70.6, 175),
-    ("discl",  card_disclaimer(), 71.0, 76.9, 190),
-    ("sources", card_sources(),  77.4, 87.2, 130),
+    ("hook",   card_hook(),      1.3,  7.4, 175),
+    ("curveA", card_curve(False), 7.7, 16.9, 150),
+    ("curveB", card_curve(True), 14.3, 16.9, 150),
+    ("bp",     card_bp(),        17.2, 23.5, 150),
+    ("bpnote", card_bp_note(),   23.9, 27.0, 565),
+    ("h40",    card_40(),        27.2, 33.7, 175),
+    ("owsley", card_owsley(),    34.0, 41.0, 150),
+    ("macula", card_macula(),    41.8, 54.0, 150),
+    ("global", card_global(),    54.2, 57.6, 150),
+    ("cta",    card_cta(),       58.4, 63.4, 175),
+    ("product", card_product(), 63.9, 72.4, 175),
+    ("discl",  card_disclaimer(), 72.8, 79.0, 190),
+    ("sources", card_sources(),  80.9, 87.3, 130),
 ]
 inputs, fc, prev = [], [], "[0:v]"
 for k, (n, im, a, b, y0) in enumerate(TIMING, start=1):
@@ -215,8 +216,81 @@ for k, (n, im, a, b, y0) in enumerate(TIMING, start=1):
     y = f"{y0 - 40}+40*pow(1-min(max((t-{a})/0.4,0),1),3)"
     fc.append(f"{prev}[o{k}]overlay=x={x}:y='{y}':eof_action=pass:enable='between(t,{a},{b})'[v{k}]")
     prev = f"[v{k}]"
-open(f"{WORK}/fc.txt", "w").write(";\n".join(fc))
-sp.run(["ffmpeg", "-y", "-i", SRC, *inputs, "-filter_complex_script", f"{WORK}/fc.txt", "-map", prev, "-map", "0:a",
-        "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-c:v", "libx264", "-crf", "18", "-preset", "medium", "-pix_fmt", "yuv420p",
+
+# ---------- subtitle (teks dibetulkan ikut apa yang dituturkan) ----------
+import json, wave, random
+SUBS = [  # (mula, tamat, teks)
+ (1.24,7.44,"Duduk bawah lampu lama, lepas tu pandangan jadi semakin gelap? Ada dua kemungkinan."),
+ (7.62,13.94,"Pertama, mata tengah adjust. Lepas kena cahaya terang, mata perlukan beberapa minit untuk pulih semula."),
+ (14.26,16.86,"Makin berumur, makin lambat."),
+ (17.20,23.36,"Yang kedua, kalau gelap bila bangun berdiri, itu tekanan darah turun sekejap."),
+ (23.84,27.02,"Biasanya tidak terlalu membimbangkan."),
+ (27.02,33.66,"Tetapi, untuk korang yang dah berumur 40 tahun ke atas, ada satu benda yang kena tahu."),
+ (33.96,40.88,"Penyelidik percaya mata yang terlalu lambat adjust ke gelap dikaitkan dengan risiko AMD."),
+ (41.72,47.46,"AMD ni penyakit di bahagian tengah retina, namanya makula."),
+ (47.90,54.08,"Bahagian ni yang bagi penglihatan tajam untuk baca, memandu dan kenal muka."),
+ (54.08,57.58,"Selalunya tiada tanda amaran awal."),
+ (58.30,63.44,"Sebab tu, kalau kerap berlaku, pergi check mata untuk sokongan harian."),
+ (63.68,72.36,"Kita ada DS Pharma Eye Care, berdaftar dengan MAL, dan digunakan secara tradisional untuk kesihatan mata."),
+ (72.74,80.92,"Bukan ganti rawatan mata, tapi ini adalah bantuan untuk melancarkan lagi penglihatan."),
+ (80.92,85.44,"Jadi, kalau nak dapatkan ini, boleh tengok di profil atau bawah."),
+ (86.36,87.44,"Sampai jumpa lagi."),
+]
+wh = json.load(open("work/awareness_whisper.json"))
+def wtimes(a, b):
+    ws = [w for sg in wh for w in sg["w"] if a - 0.05 <= w[1] <= b]
+    return [w[1] for w in ws] or [a]
+def ts(t, srt=False):
+    h, m, sec = int(t // 3600), int(t % 3600 // 60), t % 60
+    return f"{h:02d}:{m:02d}:{sec:06.3f}".replace(".", ",") if srt else f"{h}:{m:02d}:{sec:05.2f}"
+cues = []
+for a, b, txt in SUBS:
+    words = txt.split(); n = len(words); st = wtimes(a, b); i = 0
+    while i < n:
+        j = min(n, i + 4)
+        if n - j == 1: j = n
+        t0 = st[min(len(st) - 1, int(i / n * len(st)))]
+        t1 = st[min(len(st) - 1, int(j / n * len(st)))] if j < n else b
+        cues.append((t0, max(t1, t0 + 0.4), " ".join(words[i:j]))); i = j
+for k in range(len(cues) - 1):
+    if cues[k][1] > cues[k + 1][0]: cues[k] = (cues[k][0], cues[k + 1][0], cues[k][2])
+SRT = "work/awareness.srt"
+open(SRT, "w").write("\n".join(f"{k+1}\n{ts(a,True)} --> {ts(b,True)}\n{t}\n" for k, (a, b, t) in enumerate(cues)))
+ass = ["[Script Info]", "ScriptType: v4.00+", f"PlayResX: {W}", f"PlayResY: {H}", "",
+       "[V4+ Styles]", "Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding",
+       "Style: D,Inter,74,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,6,2,2,70,70,330,1", "",
+       "[Events]", "Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text"]
+for a, b, t in cues: ass.append(f"Dialogue: 0,{ts(a)},{ts(b)},D,,0,0,0,,{t}")
+open(f"{WORK}/sub.ass", "w").write("\n".join(ass))
+fc.append(f"{prev}ass={WORK}/sub.ass[vs]"); prev = "[vs]"
+
+# ---------- SFX (sintesis) pada setiap kad masuk ----------
+SR = 44100; buf = [0.0] * int(SR * 88.5)
+def add_sfx(t0, kind):
+    random.seed(int(t0 * 100)); i0 = int(t0 * SR)
+    if kind == "whoosh":
+        n = int(SR * 0.38); lp = 0.0
+        for i in range(n):
+            x = i / n; env = (x / 0.25) if x < 0.25 else (1 - x) ** 1.6
+            a = 0.04 + 0.5 * math.sin(math.pi * min(1, x * 1.1)) ** 2   # lowpass naik -> bunyi terbuka
+            lp += a * (random.uniform(-1, 1) - lp)
+            if i0 + i < len(buf): buf[i0 + i] += lp * env * 0.9
+    elif kind == "pop":
+        n = int(SR * 0.16)
+        for i in range(n):
+            x = i / n; f = 700 - 450 * x; buf_i = i0 + i
+            if buf_i < len(buf): buf[buf_i] += math.sin(2 * math.pi * f * i / SR) * (1 - x) ** 3 * 0.6
+for n_, im_, a_, b_, y_ in TIMING:
+    if n_ in ("curveB",): add_sfx(a_, "pop")
+    else: add_sfx(a_, "whoosh")
+for t_ in (34.9, 55.0): add_sfx(t_, "pop")   # bar Owsley / graf global muncul
+pk = max(abs(v) for v in buf) or 1
+with wave.open(f"{WORK}/sfx.wav", "wb") as wf:
+    wf.setnchannels(1); wf.setsampwidth(2); wf.setframerate(SR)
+    wf.writeframes(b"".join(int(max(-1, min(1, v / pk * 0.9)) * 32767).to_bytes(2, "little", signed=True) for v in buf))
+inputs += ["-i", f"{WORK}/sfx.wav"]; sfx_idx = len(TIMING) + 1
+open(f"{WORK}/fc.txt", "w").write(";\n".join(fc + [f"[0:a]loudnorm=I=-15:TP=-2:LRA=9[va];[{sfx_idx}:a]volume=0.32[sf];[va][sf]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.89[aout]"]))
+sp.run(["ffmpeg", "-y", "-i", SRC, *inputs, "-filter_complex_script", f"{WORK}/fc.txt", "-map", prev, "-map", "[aout]",
+        "-c:v", "libx264", "-crf", "18", "-preset", "medium", "-pix_fmt", "yuv420p",
         "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", OUT], check=True)
 print(OUT)
