@@ -107,6 +107,6 @@ bahagian sebahagian
 pandangan pergi ke hospital
 
 28
-00:00:44,229 --> 00:00:45,479
-hari ini
+00:00:44,229 --> 00:00:46,879
+hari ini ataupun sekarang.
 
