@@ -220,7 +220,23 @@ TIMING = [
     ("discl",  card_disclaimer(), 72.8, 79.0, 190),
     ("sources", card_sources(),  80.9, 87.3, 130),
 ]
+# ---------- video utama: flip (betulkan tulisan terbalik) + zoom in/out smooth ----------
+# (masa, zoom): antara dua titik berturutan = smoothstep. Pusat zoom dikunci pada atas kepala supaya kepala tak naik ke zon kad.
+ZOOM = [(0,1.00),(1.3,1.00),(3.4,1.10),(7.2,1.10),(8.6,1.02),(12.0,1.02),(14.2,1.12),(16.9,1.12),(18.2,1.03),
+        (22.0,1.03),(23.8,1.10),(27.0,1.10),(28.4,1.02),(32.0,1.02),(34.0,1.13),(40.8,1.13),(42.2,1.03),
+        (47.0,1.03),(48.6,1.10),(54.0,1.10),(55.4,1.02),(58.0,1.02),(60.8,1.09),(63.4,1.09),(64.6,1.12),
+        (72.2,1.12),(73.8,1.03),(79.5,1.03),(81.5,1.10),(86.0,1.10),(88.4,1.16)]
+ZX, ZY = 540, 620
+def zexpr():
+    e = f"{ZOOM[-1][1]}"
+    for (t0, z0), (t1, z1) in reversed(list(zip(ZOOM, ZOOM[1:]))):
+        x = f"((t-{t0})/{t1-t0:.3f})"
+        e = f"if(lt(t,{t1}),{z0}+({z1}-{z0})*{x}*{x}*(3-2*{x}),{e})"
+    return e
 inputs, fc, prev = [], [], "[0:v]"
+fc.append(f"[0:v]hflip,crop=w='trunc(1080/({zexpr()})/2)*2':h='trunc(1920/({zexpr()})/2)*2':"
+          f"x='{ZX}*(1-1/({zexpr()}))':y='{ZY}*(1-1/({zexpr()}))':exact=1,scale=1080:1920:flags=lanczos,setsar=1[base]")
+prev = "[base]"
 for k, (n, im, a, b, y0) in enumerate(TIMING, start=1):
     path = S(n, im); dur = b - a
     inputs += ["-loop", "1", "-framerate", "30", "-t", f"{dur:.2f}", "-i", path]
