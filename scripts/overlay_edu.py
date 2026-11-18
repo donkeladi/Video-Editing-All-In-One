@@ -317,7 +317,7 @@ def main():
         t = n / FPS
         if not kept(n):
             n += 1; prev = None; continue
-        rgb = cv2.cvtColor(f, cv2.COLOR_BGR2RGB)
+        rgb = cv2.cvtColor(cv2.flip(f, 1), cv2.COLOR_BGR2RGB)  # flip mendatar: betulkan teks terbalik (kamera depan)
         prev = person_mask(seg, rgb, prev)
         p.stdin.write(np.asarray(compose(rgb, t, prev)).tobytes()); n += 1
         if n % 90 == 0: print('frame', n, flush=True)
