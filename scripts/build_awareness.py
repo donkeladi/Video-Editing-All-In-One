@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from matte import get_matte
 
 W, H, FPS = 1080, 1920, 30
-SRC = 'input/video_utama.mov'
+SRC = 'work/edit.mov'   # hasil potongan outro (scripts/ lihat nota projek)
 FD = '/usr/share/fonts/opentype/inter/'
 def F(name, size): return ImageFont.truetype(FD + f'Inter-{name}.otf', size)
 
@@ -358,11 +358,10 @@ def load_tokens():
     med = [(46.56, 47.08, 'bawa'), (47.08, 47.36, 'buat'), (47.36, 48.26, 'pemeriksaan'), (48.26, 48.66, 'mata'),
            (48.66, 49.42, 'atau'), (49.42, 49.68, 'boleh'), (49.68, 50.26, 'dapatkan'), (50.26, 50.66, 'suplemen'),
            (50.66, 51.14, 'untuk'), (51.14, 51.76, 'penjagaan'), (51.76, 52.22, 'kesihatan'), (52.22, 52.54, 'mata'),
-           (52.54, 52.88, 'dengan'), (52.88, 53.38, 'segera.'),
-           (54.18, 54.56, 'Jangan'), (54.56, 54.82, 'tunggu'), (54.82, 55.14, 'lagi.'),
-           (55.30, 55.88, 'Jumpa'), (55.88, 56.70, 'sekarang.'),
-           (57.66, 58.36, 'Dapatkan'), (58.36, 58.74, 'rawatan'), (58.74, 59.30, 'sekarang.'),
-           (59.74, 59.84, 'Bye'), (59.84, 60.16, 'bye.')]
+           (52.54, 52.88, 'dengan'), (52.88, 53.38, 'segera.'), (53.38, 53.65, 'okey.'),
+           (53.93, 54.31, 'Jangan'), (54.31, 54.57, 'tunggu'), (54.57, 54.85, 'lagi.'),
+           (55.21, 55.95, 'Dapatkan'), (55.95, 56.37, 'rawatan'), (56.50, 56.85, 'sekarang.'),
+           (57.25, 57.5, 'Bye'), (57.95, 58.3, 'bye.')]
     return small + med
 
 # [teks ikut audio; ejaan dibetulkan]. Setiap baris = satu paparan subtitle; bilangan perkataan mesti sama dgn token.
@@ -377,8 +376,8 @@ CHUNKS = [
     ('Naik kepada 34.4%', 4), ('pada umur 15 tahun.', 4),
     ('Anak pun sering tak sedar', 5), ('penglihatan dia bermasalah.', 3),
     ('Jadi kalau sakit kepala berulang,', 5), ('bawa buat pemeriksaan mata,', 4),
-    ('atau boleh dapatkan suplemen', 5), ('untuk penjagaan kesihatan mata', 4), ('dengan segera.', 2),
-    ('Jangan tunggu lagi.', 3), ('Jumpa sekarang.', 2), ('Dapatkan rawatan sekarang.', 3), ('Bye bye.', 2),
+    ('atau boleh dapatkan suplemen', 5), ('untuk penjagaan kesihatan mata', 4), ('dengan segera.', 2), ('okey.', 1),
+    ('Jangan tunggu lagi.', 3), ('Dapatkan rawatan sekarang.', 3), ('Bye bye.', 2),
 ]
 # Betulkan token whisper → perkataan sebenar sebelum dipadan (indeks mengikut senarai selepas digabung)
 def build_tokens():
@@ -474,14 +473,14 @@ def build_scene():
     E.append(chip('Pemeriksaan mata', 'check', 430, GREEN, 44.4, 46.5, 20, 440))
     # 10 — suplemen
     E += banner('Penjagaan mata', 'Suplemen penjagaan mata', 'DS Pharma Eye Care · 650mg', 'pill', 46.5, 53.4)
-    E.append(product_card(47.9, 61.4, 10, 395))
+    E.append(product_card(47.9, 58.7, 10, 395))
     E += ingredient_els([49.9, 50.4, 50.9, 51.4], 53.4, 735, 395)
-    E.append(disclaimer(47.2, 61.3))
+    E.append(disclaimer(47.2, 58.65))
     # 11 — jangan tunggu
-    E += banner('Jangan tunggu lagi', 'Semak mata anak anda', 'Sakit kepala berulang? Jumpa sekarang', 'clock', 53.4, 57.2, icon_bg=YEL)
-    E.append(tiktok_card(56.2, 61.4, 682, 400))
+    E += banner('Jangan tunggu lagi', 'Semak mata anak anda', 'Sakit kepala berulang? Periksa mata', 'clock', 53.4, 55.1, icon_bg=YEL)
+    E.append(tiktok_card(54.5, 58.7, 682, 400))
     # 12 — CTA
-    E += banner('Dapatkan sekarang', 'DS Pharma Eye Care', 'TikTok Shop · DS Pharma Wellness', 'pill', 57.2, 61.4)
+    E += banner('Dapatkan sekarang', 'DS Pharma Eye Care', 'TikTok Shop · DS Pharma Wellness', 'pill', 55.1, 58.7)
     return E
 
 def banner_sub_badge(text):

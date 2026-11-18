@@ -119,17 +119,17 @@ untuk penjagaan kesihatan mata
 dengan segera.
 
 31
-00:00:54,180 --> 00:00:55,440
-Jangan tunggu lagi.
+00:00:53,380 --> 00:00:53,950
+okey.
 
 32
-00:00:55,300 --> 00:00:57,000
-Jumpa sekarang.
+00:00:53,930 --> 00:00:55,150
+Jangan tunggu lagi.
 
 33
-00:00:57,660 --> 00:00:59,600
+00:00:55,210 --> 00:00:57,150
 Dapatkan rawatan sekarang.
 
 34
-00:00:59,740 --> 00:01:00,460
+00:00:57,250 --> 00:00:58,600
 Bye bye.
