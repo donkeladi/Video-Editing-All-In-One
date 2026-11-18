@@ -108,10 +108,10 @@ def pill(d, x, y, s, font, bg, fg, padx=22, h=52):
 
 # ---------- jadual adegan ----------
 # (mula, tamat)
-SC = dict(A=(0.5,3.7), A2=(3.7,5.4), B1=(5.4,10.2), B2=(10.2,12.4), C=(12.4,18.0), D=(18.0,30.0),
-          E=(30.0,33.3), F=(33.3,42.2), G=(42.2,48.1))
+SC = dict(A=(0.5,3.7), A2=(3.7,5.4), B1=(5.4,10.2), B2=(10.2,12.4), C=(12.4,18.0), D=(18.0,29.8),
+          E=(30.55,33.3), F=(33.3,42.2), G=(42.2,48.1))
 D_ITEMS = [('Mata merah berjangkit','redeye',18.0,23.6),('Luka pada permukaan mata','scratch',23.6,25.4),
-           ('Radang dalam mata','inflam',25.4,27.2),('Katarak','cataract',27.2,28.5),('Jangkitan selaput otak','virus',28.5,30.0)]
+           ('Radang dalam mata','inflam',25.4,27.2),('Katarak','cataract',27.2,28.5),('Jangkitan selaput otak','virus',28.5,29.8)]
 
 def vis(key, t):
     a, b = SC[key]
@@ -219,13 +219,17 @@ def overlay(t):
         blit(c, 0, 258, W, 40, al, lambda d: tx(d, W/2, 0, 'Maklumat umum. Rujuk doktor untuk diagnosis.', F(25, 'SemiBold'), (225, 232, 245), 'ma'), dy)
     return c.resize((W, 760), Image.LANCZOS)
 
+# frame sumber yang dikekalkan (potong gagap + dead-air); 30fps
+KEEP = [(9,896),(916,1063),(1080,1253),(1265,1282),(1297,1398)]
+def kept(n): return any(a <= n < b for a, b in KEEP)
+
 # ---------- subtitle ----------
 CAPS = [(0.6,3.4,'Anak silau cahaya matahari sampai rasa tak larat?'),(3.8,5.1,'Jangan agak-agak.'),
  (5.5,9.95,'Silau atau sensitif cahaya ni bukan penyakit.'),(10.35,12.2,'Ia simptom, tanda ada sesuatu yang berlaku.'),
  (12.55,17.7,'Pada kanak-kanak, punca biasa ialah migrain atau masalah penglihatan yang belum dibetulkan.'),
  (18.04,23.3,'Tapi doktor di Malaysia juga senaraikan punca lain, macam mata merah berjangkit,'),
  (23.67,26.92,'luka pada permukaan mata, radang dalam mata,'),(27.21,29.7,'katarak, dan jangkitan selaput otak.'),
- (30.0,33.18,'Sebab tu jangan teka sendiri.'),(33.45,35.28,'Bawa anak jumpa doktor,'),
+ (30.55,33.18,'Sebab tu jangan teka sendiri.'),(33.45,35.28,'Bawa anak jumpa doktor,'),
  (36.22,41.58,'terutama kalau berulang, atau ada sakit kepala, demam atau mata merah.'),
  (42.37,45.9,'Sumber: Doctor on Call Malaysia; Specialty Vision; AllAboutVision')]
 def chunks():
@@ -304,15 +308,15 @@ def main():
             m = person_mask(seg, rgb, None)
             compose(rgb, t, m).resize((540, 960), Image.LANCZOS).save(f'work/still_{t:05.1f}.png')
         return
-    audio = ['-af', 'loudnorm=I=-14:TP=-1.5:LRA=11']
     p = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                          '-i', src, '-map', '0:v', '-map', '1:a', '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', '-pix_fmt', 'yuv420p',
-                          *audio, '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', dst], stdin=subprocess.PIPE)
+                          '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', '-pix_fmt', 'yuv420p', '-an', dst], stdin=subprocess.PIPE)
     prev = None; n = 0
     while True:
         ok, f = cap.read()
         if not ok: break
         t = n / FPS
+        if not kept(n):
+            n += 1; prev = None; continue
         rgb = cv2.cvtColor(f, cv2.COLOR_BGR2RGB)
         prev = person_mask(seg, rgb, prev)
         p.stdin.write(np.asarray(compose(rgb, t, prev)).tobytes()); n += 1
