@@ -49,12 +49,25 @@ class P:  # pembantu lukis 1x -> SS x
         s.rect(x, y, x + tw + padx * 2, y + h, fill, r=h / 2)
         s.d.text(s.pt(x + padx, y + h / 2), t, font=f, fill=fg, anchor="lm"); return x + tw + padx * 2
 
-def header(p, tag, title, sub=None):
-    p.chip(36, 30, tag, 22, TEAL, NAVY)
-    p.text(36, 78, title, 44, WHITE, "ExtraBold")
-    if sub: p.text(36, 136, sub, 26, MUTE, "Medium")
 
-def source(p, t): p.text(CW - 30, CH - 12, t, 20, MUTE, "Medium", "rb")
+PADX = 44                      # jidar kiri/kanan kad
+CHT = 390                      # tinggi kad standard
+def tw(t, size, w="Bold"): return F(w, size * SS).getlength(t) / SS
+def fit(p, x, y, t, size, maxw, col=WHITE, w="Bold", anchor="la", minsize=18):
+    """Teks yang mengecil sendiri supaya muat dalam maxw (tak boleh terkeluar kad)."""
+    while tw(t, size, w) > maxw and size > minsize: size -= 1
+    assert tw(t, size, w) <= maxw + 1, f"teks terlalu panjang: {t!r}"
+    p.text(x, y, t, size, col, w, anchor); return size
+def chip2(p, x, y, t, size=24, fill=TEAL, fg=NAVY, h=44, padx=20):
+    wd = tw(t, size) + padx * 2
+    assert x + wd <= CW - PADX + 1, f"chip keluar kad: {t!r}"
+    p.rect(x, y, x + wd, y + h, fill, r=h / 2)
+    p.d.text(p.pt(x + padx, y + h / 2), t, font=F("Bold", size * SS), fill=fg, anchor="lm"); return x + wd
+def header(p, tag, title, sub=None):
+    chip2(p, PADX, 28, tag, 21, TEAL, NAVY, 38, 18)
+    fit(p, PADX, 78, title, 46, CW - PADX * 2, WHITE, "ExtraBold")
+    if sub: fit(p, PADX, 138, sub, 27, CW - PADX * 2, MUTE, "Medium")
+def source(p, t, h=CHT): fit(p, CW - PADX, h - 20, t, 21, CW - PADX * 2, MUTE, "Medium", "rb")
 
 # ---------- graf: lengkung dark adaptation (ilustrasi konsep) ----------
 def da_curve(t, t0, tau):
@@ -63,133 +76,133 @@ def da_curve(t, t0, tau):
     return max(cone, rod)
 
 def card_curve(both):
-    im, d, pad = canvas(); p = P(d, pad)
+    im, d, pad = canvas(CW, CHT); p = P(d, pad)
     header(p, "SAINS MATA", "Mata sedang adjust ke gelap")
-    gx0, gy0, gx1, gy1 = 110, 160, CW - 60, CH - 90
-    for i in range(5):
-        y = gy0 + (gy1 - gy0) * i / 4; p.line([(gx0, y), (gx1, y)], GRID, 1)
-    p.line([(gx0, gy0), (gx0, gy1), (gx1, gy1)], MUTE, 2)
-    for m in (0, 10, 20, 30):
-        x = gx0 + (gx1 - gx0) * m / 30; p.text(x, gy1 + 8, f"{m} min" if m else "0", 20, MUTE, "Medium", "ma")
-    p.text(gx0 - 14, (gy0 + gy1) / 2, "Sensitiviti", 20, MUTE, "Medium", "rm")
-    def pts(t0, tau):
-        return [(gx0 + (gx1 - gx0) * t / 30, gy1 - (gy1 - gy0) * (da_curve(t, t0, tau) - 0.5) / 6.0) for t in [i * 0.25 for i in range(121)]]
+    # legenda (satu baris, tak bertindih graf)
+    p.ell(PADX + 9, 150, 9, TEAL); fit(p, PADX + 26, 150, "Biasa", 24, 120, WHITE, "SemiBold", "lm")
     if both:
-        p.line(pts(5, 14), AMBER, 6)
-        e = pts(5, 14)[-1]; p.chip(e[0] - 330, e[1] - 70, "Lebih berumur: lebih lambat", 22, AMBER, NAVY)
+        p.ell(PADX + 170, 150, 9, AMBER); fit(p, PADX + 187, 150, "Lebih berumur: lebih lambat", 24, 500, WHITE, "SemiBold", "lm")
+    gx0, gy0, gx1, gy1 = 96, 190, CW - PADX - 10, 296
+    for i in range(4):
+        y = gy0 + (gy1 - gy0) * i / 3; p.line([(gx0, y), (gx1, y)], GRID, 1)
+    p.line([(gx0, gy0 - 6), (gx0, gy1), (gx1, gy1)], MUTE, 2)
+    p.text(PADX - 4, (gy0 + gy1) / 2, "Pulih", 20, MUTE, "Medium", "lm")
+    for m in (0, 10, 20, 30):
+        x = gx0 + (gx1 - gx0) * m / 30
+        p.text(x, gy1 + 10, f"{m} min" if m else "0", 21, MUTE, "Medium", "ma" if m < 30 else "ra")
+    def pts(t0, tau):
+        return [(gx0 + (gx1 - gx0) * t / 30, gy1 - (gy1 - gy0 - 8) * (da_curve(t, t0, tau) - 0.5) / 5.6) for t in [i * 0.25 for i in range(121)]]
+    if both: p.line(pts(5, 14), AMBER, 6)
     p.line(pts(2.5, 5.5), TEAL, 6)
-    e = pts(2.5, 5.5)[24]; p.chip(gx0 + 250, gy0 + 52, "Biasa: pulih lebih cepat", 22, TEAL, NAVY)
-    source(p, "Ilustrasi konsep  •  Cardiff Univ. (dark adaptation)")
+    source(p, "Ilustrasi konsep  •  rujukan: Cardiff University")
     return finish(im)
 
-# ---------- kad hook ----------
+# ---------- hook ----------
 def card_hook():
-    im, d, pad = canvas(CW, 300); p = P(d, pad)
-    p.chip(36, 30, "PERNAH ALAMI?", 22, AMBER, NAVY)
-    p.text(36, 84, "Duduk bawah lampu terang,", 50, WHITE, "ExtraBold")
-    p.text(36, 148, "pandangan jadi gelap?", 50, TEAL, "ExtraBold")
-    p.text(36, 222, "Mata mungkin sedang beritahu sesuatu.", 28, MUTE, "Medium")
+    im, d, pad = canvas(CW, 310); p = P(d, pad)
+    chip2(p, PADX, 28, "PERNAH ALAMI?", 21, AMBER, NAVY, 38, 18)
+    fit(p, PADX, 86, "Duduk bawah lampu terang,", 52, CW - PADX * 2, WHITE, "ExtraBold")
+    fit(p, PADX, 154, "pandangan jadi gelap?", 52, CW - PADX * 2, TEAL, "ExtraBold")
+    fit(p, PADX, 232, "Mata mungkin sedang beritahu sesuatu.", 29, CW - PADX * 2, MUTE, "Medium")
     return finish(im)
 
 # ---------- berdiri tiba-tiba ----------
 def card_bp():
-    im, d, pad = canvas(); p = P(d, pad)
-    header(p, "PUNCA 2", "Gelap bila bangun berdiri", "Tekanan darah turun sekejap")
-    for i, (lab, col, hh) in enumerate([("Duduk", TEAL, 110), ("Berdiri", AMBER, 55), ("Beberapa saat", TEAL, 105)]):
-        x = 60 + i * 300; p.rect(x, 330 - hh, x + 230, 330, col, 14)
-        p.text(x + 115, 346, lab, 22, MUTE, "SemiBold", "ma")
-    p.text(60, 188, "Aliran darah ke kepala", 22, MUTE, "Medium")
+    im, d, pad = canvas(CW, CHT); p = P(d, pad)
+    header(p, "PUNCA 2", "Gelap bila bangun berdiri", "Aliran darah ke kepala turun sekejap")
+    base = 322; bw = 240; gap = (CW - PADX * 2 - bw * 3) / 2
+    for i, (lab, col, hh) in enumerate([("Duduk", TEAL, 120), ("Berdiri", AMBER, 55), ("Beberapa saat", TEAL, 115)]):
+        x = PADX + i * (bw + gap); p.rect(x, base - hh, x + bw, base, col, 14)
+        p.text(x + bw / 2, base + 12, lab, 24, WHITE, "SemiBold", "ma")
     return finish(im)
 def card_bp_note():
     im, d, pad = canvas(CW, 130); p = P(d, pad)
-    p.text(CW / 2, 66, "Biasanya tak membimbangkan", 42, WHITE, "ExtraBold", "mm")
+    fit(p, CW / 2, 68, "Biasanya tak membimbangkan", 44, CW - PADX * 2, WHITE, "ExtraBold", "mm")
     return finish(im)
 
 # ---------- 40+ ----------
 def card_40():
     im, d, pad = canvas(CW, 300); p = P(d, pad)
-    p.text(CW / 2 - 330, 150, "40+", 170, TEAL, "Black", "mm")
-    p.text(CW / 2 - 130, 108, "Untuk yang berumur 40 tahun", 38, WHITE, "ExtraBold")
-    p.text(CW / 2 - 130, 160, "ke atas, ada satu benda", 38, WHITE, "ExtraBold")
-    p.text(CW / 2 - 130, 212, "yang perlu tahu.", 38, WHITE, "ExtraBold")
+    fit(p, 200, 150, "40+", 170, 300, TEAL, "Black", "mm")
+    for i, t in enumerate(["Untuk yang berumur", "40 tahun ke atas,", "ada satu benda", "yang perlu tahu."]):
+        fit(p, 410, 56 + i * 56, t, 42, CW - 410 - PADX, WHITE, "ExtraBold")
     return finish(im)
 
 # ---------- Owsley: 2x ----------
 def card_owsley():
-    im, d, pad = canvas(); p = P(d, pad)
+    im, d, pad = canvas(CW, CHT); p = P(d, pad)
     header(p, "KAJIAN", "Adjust ke gelap lambat = ±2× risiko AMD", "Dewasa 60+ dengan makula normal, dipantau 3 tahun")
-    base = CH - 90
-    for i, (lab, val, col, x) in enumerate([("Adjust normal", 1, TEAL, 170), ("Adjust terlalu lambat", 2, AMBER, 560)]):
-        hh = 62 * val; p.rect(x, base - hh, x + 230, base, col, 14)
-        p.text(x + 115, base - hh / 2, "1×" if val == 1 else "±2×", 46, NAVY, "Black", "mm")
-        p.text(x + 115, base + 10, lab, 21, MUTE, "SemiBold", "ma")
+    base = 292; bw = 250
+    for lab, val, col, x in [("Adjust normal", 1, TEAL, 190), ("Adjust terlalu lambat", 2, AMBER, 540)]:
+        hh = 56 * val; p.rect(x, base - hh, x + bw, base, col, 14)
+        p.text(x + bw / 2, base - hh / 2, "1×" if val == 1 else "±2×", 48, NAVY, "Black", "mm")
+        p.text(x + bw / 2, base + 10, lab, 23, WHITE, "SemiBold", "ma")
     source(p, "Owsley et al., Ophthalmology 2016  •  Research to Prevent Blindness")
     return finish(im)
 
 # ---------- makula ----------
 def card_macula():
-    im, d, pad = canvas(); p = P(d, pad)
+    im, d, pad = canvas(CW, CHT); p = P(d, pad)
     header(p, "APA ITU AMD?", "Penyakit di bahagian tengah retina", "Bahagian itu dinamakan makula")
-    cx, cy, R = 210, 270, 62
-    p.ell(cx, cy, R + 26, (235, 240, 250)); p.ell(cx, cy, R + 8, (150, 30, 40)); p.ell(cx, cy, R - 10, (225, 90, 70))
-    p.ell(cx + 6, cy, 20, AMBER); p.ell(cx + 6, cy, 9, (255, 235, 170))
-    p.text(cx, cy + R + 34, "Makula", 24, AMBER, "ExtraBold", "ma")
-    p.text(470, 180, "Beri penglihatan tajam untuk:", 26, MUTE, "Medium")
-    x = 470
+    cx, cy, R = 170, 250, 56
+    p.ell(cx, cy, R + 24, (235, 240, 250)); p.ell(cx, cy, R + 4, (150, 30, 40)); p.ell(cx, cy, R - 12, (225, 90, 70))
+    p.ell(cx + 5, cy, 20, AMBER); p.ell(cx + 5, cy, 9, (255, 235, 170))
+    p.text(cx, cy + R + 34, "Makula", 25, AMBER, "ExtraBold", "ma")
+    fit(p, 380, 186, "Beri penglihatan tajam untuk:", 26, CW - 380 - PADX, MUTE, "Medium")
     for i, t in enumerate(["Membaca", "Memandu", "Kenal muka"]):
-        y = 225 + i * 56; p.chip(470, y, t, 28, TEAL if i % 2 == 0 else AMBER, NAVY, 24, 48)
+        chip2(p, 380, 226 + i * 54, t, 28, TEAL if i % 2 == 0 else AMBER, NAVY, 46, 24)
     return finish(im)
 
 # ---------- 196 -> 288 juta ----------
 def card_global():
-    im, d, pad = canvas(); p = P(d, pad)
+    im, d, pad = canvas(CW, CHT); p = P(d, pad)
     header(p, "TIADA TANDA AWAL", "AMD sering senyap pada peringkat awal", "Anggaran pesakit AMD di seluruh dunia")
-    base = CH - 90
-    for lab, val, col, x in [("2020", 196, TEAL, 190), ("2040 (unjuran)", 288, AMBER, 600)]:
-        hh = val / 288 * 105; p.rect(x, base - hh, x + 230, base, col, 14)
-        p.text(x + 115, base - hh - 10, f"{val} juta", 38, col, "Black", "mb")
-        p.text(x + 115, base + 10, lab, 21, MUTE, "SemiBold", "ma")
+    base = 292; bw = 250
+    for lab, val, col, x in [("2020", 196, TEAL, 190), ("2040 (unjuran)", 288, AMBER, 540)]:
+        hh = val / 288 * 95; p.rect(x, base - hh, x + bw, base, col, 14)
+        p.text(x + bw / 2, base - hh / 2, f"{val} juta", 40, NAVY, "Black", "mm")
+        p.text(x + bw / 2, base + 10, lab, 23, WHITE, "SemiBold", "ma")
     source(p, "Wong et al., Lancet Global Health 2014")
     return finish(im)
 
 # ---------- CTA ----------
 def card_cta():
-    im, d, pad = canvas(CW, 250); p = P(d, pad)
-    p.chip(36, 30, "NASIHAT", 22, RED, WHITE)
-    p.text(36, 84, "Kerap berlaku?", 56, WHITE, "ExtraBold")
-    p.text(36, 158, "Pergi buat pemeriksaan mata.", 46, TEAL, "ExtraBold")
+    im, d, pad = canvas(CW, 260); p = P(d, pad)
+    chip2(p, PADX, 28, "NASIHAT", 21, RED, WHITE, 38, 18)
+    fit(p, PADX, 86, "Kerap berlaku?", 58, CW - PADX * 2, WHITE, "ExtraBold")
+    fit(p, PADX, 164, "Pergi buat pemeriksaan mata.", 46, CW - PADX * 2, TEAL, "ExtraBold")
     return finish(im)
 
-# ---------- produk (lower third atas) ----------
+# ---------- produk ----------
 def card_product():
-    im, d, pad = canvas(CW, 250); p = P(d, pad)
-    p.chip(36, 30, "SOKONGAN HARIAN", 22, TEAL, NAVY)
-    p.text(36, 84, "DS Pharma Eye Care", 58, WHITE, "ExtraBold")
-    p.text(36, 160, "Digunakan secara tradisional untuk kesihatan mata", 27, MUTE, "Medium")
-    p.chip(36, 200, "MAL22076147T", 24, AMBER, NAVY, 20, 34)
+    im, d, pad = canvas(CW, 280); p = P(d, pad)
+    chip2(p, PADX, 28, "SOKONGAN HARIAN", 21, TEAL, NAVY, 38, 18)
+    fit(p, PADX, 84, "DS Pharma Eye Care", 60, CW - PADX * 2, WHITE, "ExtraBold")
+    fit(p, PADX, 162, "Digunakan secara tradisional untuk kesihatan mata", 28, CW - PADX * 2, MUTE, "Medium")
+    chip2(p, PADX, 208, "MAL22076147T", 25, AMBER, NAVY, 42, 20)
     return finish(im)
 def card_disclaimer():
     im, d, pad = canvas(CW, 150); p = P(d, pad)
-    p.text(CW / 2, 76, "Bukan ganti pemeriksaan mata", 44, AMBER, "ExtraBold", "mm")
+    fit(p, CW / 2, 80, "Bukan ganti pemeriksaan mata", 46, CW - PADX * 2, AMBER, "ExtraBold", "mm")
     return finish(im)
 
 # ---------- sumber ----------
 def card_sources():
     im, d, pad = canvas(CW, 400); p = P(d, pad)
-    p.chip(36, 28, "SUMBER RUJUKAN", 22, TEAL, NAVY)
+    chip2(p, PADX, 28, "SUMBER RUJUKAN", 21, TEAL, NAVY, 38, 18)
     sh = Image.open(SHOT).convert("RGB")
-    sh = sh.crop((0, 190, sh.width, 1230)); sw = 330; shh = int(sh.height * sw / sh.width)
+    sh = sh.crop((0, 190, sh.width, 1230)); sw = 320; shh = int(sh.height * sw / sh.width)
     sh = sh.resize((sw * SS, shh * SS), Image.LANCZOS)
     m = Image.new("L", sh.size, 0); ImageDraw.Draw(m).rounded_rectangle((0, 0, sh.width, sh.height), 18 * SS, fill=255)
-    im.paste(sh, ((pad + 36) * SS, (pad + 80) * SS), m)
+    im.paste(sh, ((pad + PADX) * SS, (pad + 84) * SS), m)
+    x0 = PADX + sw + 36
     for i, (a, b) in enumerate([("Cardiff University", "School of Optometry & Vision Sciences"), ("Research to Prevent Blindness", "Dark adaptation & AMD"),
                                 ("LiveScience", "Sains kesihatan mata"), ("AAO", "American Academy of Ophthalmology")]):
-        y = 88 + i * 74; p.rect(420, y, CW - 36, y + 62, (255, 255, 255, 22), 14)
-        p.rect(420, y, 430, y + 62, TEAL, 5)
-        p.text(446, y + 8, a, 26, WHITE, "ExtraBold"); p.text(446, y + 38, b, 18, MUTE, "Medium")
+        y = 84 + i * 76; p.rect(x0, y, CW - PADX, y + 66, (34, 50, 84), 14); p.rect(x0, y, x0 + 8, y + 66, TEAL, 4)
+        fit(p, x0 + 26, y + 8, a, 27, CW - PADX - x0 - 40, WHITE, "ExtraBold")
+        fit(p, x0 + 26, y + 40, b, 19, CW - PADX - x0 - 40, MUTE, "Medium")
     return finish(im)
 
-# ---------- jadual overlay: (nama, sprite, mula, tamat, y0, animasi) ----------
 S = lambda n, im: (im.save(f"{WORK}/{n}.png"), f"{WORK}/{n}.png")[1]
 # Masa dari transkrip faster-whisper (work/awareness_whisper.json)
 TIMING = [
