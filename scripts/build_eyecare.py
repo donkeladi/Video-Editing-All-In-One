@@ -194,7 +194,17 @@ g = np.zeros((H,W,4),np.uint8); y0=1050
 for y in range(y0,H): g[y,:,3] = int(150*((y-y0)/(H-y0))**1.5)
 Image.fromarray(g).save("work/grad.png")
 
-vf = ("[0:v]eq=contrast=1.05:saturation=1.08:gamma=0.98,unsharp=5:5:0.4[b];"
+
+# ---------- zoom in/out licin pada video utama (kekunci: masa, skala) ----------
+ZK = [(0,1.00),(4.2,1.08),(8.0,1.00),(13.0,1.07),(17.0,1.01),(21.8,1.08),(26.0,1.00),(30.0,1.08),
+      (35.2,1.01),(40.8,1.07),(44.4,1.00),(48.9,1.09),(53.0,1.02),(57.4,1.09),(dur,1.05)]
+def zexpr():
+    e = f"{ZK[-1][1]}"
+    for (a,za),(b,zb) in reversed(list(zip(ZK,ZK[1:]))):
+        e = f"if(lt(T,{b}),{za}+({zb}-{za})*(0.5-0.5*cos(PI*(T-{a})/({b}-{a}))),{e})"
+    return e.replace("T","(on/30)")
+ZOOM = ("scale=2160:3840:flags=bicubic,zoompan=z='%s':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30," % zexpr())
+vf = ("[0:v]"+ZOOM+"eq=contrast=1.05:saturation=1.08:gamma=0.98,unsharp=5:5:0.4[b];"
       "[b][1:v]overlay=0:0[c];[c][2:v]overlay=0:%d:eof_action=pass[d];"
       "[d]subtitles=work/eyecare.ass:fontsdir=/usr/share/fonts/opentype/inter,fade=t=out:st=%.2f:d=0.35[v]" % (BAND_Y, dur-0.35))
 af = f"[0:a]highpass=f=80,acompressor=threshold=-21dB:ratio=3:attack=5:release=90,loudnorm=I=-14:TP=-1.5:LRA=11,afade=t=out:st={dur-0.3:.2f}:d=0.3[a]"
