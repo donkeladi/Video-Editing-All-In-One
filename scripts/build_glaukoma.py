@@ -91,8 +91,9 @@ def brain(c,cx,cy,s=1.0):
     for dx in(-34,-8,18,38): c.arc((cx+(dx-12)*s,cy-26*s,cx+(dx+12)*s,cy+0*s),20,200,(200,110,150,255),3)
     c.ln([(cx,cy-34*s),(cx,cy+34*s)],(200,110,150,255),3)
 
-PW,PH,PX,PY = 960,380,60,1005
-def title(c,t,col=TEAL): c.tx((40,36),t,25,"ExtraBold",col)
+PW,PH = 960,380
+PS=0.86; PWS,PHS=int(PW*PS),int(PH*PS); PX,PY=(W-PWS)//2,985
+def title(c,t,col=TEAL): c.tx((40,34),t,28,"ExtraBold",col)
 
 # ================= PANEL: setiap fungsi (ts, tl) -> RGBA PIL =================
 def sc_hook(ts,tl):
@@ -146,7 +147,7 @@ def sc_40(ts,tl):
     if p2>0: c.tx((400,190),"tanpa disedari",52,"Black",A(RED,p2),"la")
     p3=at(ts,19.8)
     if p3>0: c.tx((400,262),"Bermula daripada penglihatan tepi",30,"Medium",A(GREY,p3),"la")
-    pill(c,400,310,"Sumber: Pakar Sunway",22,PUR,TEAL,20,44)
+    pill(c,400,305,"Sumber: Pakar Sunway",26,PUR,TEAL,22,52)
     return c.out()
 
 def sc_field(ts,tl):
@@ -191,7 +192,7 @@ def sc_chart(ts,tl):
         q=at(ts,29.7); px,py=pt(0.42,vis(0.42)); pill(c,px-80,py+46,"Tak boleh dipulihkan",24,WHITE,A(RED,.95*q),20,46)
     if ts>=32.46:
         q=at(ts,32.46); px,py=pt(0.60,vis(us)); pill(c,px-150,py-58,"Rawatan: halang jadi lebih teruk",24,(10,40,25),A(GRN,.97*q),20,46)
-    c.tx((890,355),"Ilustrasi",20,"Medium",GREY,"rm")
+    c.tx((890,352),"Ilustrasi",24,"Medium",GREY,"rm")
     return c.out()
 
 def sc_rank(ts,tl):
@@ -216,11 +217,13 @@ def sc_rank(ts,tl):
         c.tx((cx,cy),"> 50%",58,"Black",A(WHITE,ph),"mm")
         c.tx((400,120),"Lebih separuh kes",44,"Black",A(WHITE,ph*at(ts,41.5)),"la")
         c.tx((400,180),"dikesan lewat",56,"Black",A(AMB,ph*at(ts,43.8)),"la")
-        pill(c,400,290,"Sumber: WHO",24,PUR,TEAL,22,48)
+        pill(c,400,285,"Sumber: WHO",28,PUR,TEAL,24,54)
     return c.out()
 
 def sc_check(ts,tl):
     c=C(PW,PH); card(c,GRN); title(c,"CARA TAHU CUMA SATU",GRN)
+    if ts<48.4:
+        eye(c,170,220,200,112); c.tx((310,220),"Satu cara sahaja",56,"Black",WHITE,"lm")
     p=at(ts,48.4)
     if p>0:
         c.rr((40,95,920,185),45,fill=A(GRN,.18*p),outline=A(GRN,.9*p),width=3)
@@ -292,7 +295,7 @@ def sc_warn(ts,tl):
         if p>0:
             y=170+i*95; c.rr((180,y-34,920,y+34),34,fill=A(AMB,.12*p),outline=A(AMB,.7*p),width=2)
             cross(c,222,y,20*p,RED); c.tx((262,y),t,36,"Bold",A(WHITE,p),"lm")
-    c.tx((40,340),"Ubat tradisional. Sila rujuk pakar farmasi / doktor sebelum mengambil produk ini.",20,"Medium",GREY,"lm")
+    c.tx((40,318),"Ubat tradisional. Sila rujuk pakar farmasi /",24,"Medium",GREY,"lm"); c.tx((40,350),"doktor sebelum mengambil produk ini.",24,"Medium",GREY,"lm")
     return c.out()
 
 def sc_end(ts,tl):
@@ -310,13 +313,13 @@ SCENES=[(1.2,7.25,sc_hook),(7.55,15.1,sc_def),(15.1,22.6,sc_40),(22.7,26.4,sc_fi
         (35.35,45.6,sc_rank),(45.9,55.85,sc_check),(59.3,63.8,sc_prod),(63.8,66.6,sc_ing),(66.6,70.3,sc_warn),(75.3,78.4,sc_end)]
 
 # ---- bayang panel (sekali)
-_sh=Image.new("RGBA",(PW+160,PH+160),(0,0,0,0)); ImageDraw.Draw(_sh).rounded_rectangle((80,100,80+PW,100+PH),30,fill=(0,0,0,170)); SHADOW=_sh.filter(ImageFilter.GaussianBlur(26))
+_sh=Image.new("RGBA",(PWS+160,PHS+160),(0,0,0,0)); ImageDraw.Draw(_sh).rounded_rectangle((80,100,80+PWS,100+PHS),26,fill=(0,0,0,170)); SHADOW=_sh.filter(ImageFilter.GaussianBlur(26))
 def panel_layer(ts):
     for a,b,fn in SCENES:
         if a<=ts<=b:
             tl=ts-a; fin=clamp(tl/0.4); fout=clamp((b-ts)/0.25)
             alpha=min(eo(fin),fout); dy=int((1-eb(fin))*60)
-            L=Image.new("RGBA",(W,H),(0,0,0,0)); p=fn(ts,tl)
+            L=Image.new("RGBA",(W,H),(0,0,0,0)); p=fn(ts,tl).resize((PWS,PHS),Image.LANCZOS)
             if alpha<1: p.putalpha(p.getchannel("A").point(lambda v,a=alpha:int(v*a)))
             sh=SHADOW.copy(); sh.putalpha(sh.getchannel("A").point(lambda v,a=alpha:int(v*a)))
             L.alpha_composite(sh,(PX-80,PY-80+dy)); L.alpha_composite(p,(PX,PY+dy)); return L,True
@@ -341,12 +344,12 @@ _sc={}
 def sub_sprite(text,wi):
     k=(text,wi)
     if k in _sc: return _sc[k]
-    words=text.split(); f=F("ExtraBold",60); maxw=940; lines=[[]];
+    words=text.split(); f=F("ExtraBold",56); maxw=840; lines=[[]];
     for i,w in enumerate(words):
         cur=" ".join(x for x,_ in lines[-1]+[(w,i)])
         if lines[-1] and f.getlength(cur)>maxw: lines.append([])
         lines[-1].append((w,i))
-    lh=76; im=Image.new("RGBA",(W,lh*len(lines)+30),(0,0,0,0)); d=ImageDraw.Draw(im)
+    lh=72; im=Image.new("RGBA",(W,lh*len(lines)+30),(0,0,0,0)); d=ImageDraw.Draw(im)
     for li,ln in enumerate(lines):
         tot=f.getlength(" ".join(x for x,_ in ln)); x=(W-tot)/2; y=lh*li+38
         for w,i in ln:
@@ -392,7 +395,7 @@ def compose(rgb,t):
     if has:
         out.alpha_composite(P)
     S=sub_layer(ts)
-    if S is not None: out.alpha_composite(S,(0,1400))
+    if S is not None: out.alpha_composite(S,(0,1335))
     return out.convert("RGB")
 
 def build_base():
@@ -404,6 +407,57 @@ def build_base():
     fc=";".join(parts+fa+[cc])
     sp.run(["ffmpeg","-y","-v","error","-i",SRC,"-filter_complex",fc,"-map","[v]","-map","[a]","-c:v","libx264","-crf","14","-preset","fast","-pix_fmt","yuv420p","-c:a","aac","-b:a","256k",f"{WORK}/base.mp4"],check=True)
 
+# ---- sound effect (dijana lokal, tiada kredit)
+SR=48000
+def _env(n,a=0.01,d=3.0):
+    t=np.arange(n)/SR; return np.minimum(1,t/a)*np.exp(-t*d)
+def sfx_pop(f=700,dur=.14):
+    n=int(SR*dur); t=np.arange(n)/SR; fr=f*(1+0.6*np.exp(-t*40)); return np.sin(2*np.pi*np.cumsum(fr)/SR)*_env(n,.002,26)
+def sfx_chime(f=880,dur=.6):
+    n=int(SR*dur); t=np.arange(n)/SR; return (np.sin(2*np.pi*f*t)+.5*np.sin(2*np.pi*f*1.5*t)+.25*np.sin(2*np.pi*f*2*t))*_env(n,.004,7)/1.75
+def sfx_ok(): return np.concatenate([sfx_chime(988,.18)[:int(SR*.09)],np.zeros(0)]) + 0 if False else _mix2(sfx_chime(784,.5),sfx_chime(1175,.5),int(SR*.09))
+def _mix2(a,b,off):
+    o=np.zeros(max(len(a),off+len(b))); o[:len(a)]+=a; o[off:off+len(b)]+=b; return o
+def sfx_bad(): 
+    n=int(SR*.28); t=np.arange(n)/SR; fr=220*np.exp(-t*2.2); return np.tanh(2.5*np.sin(2*np.pi*np.cumsum(fr)/SR))*_env(n,.003,9)*.7
+def sfx_thud(dur=.5):
+    n=int(SR*dur); t=np.arange(n)/SR; fr=110*np.exp(-t*7)+45; x=np.sin(2*np.pi*np.cumsum(fr)/SR)*_env(n,.002,8)
+    c=np.random.RandomState(1).randn(n)*_env(n,.001,120)*.25; return x+c
+def sfx_whoosh(dur=.45,lo=300,hi=3200,seed=0):
+    n=int(SR*dur); rs=np.random.RandomState(seed); x=rs.randn(n); t=np.linspace(0,1,n)
+    fc=lo*(hi/lo)**t; a=1-np.exp(-2*np.pi*fc/SR); y=np.zeros(n); z1=z2=0.0
+    for i in range(n): z1+=a[i]*(x[i]-z1); z2+=a[i]*(z1-z2); y[i]=z1-z2
+    e=np.sin(np.pi*t)**1.6; y=y*e; return y/(np.abs(y).max()+1e-9)
+def sfx_rise(dur=1.5):
+    n=int(SR*dur); t=np.arange(n)/SR; fr=300*(6**(t/dur)); x=np.sin(2*np.pi*np.cumsum(fr)/SR); e=np.minimum(1,t/.1)*np.minimum(1,(dur-t)/.15); return x*e*.6
+def sfx_tick(): return sfx_pop(1500,.05)
+def sfx_swipe(): return sfx_whoosh(.22,1500,6000,5)
+def gen_sfx():
+    out=np.zeros(int(SR*(DUR+1.0)))
+    def put(src_t,snd,gain):
+        t=src2out(src_t)
+        if t is None: return
+        i=int(t*SR); n=min(len(snd),len(out)-i)
+        if n>0: out[i:i+n]+=snd[:n]*gain
+    wh=[sfx_whoosh(.45,300,3200,k) for k in range(3)]
+    for k,(a,b,fn) in enumerate(SCENES): put(a+0.02,wh[k%3],0.30)         # panel masuk
+    ok,bad=sfx_ok(),sfx_bad()
+    for t in (4.04,5.74,23.2): put(t,ok,.28)
+    put(6.40,sfx_thud(),.50); put(10.54,bad,.40); put(16.0,sfx_rise(1.5),.22); put(17.55,ok,.26)
+    put(18.5,sfx_pop(520),.35)
+    for t in (24.76,25.74): put(t,bad,.30)
+    put(29.7,sfx_thud(.35),.40); put(32.46,ok,.30)
+    for i,t in enumerate((35.7,35.95,36.2)): put(t,sfx_pop(500+i*120,.12),.28)
+    put(37.3,sfx_thud(),.55); put(40.4,sfx_rise(1.5),.22); put(41.95,sfx_pop(600),.30); put(43.8,sfx_pop(500),.32)
+    put(48.4,ok,.32); put(50.5,bad,.28); put(51.9,sfx_swipe(),.30); put(54.2,sfx_pop(760),.35)
+    put(61.98,ok,.32)
+    for i in range(4): put(63.9+i*0.25,sfx_pop(620+i*90),.30)
+    put(66.68,sfx_tick(),.35); put(68.12,sfx_tick(),.35); put(75.4,sfx_chime(1046,.7),.25)
+    out=np.tanh(out*1.2)
+    import wave
+    with wave.open(f"{WORK}/sfx.wav","wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes((out*32767*0.9).astype(np.int16).tobytes())
+
 def write_srt():
     def f(t): h=int(t//3600); m=int(t%3600//60); s=t%60; return f"{h:02d}:{m:02d}:{int(s):02d},{int(round((s-int(s))*1000)):03d}"
     out=[];n=1
@@ -414,15 +468,15 @@ def write_srt():
     open(f"{WORK}/glaukoma.srt","w").write("\n".join(out))
 
 if __name__=="__main__":
-    build_base(); write_srt()
+    build_base(); write_srt(); gen_sfx()
     if "--probe" in sys.argv:
         for t in [float(x) for x in sys.argv[sys.argv.index("--probe")+1].split(",")]:
             raw=sp.run(["ffmpeg","-v","error","-ss",str(t),"-i",f"{WORK}/base.mp4","-frames:v","1","-f","rawvideo","-pix_fmt","rgb24","-"],capture_output=True).stdout
             rgb=np.frombuffer(raw,np.uint8).reshape(H,W,3).copy(); compose(rgb,t).save(f"{WORK}/probe_{t:05.1f}.png")
         sys.exit()
     rd=sp.Popen(["ffmpeg","-v","error","-i",f"{WORK}/base.mp4","-f","rawvideo","-pix_fmt","rgb24","-"],stdout=sp.PIPE)
-    wr=sp.Popen(["ffmpeg","-y","-v","error","-f","rawvideo","-pix_fmt","rgb24","-s",f"{W}x{H}","-r",str(FPS),"-i","-","-i",f"{WORK}/base.mp4","-map","0:v","-map","1:a",
-                 "-c:v","libx264","-crf","18","-preset","medium","-pix_fmt","yuv420p","-af","loudnorm=I=-14:TP=-1.5:LRA=11","-c:a","aac","-b:a","192k","-shortest","output/glaukoma_awareness.mp4"],stdin=sp.PIPE)
+    wr=sp.Popen(["ffmpeg","-y","-v","error","-f","rawvideo","-pix_fmt","rgb24","-s",f"{W}x{H}","-r",str(FPS),"-i","-","-i",f"{WORK}/base.mp4","-i",f"{WORK}/sfx.wav","-filter_complex","[1:a]aresample=48000,aformat=channel_layouts=mono[v];[2:a]aresample=48000[x];[v][x]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11[a]","-map","0:v","-map","[a]",
+                 "-c:v","libx264","-crf","18","-preset","medium","-pix_fmt","yuv420p","-c:a","aac","-b:a","192k","-shortest","output/glaukoma_awareness.mp4"],stdin=sp.PIPE)
     i=0
     while True:
         b=rd.stdout.read(W*H*3)
