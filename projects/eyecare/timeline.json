@@ -1,0 +1,437 @@
+{
+ "fps": 30,
+ "dur": 59.7,
+ "last_word": 56.54,
+ "segments": [
+  [
+   "L1",
+   0.0,
+   4.32
+  ],
+  [
+   "S",
+   4.32,
+   21.3
+  ],
+  [
+   "L1",
+   21.3,
+   23.4
+  ],
+  [
+   "S",
+   23.4,
+   50.94
+  ],
+  [
+   "L1",
+   50.94,
+   56.54
+  ],
+  [
+   "S",
+   56.54,
+   59.7
+  ]
+ ],
+ "zoom_through": [
+  4.32,
+  21.3,
+  56.54
+ ],
+ "punch_in": [
+  2.4,
+  10.88,
+  50.28
+ ],
+ "flashes": [
+  21.46,
+  43.82,
+  56.54
+ ],
+ "slams": [
+  {
+   "t0": 0.0,
+   "t1": 1.9,
+   "lines": [
+    "[MENTAH]",
+    "JE?"
+   ]
+  },
+  {
+   "t0": 21.46,
+   "t1": 23.1,
+   "lines": [
+    "LARUT",
+    "[LEMAK]"
+   ]
+  }
+ ],
+ "captions": [
+  [
+   0.0,
+   1.16,
+   "Korang yang mana"
+  ],
+  [
+   1.16,
+   2.4,
+   "suka [lobak merah]"
+  ],
+  [
+   2.4,
+   3.4,
+   "[rugi] kalau makan"
+  ],
+  [
+   3.4,
+   4.32,
+   "macam tu sahaja"
+  ],
+  [
+   4.32,
+   5.9,
+   "Sebab apa dalam"
+  ],
+  [
+   5.9,
+   6.84,
+   "[lobak merah] dia"
+  ],
+  [
+   6.84,
+   7.4,
+   "kaya dengan"
+  ],
+  [
+   7.4,
+   8.4,
+   "[beta-karotin]"
+  ],
+  [
+   8.4,
+   9.54,
+   "yang membantu badan"
+  ],
+  [
+   9.54,
+   10.88,
+   "tukarkan ia jadi"
+  ],
+  [
+   10.88,
+   12.06,
+   "[vitamin A]"
+  ],
+  [
+   12.08,
+   13.4,
+   "Yang penting ia"
+  ],
+  [
+   13.4,
+   13.92,
+   "juga untuk"
+  ],
+  [
+   13.92,
+   15.02,
+   "[penglihatan malam]"
+  ],
+  [
+   15.02,
+   15.56,
+   "dan juga"
+  ],
+  [
+   15.56,
+   17.3,
+   "[daya tahan] badan"
+  ],
+  [
+   17.52,
+   18.48,
+   "Masalah yang"
+  ],
+  [
+   18.48,
+   19.0,
+   "dekat sini"
+  ],
+  [
+   19.0,
+   20.4,
+   "[karotenoid]"
+  ],
+  [
+   20.44,
+   21.46,
+   "[karotenoid] ini"
+  ],
+  [
+   23.1,
+   25.06,
+   "Manual [MSD] cakap"
+  ],
+  [
+   25.06,
+   26.46,
+   "ia paling baik"
+  ],
+  [
+   26.46,
+   27.86,
+   "diserap daripada sayur"
+  ],
+  [
+   27.86,
+   28.74,
+   "yang dimasak dengan"
+  ],
+  [
+   28.74,
+   29.64,
+   "sedikit [lemak]"
+  ],
+  [
+   29.64,
+   30.44,
+   "ataupun [minyak]"
+  ],
+  [
+   30.44,
+   32.76,
+   "[Avokado] pun ada"
+  ],
+  [
+   32.76,
+   33.64,
+   "sumber [lemak]"
+  ],
+  [
+   33.64,
+   34.44,
+   "yang baik"
+  ],
+  [
+   34.44,
+   35.66,
+   "[Berita Harian]"
+  ],
+  [
+   35.66,
+   36.3,
+   "ada tulis"
+  ],
+  [
+   36.3,
+   37.52,
+   "ia membantu serap"
+  ],
+  [
+   37.52,
+   38.84,
+   "[lemak] yang larut"
+  ],
+  [
+   38.84,
+   40.2,
+   "Ada tertulis dalam"
+  ],
+  [
+   40.2,
+   41.62,
+   "[Berita Harian 2019]"
+  ],
+  [
+   41.62,
+   42.56,
+   "kalau tak"
+  ],
+  [
+   42.56,
+   43.28,
+   "silap saya"
+  ],
+  [
+   43.28,
+   44.36,
+   "Dalam DS Pharma"
+  ],
+  [
+   44.36,
+   45.18,
+   "[Eye Care] pun"
+  ],
+  [
+   45.18,
+   46.28,
+   "ada [lobak merah]"
+  ],
+  [
+   46.28,
+   47.0,
+   "dan [avokado]"
+  ],
+  [
+   47.0,
+   48.58,
+   "berdaftar dengan [MAL]"
+  ],
+  [
+   48.58,
+   49.62,
+   "dan digunakan"
+  ],
+  [
+   49.62,
+   50.94,
+   "secara [tradisional]"
+  ],
+  [
+   50.94,
+   52.4,
+   "untuk [kesihatan mata]"
+  ]
+ ],
+ "elements": [
+  {
+   "id": "carrot_hook",
+   "kind": "icon",
+   "name": "carrot",
+   "t0": 1.44,
+   "t1": 4.2,
+   "cx": 872,
+   "cy": 650,
+   "size": 170
+  },
+  {
+   "id": "carrot_big",
+   "kind": "icon",
+   "name": "carrot",
+   "t0": 4.5,
+   "t1": 7.3,
+   "cx": 510,
+   "cy": 580,
+   "size": 380
+  },
+  {
+   "id": "card_a",
+   "kind": "card_a",
+   "t0": 7.4,
+   "t1": 17.9
+  },
+  {
+   "id": "src_kemenkes",
+   "kind": "src",
+   "text": "Sumber: Kemenkes Indonesia",
+   "t0": 10.88,
+   "t1": 17.9
+  },
+  {
+   "id": "chip_night",
+   "kind": "chip",
+   "text": "penglihatan malam",
+   "t0": 13.92,
+   "t1": 17.9,
+   "cx": 510,
+   "cy": 745
+  },
+  {
+   "id": "chip_imun",
+   "kind": "chip",
+   "text": "daya tahan badan",
+   "t0": 15.56,
+   "t1": 17.9,
+   "cx": 510,
+   "cy": 835
+  },
+  {
+   "id": "particle_intro",
+   "kind": "particle",
+   "t0": 19.0,
+   "t1": 21.3,
+   "orbit": false
+  },
+  {
+   "id": "chip_karot",
+   "kind": "chip",
+   "text": "karotenoid",
+   "t0": 19.2,
+   "t1": 21.3,
+   "cx": 510,
+   "cy": 760
+  },
+  {
+   "id": "oil_scene",
+   "kind": "particle",
+   "t0": 23.4,
+   "t1": 30.44,
+   "orbit": true,
+   "pan": true
+  },
+  {
+   "id": "src_msd",
+   "kind": "src",
+   "text": "Sumber: MSD Manual (versi Indonesia)",
+   "t0": 23.98,
+   "t1": 28.6
+  },
+  {
+   "id": "avocado",
+   "kind": "icon",
+   "name": "avocado",
+   "t0": 30.44,
+   "t1": 43.2,
+   "cx": 310,
+   "cy": 590,
+   "size": 380
+  },
+  {
+   "id": "chip_lemak",
+   "kind": "chip",
+   "text": "lemak baik",
+   "t0": 33.32,
+   "t1": 43.2,
+   "cx": 745,
+   "cy": 590
+  },
+  {
+   "id": "src_bh",
+   "kind": "src",
+   "text": "Sumber: Berita Harian 2019",
+   "t0": 34.8,
+   "t1": 38.9
+  },
+  {
+   "id": "product",
+   "kind": "photo",
+   "name": "front",
+   "t0": 43.82,
+   "t1": 50.94,
+   "cx": 510,
+   "cy": 575,
+   "h": 450
+  },
+  {
+   "id": "chip_mal",
+   "kind": "chip",
+   "text": "Berdaftar [MAL22076147T]",
+   "t0": 47.0,
+   "t1": 50.94,
+   "cx": 510,
+   "cy": 850
+  },
+  {
+   "id": "endcard",
+   "kind": "endcard",
+   "t0": 56.54,
+   "t1": 59.7
+  }
+ ],
+ "colors": {
+  "purple": "#4C367A",
+  "teal": "#7DCCCE",
+  "purple_dark": "#2E2050 (diterbitkan, latar)"
+ }
+}
