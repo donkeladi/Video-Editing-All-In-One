@@ -152,41 +152,45 @@ def chip(text, size=44, fill=CARD, fg=WHITE, ring=TEAL, font=MB, padx=40, h=None
     return shadow_wrap(base, 10, 6, 80, 16)
 
 def source_chip(name):
-    f1, f2 = F(NM, 30), F(NB, 30)
+    f1, f2 = F(NM, 38), F(NB, 38)
     a, b = "Sumber: ", name
-    w = int(tw(f1, a) + tw(f2, b)) + 64; h = 58
+    w = int(tw(f1, a) + tw(f2, b)) + 80; h = 72
     base = rr(w, h, h // 2, (246, 242, 252, 244)); d = ImageDraw.Draw(base)
-    put(d, 32, h / 2, a, f1, (90, 74, 126), "l"); put(d, 32 + tw(f1, a), h / 2, b, f2, INK, "l")
+    put(d, 40, h / 2, a, f1, (90, 74, 126), "l"); put(d, 40 + tw(f1, a), h / 2, b, f2, INK, "l")
     return shadow_wrap(base, 8, 4, 70, 14)
 
 def card_title(kind, kw, rest, sub=None):
-    w, h = 840, 250 if sub else 210
-    base = rr(w, h, 38, CARD, TEAL, 3); d = ImageDraw.Draw(base)
-    bd = 156; bg = badge(kind, bd); base.alpha_composite(bg, (28, h // 2 - bg.height // 2))
-    x = 28 + bg.width + 22; cy = h // 2 - (22 if sub else 0)
-    f = F(MX, 64); x = kwbox(d, x + 18, cy, kw, f, "l") + 18
-    if rest: put(d, x, cy, rest, f, WHITE, "l")
-    if sub: put(d, 28 + bg.width + 24, cy + 66, sub, F(NM, 33), SOFT, "l")
+    w = 840; bd = 196; x = 22 + bd + 20 + 14
+    size = 76; full = kw + (" " + rest if rest else "")
+    while tw(F(MX, size), full) + 40 > w - x - 24 and size > 40: size -= 2
+    fsub = F(NM, 40); lines = []
+    if sub:
+        lines = [sub]
+        if tw(fsub, sub) > w - x - 24:
+            ws_ = sub.split(); k = len(ws_) // 2; lines = [" ".join(ws_[:k]), " ".join(ws_[k:])]
+    h = 260 if not sub else (290 if len(lines) == 1 else 340)
+    base = rr(w, h, 42, CARD, TEAL, 3); d = ImageDraw.Draw(base)
+    bg = badge(kind, bd); base.alpha_composite(bg, (22, h // 2 - bg.height // 2))
+    cy = h // 2 - (34 if sub else 0); f = F(MX, size)
+    xe = kwbox(d, x + 20, cy, kw, f, "l") + 18
+    if rest: put(d, xe, cy, rest, f, WHITE, "l")
+    for k, ln in enumerate(lines): put(d, x, cy + 80 + k * 48, ln, fsub, SOFT, "l")
     return shadow_wrap(base)
 
 def card_conv():
-    w, h = 840, 300
-    base = rr(w, h, 38, CARD, TEAL, 3); d = ImageDraw.Draw(base)
-    put(d, w / 2, 62, "badan tukar", F(NM, 34), SOFT, "m")
-    f = F(MB, 46); fa = F(MX, 54)
-    t1 = "beta-karotin"; t2 = "vitamin"
-    total = tw(f, t1) + 110 + tw(fa, t2) + 18 + (tw(fa, "A") + 40)
-    x = (w - total) / 2; cy = 190
-    put(d, x, cy, t1, f, WHITE, "l"); x += tw(f, t1) + 22
-    d.rectangle([x, cy - 7, x + 52, cy + 7], fill=TEAL); d.polygon([(x + 48, cy - 26), (x + 82, cy), (x + 48, cy + 26)], fill=TEAL)
-    x += 110 - 22 + 0
-    put(d, x, cy, t2, fa, WHITE, "l"); x += tw(fa, t2) + 18 + 20
-    kwbox(d, x, cy, "A", fa, "l")
+    w, h = 840, 470
+    base = rr(w, h, 42, CARD, TEAL, 3); d = ImageDraw.Draw(base)
+    put(d, w / 2, 56, "badan tukar", F(NM, 40), SOFT, "m")
+    put(d, w / 2, 138, "beta-karotin", F(MB, 70), WHITE, "m")
+    cx = w / 2; d.rectangle([cx - 9, 192, cx + 9, 246], fill=TEAL); d.polygon([(cx - 36, 238), (cx + 36, 238), (cx, 284)], fill=TEAL)
+    fa = F(MX, 84); t2 = "vitamin"; tot = tw(fa, t2) + 44 + tw(fa, "A") + 44
+    x = (w - tot) / 2; cy = 372
+    put(d, x, cy, t2, fa, WHITE, "l"); kwbox(d, x + tw(fa, t2) + 44, cy, "A", fa, "l")
     return shadow_wrap(base)
 
 def card_chips_label(label):
-    f = F(NM, 36); w = int(tw(f, label)) + 70; h = 64
-    base = rr(w, h, 32, (26, 15, 52, 200)); d = ImageDraw.Draw(base); put(d, w / 2, h / 2, label, f, SOFT, "m")
+    f = F(NM, 44); w = int(tw(f, label)) + 70; h = 76
+    base = rr(w, h, 38, (26, 15, 52, 200)); d = ImageDraw.Draw(base); put(d, w / 2, h / 2, label, f, SOFT, "m")
     return shadow_wrap(base, 8, 4, 60, 14)
 
 def image_card(path, wd, crop=None, ring=TEAL):
@@ -224,9 +228,11 @@ def slam_sprite():
 # ======================= elemen & animasi =======================
 class El:
     def __init__(s, spr, cx, cy, t0, t1, enter=0.35, ex=0.12, c=1.1, fs=0.6, shake=None, sfx="pop",
-                 fn=None, size=None, margin=0, face_ok=False):
+                 fn=None, size=None, margin=0, face_ok=False, a0=0.0, mode="pop"):
         s.spr, s.cx, s.cy, s.t0, s.t1, s.enter, s.ex, s.c, s.fs, s.shake, s.sfx, s.fn = spr, cx, cy, t0, t1, enter, ex, c, fs, shake, sfx, fn
         s.margin = margin
+        s.a0, s.mode = a0, mode
+        if mode != "pop" and fs == 0.6: s.fs = 0.9
         if isinstance(spr, tuple): s.spr, s.margin = spr
         s.size = size or (s.spr.size if s.spr is not None else None)
 
@@ -235,13 +241,15 @@ class El:
     def draw(s, fr, t):
         if t < s.t0 or t >= s.t1: return
         spr = s.fn(t) if s.fn else s.spr
-        a = clamp((t - s.t0) / s.enter * 2.5); sc = s.fs + (1 - s.fs) * out_back((t - s.t0) / s.enter, s.c)
+        a = max(s.a0, clamp((t - s.t0) / s.enter * 2.5)); sc = s.fs + (1 - s.fs) * out_back((t - s.t0) / s.enter, s.c)
         if t > s.t1 - s.ex:
             x = (s.t1 - t) / s.ex; a = min(a, x); sc *= 0.93 + 0.07 * x
         dx = dy = 0
         if s.shake:
             st, du, am = s.shake; u = (t - st) / du
             if 0 <= u < 1: dx, dy = am * math.sin(90 * (t - st)) * (1 - u), am * math.cos(70 * (t - st)) * (1 - u)
+        mv = {"up": (0, 70), "down": (0, -50), "left": (-150, 0), "right": (150, 0)}.get(s.mode)
+        if mv: o = 1 - out_cubic((t - s.t0) / s.enter); dx += mv[0] * o; dy += mv[1] * o
         if abs(sc - 1) > 0.003: spr = spr.resize((max(1, int(spr.width * sc)), max(1, int(spr.height * sc))), Image.BILINEAR)
         if a < 0.999: spr = spr.copy(); spr.putalpha(spr.getchannel("A").point(lambda v: int(v * a)))
         fr.paste(spr, (int(s.cx - spr.width / 2 + dx), int(s.cyv(t) - spr.height / 2 + dy)), spr)
@@ -260,96 +268,103 @@ def layout_at(t):
 CX = 510  # pusat safe-area x 60..960
 
 # ---------- HOOK ----------
-add(slam_sprite(), CX, 372, 0.0, 2.35, enter=0.16, c=0.6, fs=1.55, shake=(0.0, 0.28, 8), sfx="slam")
+add(slam_sprite(), CX, 372, 0.0, 2.35, enter=0.16, c=0.6, fs=1.22, shake=(0.0, 0.28, 8), sfx="slam", a0=1.0)
 for kind, t, x in (("lobak", 0.0, 210), ("goji", 1.56, 410), ("bunga", 2.46, 610), ("avokado", 3.18, 810)):
     add(badge(kind, 140), x, 1285, t, 11.20, margin=10)
 
 # ---------- LOBAK (11.36–24.36) ----------
-add(card_title("lobak", "LOBAK", "MERAH"), CX, 575, 11.45, 14.50)
-add(card_conv(), CX, 575, 14.55, 21.40)
-add(source_chip("Klarity Health"), CX, 292, 15.20, 19.60)
-add(card_chips_label("vitamin A juga penting untuk"), CX, 470, 21.45, 24.25)
-add(chip("pertumbuhan", 50, wmin=560), CX, 575, 21.52, 24.25)
-add(chip("sistem imun", 50, wmin=560), CX, 705, 22.80, 24.25)
+add(card_title("lobak", "LOBAK", "MERAH"), CX, 590, 11.45, 14.50, mode="up")
+add(card_conv(), CX, 590, 14.55, 21.40, mode="up")
+add(source_chip("Klarity Health"), CX, 292, 15.20, 19.60, mode="down")
+add(card_chips_label("vitamin A juga penting untuk"), CX, 450, 21.45, 24.25, mode="up")
+add(chip("pertumbuhan", 64, wmin=720), CX, 600, 21.52, 24.25, mode="left")
+add(chip("sistem imun", 64, wmin=720), CX, 760, 22.80, 24.25, mode="right")
 
 # ---------- GOJI (24.36–34.46) ----------
-add(card_title("goji", "GOJI", None, sub="dalam perubatan tradisional Cina"), CX, 575, 24.95, 28.30)
+add(card_title("goji", "GOJI", None, sub="dalam perubatan tradisional Cina"), CX, 590, 24.95, 28.30, mode="up")
 
 def counter_fn(t):
     n = int(2000 * out_cubic((t - 28.40) / 0.55)); txt = f"{n:,}" + ("+" if n >= 2000 else "")
-    w, h = 840, 420; base = rr(w, h, 40, CARD, TEAL, 3); d = ImageDraw.Draw(base)
-    f = F(MX, 170); full = "2,000+"
-    wb = tw(f, full); x0 = w / 2 - wb / 2
-    d.rounded_rectangle([x0 - 30, 70, x0 + wb + 30, 250], 36, fill=TEAL)
-    put(d, w / 2, 160, txt, f, INK, "m")
-    put(d, w / 2, 328, "tahun", F(MB, 66), WHITE, "m")
-    bg = badge("goji", 76); base.alpha_composite(bg, (w - 76 - 40, 14))
+    w, h = 840, 500; base = rr(w, h, 42, CARD, TEAL, 3); d = ImageDraw.Draw(base)
+    full = "2,000+"; size = 210
+    while tw(F(MX, size), full) > 690: size -= 4
+    f = F(MX, size); wb = tw(f, full); x0 = w / 2 - wb / 2; cy = 190
+    d.rounded_rectangle([x0 - 36, cy - size * 0.68, x0 + wb + 36, cy + size * 0.68], 40, fill=TEAL)
+    put(d, w / 2, cy, txt, f, INK, "m")
+    put(d, w / 2, 410, "tahun", F(MB, 84), WHITE, "m")
+    bg = badge("goji", 100); base.alpha_composite(bg, (w - 100 - 26, 12))
     return shadow_wrap(base)[0]
-add(None, CX, 575, 28.40, 31.45, enter=0.2, c=0.8, fn=counter_fn, size=(840, 420), shake=(28.95, 0.28, 7), sfx="tick")
-add(source_chip("News-Medical"), CX, 292, 29.80, 33.20)
-add(card_chips_label("dalam kajian:"), CX, 470, 31.50, 34.42)
-add(chip("antioksidan", 50, wmin=560), CX, 575, 31.58, 34.42)
-add(chip("imun", 50, wmin=560), CX, 705, 33.62, 34.42)
+add(None, CX, 590, 28.40, 31.45, enter=0.2, c=0.8, fn=counter_fn, size=(840, 500), shake=(28.95, 0.28, 7), sfx="tick")
+add(source_chip("News-Medical"), CX, 292, 29.80, 33.20, mode="down")
+add(card_chips_label("dalam kajian:"), CX, 450, 31.50, 34.42, mode="up")
+add(chip("antioksidan", 64, wmin=720), CX, 600, 31.58, 34.42, mode="left")
+add(chip("imun", 64, wmin=720), CX, 760, 33.62, 34.42, mode="right")
 
 # ---------- AVOKADO (34.62–43.18) ----------
 TILES = [240, 420, 600, 780]
-LAND = [40.40, 40.70, 41.00, 41.30]
+LAND = [40.45, 40.75, 41.05, 41.35]
+DROP = 0.8
 def avo_fn(t):
-    w, h = 840, 560; im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-    im.alpha_composite(badge("avokado", 190), (w // 2 - 105, 0))
-    f = F(MX, 60); wt = tw(f, "AVOKADO")
-    d.rounded_rectangle([w / 2 - wt / 2 - 24, 222, w / 2 + wt / 2 + 24, 302], 22, fill=TEAL); put(d, w / 2, 262, "AVOKADO", f, INK, "m")
-    if t >= 39.75:
-        s = clamp((t - 39.75) / 0.3); ft = F(MX, 62)
+    w, h = 840, 600; im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    im.alpha_composite(badge("avokado", 210), (w // 2 - 115, 0))
+    f = F(MX, 76); wt = tw(f, "AVOKADO")
+    d.rounded_rectangle([w / 2 - wt / 2 - 28, 240, w / 2 + wt / 2 + 28, 330], 26, fill=TEAL); put(d, w / 2, 285, "AVOKADO", f, INK, "m")
+    if t >= 39.45:
+        s_ = clamp((t - 39.45) / 0.3); ft = F(MX, 76)
         for i, (cx, tl) in enumerate(zip(TILES, LAND)):
             lit = t >= tl
             sc = 1 + (0.14 * math.sin(math.pi * clamp((t - tl) / 0.25)) if lit else 0)
-            half = int(52 * sc * (0.5 + 0.5 * s))
-            d.rounded_rectangle([cx - half, 400 - half, cx + half, 400 + half], 20, fill=TEAL if lit else (26, 15, 52, 235), outline=TEAL, width=4)
-            put(d, cx, 400, "ADEK"[i], ft, INK if lit else TEAL, "m")
-            u = (t - (tl - 0.55)) / 0.55
+            half = int(60 * sc * (0.5 + 0.5 * s_))
+            d.rounded_rectangle([cx - half, 440 - half, cx + half, 440 + half], 22, fill=TEAL if lit else (26, 15, 52, 235), outline=TEAL, width=4)
+            put(d, cx, 440, "ADEK"[i], ft, INK if lit else TEAL, "m")
+            u = (t - (tl - DROP)) / DROP
             if 0 <= u < 1:
-                x = 420 + (cx - 420) * (0.35 * u + 0.65 * u * u); y = 205 + (352 - 205) * u * u
-                d.polygon([(x, y - 22), (x - 11, y + 4), (x, y + 12), (x + 11, y + 4)], fill=(255, 206, 70))
-                d.ellipse([x - 11, y - 2, x + 11, y + 20], fill=(255, 206, 70))
-        f2 = F(NB, 36); put(d, w / 2, 500, "vitamin larut lemak", f2, SOFT, "m")
+                x = 420 + (cx - 420) * (0.35 * u + 0.65 * u * u); y = 225 + (372 - 225) * u * u
+                d.polygon([(x, y - 34), (x - 17, y + 6), (x, y + 18), (x + 17, y + 6)], fill=(255, 206, 70))
+                d.ellipse([x - 17, y - 2, x + 17, y + 32], fill=(255, 206, 70))
+        put(d, w / 2, 556, "vitamin larut lemak", F(NB, 44), SOFT, "m")
     return im
-add(None, CX, 620, 35.00, 43.08, fn=avo_fn, size=(840, 560), sfx="pop")
-add(source_chip("Berita Harian 2019"), CX, 292, 36.20, 39.70)
+add(None, CX, 640, 35.00, 43.08, fn=avo_fn, size=(840, 600), sfx="pop", mode="up")
+add(source_chip("Berita Harian 2019"), CX, 292, 36.20, 39.70, mode="down")
 
 # ---------- EYEBRIGHT (43.2–55.4) ----------
-add(card_title("bunga", "EYEBRIGHT", None, sub="bunga Eropah"), CX, 505, 43.90, 55.40)
-add(source_chip("Planta Medica 2023"), CX, 292, 45.90, 49.20)
-add(source_chip("Christopher Hobbs"), CX, 292, 50.10, 53.60)
-add(card_chips_label("KEGUNAAN TRADISIONAL"), CX, 700, 48.75, 55.40)
-_cm, _cs, _ca = chip("mata", 48, wmin=200), chip("selsema", 48, wmin=200), chip("alahan", 48, wmin=200)
-_wm, _ws, _wa = _cm[0].width, _cs[0].width, _ca[0].width; _gap = 10
+add(card_title("bunga", "EYEBRIGHT", None, sub="bunga Eropah"), CX, 525, 43.90, 55.40, mode="up")
+add(source_chip("Planta Medica 2023"), CX, 292, 45.90, 49.20, mode="down")
+add(source_chip("Christopher Hobbs"), CX, 292, 50.10, 53.60, mode="down")
+add(card_chips_label("KEGUNAAN TRADISIONAL"), CX, 740, 48.75, 55.40, mode="up")
+_cm, _cs, _ca = chip("mata", 52, padx=34, wmin=210), chip("selsema", 52, padx=34, wmin=210), chip("alahan", 52, padx=34, wmin=210)
+_wm, _ws, _wa = _cm[0].width, _cs[0].width, _ca[0].width; _gap = 4
 _x0 = CX - (_wm + _ws + _wa + 2 * _gap) / 2
-add(_cm, _x0 + _wm / 2, 810, 48.95, 55.40)
-add(_cs, _x0 + _wm + _gap + _ws / 2, 810, 53.65, 55.40)
-add(_ca, _x0 + _wm + _ws + 2 * _gap + _wa / 2, 810, 54.85, 55.40)
+add(_cm, _x0 + _wm / 2, 850, 48.95, 55.40, mode="left")
+add(_cs, _x0 + _wm + _gap + _ws / 2, 850, 53.65, 55.40, mode="up")
+add(_ca, _x0 + _wm + _ws + 2 * _gap + _wa / 2, 850, 54.85, 55.40, mode="right")
 
 # ---------- PRODUK (55.62–65.94) ----------
-add(image_card("projects/eyecare/assets/box_packshot.png", 760), CX, 1090, 56.40, 61.70)
-add(image_card("projects/eyecare/assets/hologram_real.png", 700, crop=(14, 4, 396, 186)), CX, 1090, 61.70, T_SKIP0 - 0.05)
+add(image_card("projects/eyecare/assets/box_packshot.png", 620), CX, 1075, 56.40, 61.70, mode="up")
+add(image_card("projects/eyecare/assets/hologram_real.png", 620, crop=(14, 4, 396, 186)), CX, 1078, 61.70, T_SKIP0 - 0.05, fs=0.75, c=0.9)
 for kind, t, x in (("lobak", 57.50, CX - 216), ("goji", 57.72, CX - 72), ("bunga", 57.94, CX + 72), ("avokado", 58.16, CX + 216)):
-    add(badge(kind, 100), x, 1340, t, 60.80, margin=10)
-add(mal_chip(), CX, 1340, 60.90, 63.35)
-add(claim_chip(), CX, 1335, 63.40, T_SKIP0 - 0.05)
+    add(badge(kind, 100), x, 1290, t, 60.80, margin=10)
+add(mal_chip(), CX, 1290, 60.90, 63.35, mode="right")
+add(claim_chip(), CX, 1295, 63.40, T_SKIP0 - 0.05, mode="left")
 
 # ---------- END CARD ----------
-add(image_card("projects/eyecare/assets/box_packshot.png", 820), CX, 640, T_END + 0.05, DUR + 1, enter=0.4)
-def _line(text, font, cy, kw=None):
-    w, h = 900, 150; im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+def _line(text, fname, size, kw=None, maxw=860):
     if kw:
-        a, b = text, kw; f = font; tot = tw(f, a + " ") + tw(f, b) + 44; x = w / 2 - tot / 2
-        put(d, x, h / 2, a + " ", f, WHITE, "l"); kwbox(d, x + tw(f, a + " ") + 22, h / 2, b, f, "l")
-    else: put(d, w / 2, h / 2, text, font, WHITE, "m")
+        while tw(F(fname, size), text + " ") + tw(F(fname, size), kw) + 44 > maxw: size -= 4
+    else:
+        while tw(F(fname, size), text) > maxw: size -= 2
+    f = F(fname, size); w, h = 900, int(size * 1.7); im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    if kw:
+        tot = tw(f, text + " ") + tw(f, kw) + 44; x = w / 2 - tot / 2
+        put(d, x, h / 2, text + " ", f, WHITE, "l"); kwbox(d, x + tw(f, text + " ") + 22, h / 2, kw, f, "l")
+    else: put(d, w / 2, h / 2, text, f, WHITE, "m")
     return im
-add(_line("EYE", F(MX, 120), 0, kw="CARE"), CX, 1000, T_END + 0.12, DUR + 1, enter=0.35, c=0.6, fs=1.4, shake=(T_END + 0.12, 0.25, 7), sfx="slam", size=(900, 150))
-add(chip("MAL22076147T", 40, font=NB, wmin=0), CX, 1130, T_END + 0.30, DUR + 1)
-add(_line("Digunakan secara tradisional untuk kesihatan mata", F(NM, 33), 0), CX, 1235, T_END + 0.40, DUR + 1, size=(900, 150))
-add(_line("Fakta bahan, bukan tuntutan produk.", F(NM, 30), 0), CX, 1300, T_END + 0.50, DUR + 1, size=(900, 150))
+add(image_card("projects/eyecare/assets/box_packshot.png", 848), CX, 600, T_END + 0.05, DUR + 1, enter=0.4, mode="up")
+add(_line("EYE", MX, 150, kw="CARE"), CX, 950, T_END + 0.12, DUR + 1, enter=0.35, c=0.6, fs=1.4, shake=(T_END + 0.12, 0.25, 7), sfx="slam")
+add(chip("MAL22076147T", 46, font=NB), CX, 1095, T_END + 0.30, DUR + 1, mode="up")
+add(_line("Digunakan secara tradisional", NM, 40), CX, 1200, T_END + 0.40, DUR + 1, mode="up")
+add(_line("untuk kesihatan mata", NM, 40), CX, 1250, T_END + 0.44, DUR + 1, mode="up")
+add(_line("Fakta bahan, bukan tuntutan produk.", NM, 34), CX, 1335, T_END + 0.55, DUR + 1, mode="up")
 
 # ======================= kapsyen =======================
 def load_tokens():
@@ -427,18 +442,26 @@ def gradient(w, h, c0, c1):
     t = np.linspace(0, 1, h)[:, None, None]; a = np.array(c0)[None, None, :] * (1 - t) + np.array(c1)[None, None, :] * t
     return Image.fromarray(np.repeat(a, w, axis=1).astype(np.uint8), "RGB")
 
-def deco(im, seed):
-    ov = Image.new("RGBA", im.size, (0, 0, 0, 0)); d = ImageDraw.Draw(ov); rng = np.random.RandomState(seed)
-    for _ in range(7):
-        x, y, r = rng.randint(0, im.width), rng.randint(0, im.height), rng.randint(60, 220)
-        d.ellipse([x - r, y - r, x + r, y + r], fill=(123, 203, 205, 14))
-    cx, cy = im.width - 40, 70
-    for k in range(14):
-        a = math.radians(95 + k * 6); l0, l1 = 120, 120 + 150 + (k % 3) * 60
-        d.line([cx + l0 * math.cos(a), cy + l0 * math.sin(a), cx + l1 * math.cos(a), cy + l1 * math.sin(a)], fill=(123, 203, 205, 70), width=7)
-    im.paste(ov, (0, 0), ov); return im
-PANEL = deco(gradient(W, 1056, PURPLE, DEEP), 3)
-ENDBG = deco(gradient(W, H, PURPLE, DEEP), 9)
+def _bubble(r, col, a):
+    im = Image.new("RGBA", (2 * r, 2 * r), (0, 0, 0, 0)); ImageDraw.Draw(im).ellipse([0, 0, 2 * r - 1, 2 * r - 1], fill=col + (a,))
+    return im.filter(ImageFilter.GaussianBlur(r * 0.16))
+LAV = (150, 110, 220)
+BUBS = [(_bubble(170, TEAL, 40), 180, 300, 0.30, 0.21, 0.0), (_bubble(240, LAV, 46), 820, 700, 0.17, 0.25, 1.7),
+        (_bubble(130, TEAL, 32), 620, 150, 0.35, 0.15, 3.1), (_bubble(200, LAV, 38), 120, 900, 0.22, 0.19, 4.4),
+        (_bubble(180, TEAL, 34), 900, 1300, 0.20, 0.23, 2.2), (_bubble(260, LAV, 42), 200, 1650, 0.16, 0.18, 5.0)]
+_fan = Image.new("RGBA", (900, 900), (0, 0, 0, 0)); _fd = ImageDraw.Draw(_fan)
+for k in range(24):
+    a = math.radians(k * 15); l1 = 330 + (k % 3) * 70
+    _fd.line([450 + 150 * math.cos(a), 450 + 150 * math.sin(a), 450 + l1 * math.cos(a), 450 + l1 * math.sin(a)], fill=(123, 203, 205, 84), width=9)
+GRAD = {1056: gradient(W, 1056, PURPLE, DEEP), H: gradient(W, H, PURPLE, DEEP)}
+def bg_frame(t, h):
+    im = GRAD[h].copy()
+    for spr, x, y, s1, s2, ph in BUBS:
+        if y > h: continue
+        im.paste(spr, (int(x - spr.width / 2 + 70 * math.sin(t * s1 + ph)), int(y - spr.height / 2 + 50 * math.cos(t * s2 + ph))), spr)
+    fan = _fan.rotate(10 * math.sin(t * 0.25), resample=Image.BILINEAR)
+    im.paste(fan, (W - 70 - 450, 70 - 450), fan)
+    return im
 
 def seg_prog(t, a, b): return clamp((t - a) / (b - a))
 def punch_mul(t):
@@ -455,7 +478,7 @@ def window(x0, y0, ww, hw, mx, my):
 
 def base_frame(src, t):
     lay = layout_at(t)
-    if lay == "end": return ENDBG.copy()
+    if lay == "end": return bg_frame(t, H)
     if lay == "full":
         a, b = (0, T_SPLIT0) if t < T_SPLIT0 else (T_FULL1, T_END)
         s = 1.15 * (1 + 0.035 * seg_prog(t, a, b)) * punch_mul(t)
@@ -463,11 +486,11 @@ def base_frame(src, t):
         yo = 700 if t < T_SPLIT0 else 640  # beat 6: muka lebih tinggi, ruang untuk kad kotak
         box = window(FACE[0] - 540 / s, FACE[1] - yo / s, ww, hw, W, H)
         return src.resize((W, H), Image.BILINEAR, box=box)
-    s = 1.0 * (1 + 0.035 * seg_prog(t, T_SPLIT0, T_FULL1))
+    s = 1.1 * (1 + 0.035 * seg_prog(t, T_SPLIT0, T_FULL1))
     ww, hw = W / s, 864 / s
     box = window(FACE[0] - 540 / s, FACE[1] - 230 / s, ww, hw, W, H)
-    fr = PANEL.copy().crop((0, 0, W, 1056)); full = Image.new("RGB", (W, H))
-    full.paste(PANEL, (0, 0)); full.paste(src.resize((W, 864), Image.BILINEAR, box=box), (0, 1056))
+    full = Image.new("RGB", (W, H))
+    full.paste(bg_frame(t, 1056), (0, 0)); full.paste(src.resize((W, 864), Image.BILINEAR, box=box), (0, 1056))
     ImageDraw.Draw(full).rectangle([0, 1053, W, 1059], fill=TEAL)
     return full
 
