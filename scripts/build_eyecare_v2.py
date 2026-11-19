@@ -63,6 +63,45 @@ def src2(text):
     f = font(NOTO6, 36); w = int(f.getlength(text)) + 64; h = 66
     im = rr(w, h, 33, (24, 14, 52, 215), (255, 255, 255, 170), 2); ImageDraw.Draw(im).text((32, h // 2 + 1), text, font=f, fill=(255, 255, 255, 255), anchor="lm"); return im
 
+
+# ------------------------------------------------------------------ bahan rujukan sebenar (foto bahan + petikan akhbar yang dibekalkan pengguna)
+REF = os.path.join(ROOT, "assets/ref/")
+@functools.lru_cache(None)
+def ref(name): return Image.open(REF + name).convert("RGB")
+def cover(img, w, h, fx, fy, zoom=1.0):
+    iw, ih = img.size; sc = max(w / iw, h / ih) * zoom; cw, ch = w / sc, h / sc
+    x0 = min(max(fx * iw - cw / 2, 0), iw - cw); y0 = min(max(fy * ih - ch / 2, 0), ih - ch)
+    return img.resize((w, h), Image.LANCZOS, box=(x0, y0, x0 + cw, y0 + ch))
+PHOTO = {"carrot": ("carrot.webp", 0.45, 0.62, 1.7), "avocado": ("avocado.webp", 0.52, 0.58, 1.5), "goji": ("goji.webp", 0.62, 0.45, 1.3), "eyebright": ("eyebright.jpg", 0.50, 0.40, 1.15)}
+def circ_photo(name, d):
+    f, fx, fy, z = PHOTO[name]; im = cover(ref(f), d, d, fx, fy, z).convert("RGBA")
+    m = Image.new("L", (d * 3, d * 3), 0); ImageDraw.Draw(m).ellipse((0, 0, d * 3 - 1, d * 3 - 1), fill=255); im.putalpha(m.resize((d, d), Image.LANCZOS)); return im
+@functools.lru_cache(None)
+def node_photo_sprite(name, r):
+    D = 2 * r + 16; im = Image.new("RGBA", (D, D), (0, 0, 0, 0))
+    sh = Image.new("RGBA", (D, D), (0, 0, 0, 0)); ImageDraw.Draw(sh).ellipse((8, 14, D - 8, D - 2), fill=(0, 0, 0, 70)); im.alpha_composite(sh.filter(ImageFilter.GaussianBlur(7)))
+    k = 3; c = Image.new("RGBA", (D * k, D * k), (0, 0, 0, 0)); ImageDraw.Draw(c).ellipse((8 * k, 8 * k, (D - 8) * k, (D - 8) * k), fill=(255, 255, 255, 255))
+    im.alpha_composite(c.resize((D, D), Image.LANCZOS)); ph = circ_photo(name, 2 * r - 12); im.alpha_composite(ph, (D // 2 - ph.width // 2, D // 2 - ph.height // 2)); return im
+@functools.lru_cache(None)
+def tile_sprite(name, label, tag, mg):
+    w, h = 205, 215; im = rr(w, h, 26, (255, 255, 255, 250))
+    f, fx, fy, z = PHOTO[name]; ph = cover(ref(f), w, 112, fx, fy, z).convert("RGBA")
+    m = Image.new("L", (w * 3, 112 * 3), 0); ImageDraw.Draw(m).rounded_rectangle((0, 0, w * 3 - 1, 112 * 3 + 80), 26 * 3, fill=255); ph.putalpha(m.resize((w, 112), Image.LANCZOS)); im.alpha_composite(ph, (0, 0))
+    d = ImageDraw.Draw(im); d.text((w / 2, 134), label, font=font(MONT7, 24), fill=v1.PURPLE_DARK + (255,), anchor="mm")
+    d.text((w / 2, 168), mg, font=font(MONT9, 38), fill=v1.PURPLE + (255,), anchor="mm"); d.text((w / 2, 199), tag, font=font(NOTO6, 20), fill=(110, 100, 140, 255), anchor="mm"); return im
+@functools.lru_cache(None)
+def article_sprite():
+    from PIL import ImageChops
+    b1, b3 = ref("bh1.png"), ref("bh3.png")
+    logo = b1.crop((515, 205, 700, 375)); head = b1.crop((40, 575, 905, 800)); date = b1.crop((40, 925, 500, 990)); q = b3.crop((30, 1995, 1140, 2155)).convert("RGB")
+    hl = Image.new("RGB", q.size, (255, 255, 255)); ImageDraw.Draw(hl).rounded_rectangle((14, 83, 482, 153), 14, fill=TEAL)   # serlah "menyerap lemak larut"
+    q = ImageChops.multiply(q, hl)
+    sz = lambda im, k: im.resize((int(im.width * k), int(im.height * k)), Image.LANCZOS)
+    logo, head, date, q = sz(logo, 0.47), sz(head, 0.47), sz(date, 0.56), sz(q, 0.76)
+    W2, H2 = 880, 302; card = rr(W2, H2, 30, (255, 255, 255, 252)).convert("RGBA")
+    card.alpha_composite(logo.convert("RGBA"), (22, 16)); card.alpha_composite(head.convert("RGBA"), (122, 14)); card.alpha_composite(date.convert("RGBA"), (122, 124))
+    card.alpha_composite(q.convert("RGBA"), (18, 168)); av = circ_photo("avocado", 108); card.alpha_composite(av, (W2 - 108 - 36, 22)); return card
+
 # ------------------------------------------------------------------ latar
 @functools.lru_cache(None)
 def bg_base():
@@ -110,8 +149,11 @@ def draw_bg_elements(cv, t, R):
         if k == "ghost": ghost(cv, t, e)
         elif k == "icon": paste(cv, svg_png(e["name"], e["size"]), e["cx"], e["cy"] + 5 * math.sin((t - e["t0"]) * 3), s, a, R)
         elif k == "tracker": paste(cv, tracker_sprite(e["step"], e["title"]), 510, 300, 1.0, fade(t, e["t0"], e["t1"], 0.15, 0.10), R)
+        elif k == "photoicon": paste(cv, node_photo_sprite(e["name"], e["d"] // 2), e["cx"], e["cy"] + 5 * math.sin((t - e["t0"]) * 3), s, a, R)
+        elif k == "tile": paste(cv, tile_sprite(e["name"], e["label"], e["tag"], e["mg"]), e["cx"], e["cy"], s, a, R)
+        elif k == "article": paste(cv, article_sprite(), e["cx"], e["cy"], s, a, R)
         elif k == "node":
-            r = e["r"]; paste(cv, node_sprite(e["icon"], r), e["cx"], e["cy"], s, a, R)
+            r = e["r"]; paste(cv, node_photo_sprite(e["icon"][:-6], r) if e["icon"].endswith("_photo") else node_sprite(e["icon"], r), e["cx"], e["cy"], s, a, R)
             a2, s2 = anim(t, e["t0"] + 0.10, e["t1"]); paste(cv, label2(e["label"]), e["cx"], e["cy"] + r + 42, s2, a2, R)
         elif k == "line":
             p = eo((t - e["t0"]) / 0.35); lay, (ox, oy) = line_layer(e["pts"], p); paste_layer(cv, lay, ox, oy, fade(t, e["t0"], e["t1"]), R)

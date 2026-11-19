@@ -10,3 +10,4 @@ output/*
 *.mp3
 work/
 __pycache__/
+assets/ref/

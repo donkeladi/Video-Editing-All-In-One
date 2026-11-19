@@ -6,14 +6,14 @@ ELEMENTS = [
  dict(id="g_carrot", kind="ghost", name="carrot", t0=0.0, t1=19.0, gx=870, gy=1180, ang=-28),
  dict(id="g_oil", kind="ghost", name="droplet", t0=19.0, t1=30.44, gx=540, gy=1130, ang=0),
  dict(id="g_avo", kind="ghost", name="avocado", t0=30.44, t1=43.2, gx=250, gy=1200, ang=14),
- dict(id="carrot_hook", kind="icon", name="carrot", t0=1.44, t1=4.20, cx=872, cy=760, size=190),
+ dict(id="carrot_hook", kind="photoicon", name="carrot", t0=1.44, t1=4.20, cx=850, cy=760, d=190),
  dict(id="trk1", kind="tracker", step=1, title="BETA-KAROTIN", t0=4.32, t1=19.00),
  dict(id="trk2a", kind="tracker", step=2, title="LARUT LEMAK", t0=19.00, t1=21.30),
  dict(id="trk2b", kind="tracker", step=2, title="LARUT LEMAK", t0=23.40, t1=30.44),
  dict(id="trk3", kind="tracker", step=3, title="LEMAK BAIK", t0=30.44, t1=43.20),
  dict(id="trk4", kind="tracker", step=4, title="KANDUNGAN", t0=43.28, t1=50.94),
  # bab 1
- dict(id="n_carrot", kind="node", icon="carrot", cx=N1, cy=NY, r=R, label="lobak merah", t0=5.90, t1=17.90),
+ dict(id="n_carrot", kind="node", icon="carrot_photo", cx=N1, cy=NY, r=R, label="lobak merah", t0=5.90, t1=17.90),
  dict(id="a1", kind="line", pts=[(298, NY), (382, NY)], t0=7.15, t1=17.90),
  dict(id="n_beta", kind="node", icon="particle", cx=N2, cy=NY, r=R, label="beta-karotin", t0=7.40, t1=17.90),
  dict(id="a2", kind="line", pts=[(598, NY), (682, NY)], t0=10.55, t1=17.90),
@@ -31,17 +31,21 @@ ELEMENTS = [
  dict(id="t_masak", kind="tag", text="dimasak", cx=720, cy=655, t0=27.90, t1=30.44),
  dict(id="src_msd", kind="src", text="Sumber: MSD Manual (versi Indonesia)", t0=23.98, t1=28.60),
  # bab 3
- dict(id="n_avo", kind="node", icon="avocado", cx=N1, cy=NY, r=R, label="avokado", t0=30.44, t1=43.20),
- dict(id="a3", kind="line", pts=[(298, NY), (382, NY)], t0=33.05, t1=43.20),
- dict(id="n_baik", kind="node", icon="droplet", cx=N2, cy=NY, r=R, label="lemak baik", t0=33.32, t1=43.20),
- dict(id="a4", kind="line", pts=[(598, NY), (682, NY)], t0=36.75, t1=43.20),
- dict(id="n_serap", kind="node", icon="oilparticle", cx=N3, cy=NY, r=R, label="serap lemak larut", t0=37.06, t1=43.20),
- dict(id="src_bh", kind="src", text="Sumber: Berita Harian 2019", t0=34.80, t1=38.90),
- # bab 4
- dict(id="product", kind="photo", name="front", t0=43.82, t1=50.94, cx=232, cy=495, h=230),
- dict(id="chip_mal", kind="chipS", text="MAL22076147T", t0=47.00, t1=50.94, cx=232, cy=655),
- dict(id="ing_carrot", kind="ing2", icon="carrot", name="Lobak merah", tag="serbuk", mg="60mg", cx=555, cy=495, t0=45.18, t1=50.94),
- dict(id="ing_avo", kind="ing2", icon="avocado", name="Avokado", tag="ekstrak", mg="15mg", cx=825, cy=495, t0=46.48, t1=50.94),
+ dict(id="n_avo", kind="node", icon="avocado_photo", cx=N1, cy=NY, r=R, label="avokado", t0=30.44, t1=38.80),
+ dict(id="a3", kind="line", pts=[(298, NY), (382, NY)], t0=33.05, t1=38.80),
+ dict(id="n_baik", kind="node", icon="droplet", cx=N2, cy=NY, r=R, label="lemak baik", t0=33.32, t1=38.80),
+ dict(id="a4", kind="line", pts=[(598, NY), (682, NY)], t0=36.75, t1=38.80),
+ dict(id="n_serap", kind="node", icon="oilparticle", cx=N3, cy=NY, r=R, label="serap lemak larut", t0=37.06, t1=38.80),
+ dict(id="src_bh", kind="src", text="Sumber: Berita Harian 2019", t0=34.80, t1=43.20),
+ dict(id="article", kind="article", t0=38.84, t1=43.20, cx=510, cy=498),
+ # bab 4: produk + kandungan pada label (foto bahan dibekalkan pengguna)
+ dict(id="product", kind="photo", name="front", t0=43.82, t1=50.94, cx=210, cy=790, h=190),
+ dict(id="chip_mal", kind="chipS", text="MAL22076147T", t0=47.00, t1=50.94, cx=210, cy=915),
+ dict(id="tile_carrot", kind="tile", name="carrot", label="Lobak merah", tag="serbuk", mg="60mg", cx=184, cy=465, t0=45.18, t1=50.94),
+ dict(id="tile_avo", kind="tile", name="avocado", label="Avokado", tag="ekstrak", mg="15mg", cx=402, cy=465, t0=46.48, t1=50.94),
+ dict(id="tile_goji", kind="tile", name="goji", label="Goji", tag="ekstrak", mg="50mg", cx=620, cy=465, t0=47.45, t1=50.94),
+ dict(id="tile_eye", kind="tile", name="eyebright", label="Eyebright", tag="ekstrak", mg="40mg", cx=838, cy=465, t0=47.75, t1=50.94),
+ dict(id="src_label", kind="src", text="Sumber: label produk", t0=45.18, t1=50.94),
  dict(id="endcard", kind="end2", t0=56.54, t1=DUR),
 ]
 def sfx_cues():
@@ -50,7 +54,7 @@ def sfx_cues():
     for T in ZOOM_THROUGH: c.append((T - 0.15, "whoosh", -17))
     for e in ELEMENTS:
         k = e["kind"]
-        if k in ("icon", "photo", "scene2", "node", "pill2", "ing2", "end2"): c.append((e["t0"], "pop", -19))
+        if k in ("icon", "photoicon", "photo", "scene2", "node", "pill2", "ing2", "tile", "article", "end2"): c.append((e["t0"], "pop", -19))
         elif k in ("chipS", "src", "tag", "line"): c.append((e["t0"], "tick", -25))
     for t in FLASHES: c.append((t, "shimmer", -23))
     c.append((23.40, "sizzle", -31))

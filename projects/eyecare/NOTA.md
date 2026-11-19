@@ -11,3 +11,8 @@ Keputusan lalai (awak belum jawab): CTA lisan 52.72–56.54 TIDAK dikapsyen & ti
 - Render: scripts/build_eyecare_v2.py <video> work/render2 --workers 4 ; timeline: scripts/eyecare_timeline_v2.py ; audio sama (EYECARE_TIMELINE=eyecare_timeline_v2).
 - Penyampai skala 1.0 (anjak ke bawah 290px untuk ruang grafik); push 3.5% + 3 punch-in 12% kekal. Latar langsir diganti latar jenama.
 - Versi split (v1) kekal: output/eyecare_tiktok_9x16.mp4
+
+## v3 — bahan rujukan pengguna (output/eyecare_tiktok_9x16_v3.mp4)
+- Foto bahan (lobak merah, avokado, goji, eyebright) + petikan Berita Harian (27 Julai 2019) dibekalkan pengguna -> assets/ref/ (TIDAK di-commit: hak cipta pihak ketiga).
+- Nod lobak/avokado guna foto bulat; kad petikan akhbar (38.84–43.2s) dengan "menyerap lemak larut" diserlahkan (kotak teal); 4 jubin kandungan label (60/15/50/40mg) + chip "Sumber: label produk".
+- Pengesahan sumber: artikel BH 27/7/2019 "Avokado, kekal berat badan ideal" menyebut avokado "berupaya menyerap lemak larut" dan "kaya dengan lemak baik". Dakwaan mata/katarak/tekanan darah dalam artikel TIDAK digunakan.
