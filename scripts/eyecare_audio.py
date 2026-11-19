@@ -5,7 +5,8 @@ import sys, os, subprocess, wave
 import numpy as np
 from scipy.signal import lfilter, butter, fftconvolve
 sys.path.insert(0, os.path.dirname(__file__))
-from eyecare_timeline import *
+import importlib
+globals().update({k: v for k, v in vars(importlib.import_module(os.environ.get('EYECARE_TIMELINE', 'eyecare_timeline_v2'))).items() if not k.startswith('__')})
 SR = 44100; N = int(DUR * SR); rng = np.random.default_rng(7)
 db = lambda x: 10 ** (x / 20)
 
