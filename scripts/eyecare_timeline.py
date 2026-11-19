@@ -73,7 +73,7 @@ ELEMENTS = [
  dict(id="oil_scene", kind="particle", t0=23.40, t1=30.44, orbit=True, pan=True),
  dict(id="co_karot", kind="callout", text="karotenoid", cx=250, cy=400, target=(440, 462), t0=23.50, t1=30.44),
  dict(id="co_masak", kind="callout", text="dimasak", cx=795, cy=645, target=(690, 715), t0=27.90, t1=30.44),
- dict(id="co_minyak", kind="callout", text="sedikit minyak", cx=775, cy=400, target=(635, 460), t0=28.74, t1=30.44),
+ dict(id="co_minyak", kind="callout", text="minyak", cx=790, cy=400, target=(640, 462), t0=29.00, t1=30.44),
  dict(id="src_msd", kind="src", text="Sumber: MSD Manual (versi Indonesia)", t0=23.98, t1=28.60),
  # bab 3: avokado -> lemak baik -> serap lemak larut
  dict(id="n_avo", kind="node", icon="avocado", cx=N1, cy=540, r=95, label="avokado", t0=30.44, t1=43.20),
