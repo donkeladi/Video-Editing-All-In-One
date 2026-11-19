@@ -65,7 +65,13 @@ def paste(canvas, spr, cx, cy, a=1.0, sc=1.0):
     if abs(sc - 1) > 0.004:
         spr = spr.resize((max(1, int(spr.width * sc)), max(1, int(spr.height * sc))), Image.BILINEAR)
     spr = with_alpha(spr, a)
-    canvas.paste(spr, (int(cx - spr.width / 2), int(cy - spr.height / 2)), spr)
+    x, y = int(cx - spr.width / 2), int(cy - spr.height / 2)
+    if canvas.mode == "RGBA":
+        l, tp = max(0, x), max(0, y); r, b = min(canvas.width, x + spr.width), min(canvas.height, y + spr.height)
+        if r <= l or b <= tp: return
+        canvas.alpha_composite(spr.crop((l - x, tp - y, r - x, b - y)), (l, tp))
+    else:
+        canvas.paste(spr, (x, y), spr)
 
 def runs_sprite(words, kind="M", size=60, wght=800, color=WHITE, shadow=True, maxw=None, align="center", boxcolor=TEAL, boxtext=DEEP, line_gap=1.12):
     """words: list[(text, boxed)]. Kotak teal di belakang kata kunci = satu-satunya bentuk penekanan."""
@@ -247,6 +253,7 @@ def build_sprites():
     S["chip_mnt"] = pill("Sumber: Medical News Today")
     S["chip_na"] = pill("Sumber: Nutrition Advance")
     S["chip_lp"] = pill("Sumber: label produk")
+    S["bd"] = card_bg(900, 770, fill=DEEP, alpha=212, rad=40)
     S["card1"] = card_bg(880, 560)
     S["card2"] = card_bg(880, 470)
     # kapsyen
@@ -286,17 +293,17 @@ ZOOM_THROUGH = [3.9, 46.4, 71.6]
 PUNCH = [(11.82, "L2"), (22.52, "L2"), (47.00, "L1")]
 FLASH = [13.10, 47.00]
 L1_ZOOM = 1.15
-CAP_Y_L1, CAP_Y_L2 = 1400, 1445
+CAP_Y = 1458
 
 def seg_at(t):
     for a, b, k in SEGS:
         if a <= t < b: return a, b, k
     return SEGS[-1]
 
-def punch_mult(t, layout):
+def punch_mult(t, layout=None):
     m = 1.0
     for t0, lay in PUNCH:
-        if lay == layout and t0 - 0.0 <= t < t0 + 0.8:
+        if t0 <= t < t0 + 0.8:
             x = t - t0
             b = ease_out(x / 0.10) if x < 0.10 else (1.0 if x < 0.45 else 1 - ease_io((x - 0.45) / 0.35))
             m = max(m, 1 + 0.12 * b)
@@ -361,7 +368,7 @@ def draw_bowl(canvas, t):
                     rx = 30 + 190 * ease_out(u); ry = rx * 0.26
                     al = int(200 * (1 - u))
                     d.ellipse((x - rx, sy + 10 - ry, x + rx, sy + 10 + ry), outline=(255, 255, 255, al), width=4)
-    canvas.paste(layer, (0, 0), layer)
+    canvas.alpha_composite(layer)
     if t >= 7.65:
         a2, s2 = anim(t, 7.65, 8.15)
         paste(canvas, S["lbl_goji"], 540, 400, a2, s2)
@@ -374,6 +381,9 @@ def row_in(canvas, spr, t, t0, x, y, t1, gap=0.34):
 
 def draw_top(canvas, t):
     """Kandungan panel grafik L2 (koordinat skrin; selamat x60-960, y250-1500)."""
+    for (b0, b1) in BD_RANGES:
+        a, s = anim(t, b0, b1, din=0.4)
+        paste(canvas, S["bd"], 520, 665, a, s)
     draw_bowl(canvas, t)
     draw_timeline(canvas, t)
     # zeaxanthin / karotenoid
@@ -449,10 +459,11 @@ def draw_top(canvas, t):
         a, s = anim(t, t0, t1)
         if a > 0: paste(canvas, S[key], 520, 1000, a, s)
 
+BD_RANGES = [(3.9, 22.3), (48.95, 71.7), (CUT, TOTAL + 1)]
 SLAM1_T = (0.0, 2.3)
 SLAM2_T = (47.0, 48.9)
 def draw_slams(canvas, t):
-    for (t0, t1), keys, ys in (((0.0, 2.3), ("slam1a", "slam1b"), (1075, 1255)), ((47.0, 48.9), ("slam2",), (1110,))):
+    for (t0, t1), keys, ys in (((0.0, 2.3), ("slam1a", "slam1b"), (900, 1080)), ((47.0, 48.9), ("slam2",), (990,))):
         if not (t0 <= t < t1): continue
         x = t - t0
         sc = 1 + 0.15 * (1 - ease_out(x / 0.2)) if x < 0.2 else 1.0
@@ -470,30 +481,22 @@ def draw_caps(canvas, t, y):
             s = 0.9 + 0.1 * (s - 0.84) / 0.16 if s < 1 else s
             paste(canvas, spr, 540, y, a, s)
 
+GFX_SCALE, GFX_X, GFX_Y = 0.8, 108, 568   # grafik dalam koordinat lama -> zon y~750-1370 (bawah dagu)
 def render(k, src):
-    """src: PIL RGB 1080x1920 (bingkai sumber atau None)."""
+    """src: PIL RGB 1080x1920. Video utama penuh; semua grafik = overlay (tiada panel)."""
     t = k / FPS
     s0, s1, lay = seg_at(t)
     prog = clamp((t - s0) / (s1 - s0))
-    push = 1 + 0.035 * prog
-    if lay == "L1":
-        z = L1_ZOOM * push * punch_mult(t, "L1")
-        frame = view(src, z, (470, 585), (540, 700), W, H)
-        draw_slams(frame, t)
-        # kapsyen: elak bertindih dengan slam L1 (slam di y~950-1230, kapsyen y1400)
-        draw_caps(frame, t, CAP_Y_L1)
-    else:
-        frame = Image.new("RGB", (W, H))
-        frame.paste(S["panel"], (0, 0))
-        z = push * punch_mult(t, "L2") if lay == "L2" else (1 + 0.035 * prog)
-        pres = view(src, z, (470, 585), (520, 190), W, PRES_H)
-        frame.paste(pres, (0, PANEL_H))
-        # bayang halus pada sempadan
-        sh = Image.new("RGBA", (W, 26), (0, 0, 0, 0)); sd = ImageDraw.Draw(sh)
-        for i in range(26): sd.line((0, i, W, i), fill=(0, 0, 0, int(90 * (1 - i / 26) ** 2)))
-        frame.paste(sh, (0, PANEL_H), sh)
-        fr = frame.convert("RGBA"); draw_top(fr, t); frame = fr.convert("RGB")
-        if lay == "L2": draw_caps(frame, t, CAP_Y_L2)
+    base = {"L1": 1.18, "L2": 1.08, "END": 1.12}[lay]
+    z = base * (1 + 0.035 * prog) * punch_mult(t)
+    frame = view(src, z, (470, 585), (540, 500), W, H).convert("RGBA")
+    layer = Image.new("RGBA", (W, PANEL_H), (0, 0, 0, 0)); draw_top(layer, t)
+    if layer.getbbox():
+        lay2 = layer.resize((int(W * GFX_SCALE), int(PANEL_H * GFX_SCALE)), Image.LANCZOS)
+        frame.alpha_composite(lay2, (GFX_X, GFX_Y))
+    frame = frame.convert("RGB")
+    draw_slams(frame, t)
+    draw_caps(frame, t, CAP_Y)
     # zoom-through ~0.3s (0.15 keluar + 0.15 masuk)
     for tc in ZOOM_THROUGH:
         d = t - tc
