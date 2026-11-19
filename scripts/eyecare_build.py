@@ -21,8 +21,23 @@ WHITE = (255, 255, 255)
 LAV = (200, 190, 235)
 CARD = (112, 88, 176)
 
-CUT = 74.44                 # perkataan terakhir "sendiri" tamat ~74.42
-TOTAL = 78.04               # end card 3.6s selepas perkataan terakhir
+EDL = json.load(open(os.path.join(ROOT, "scripts/eyecare_edl.json")))
+CUTS = [tuple(c) for c in EDL["cuts"]]          # potongan gagap (masa sumber)
+REMOVED = sum(b - a for a, b in CUTS)
+CUT = EDL["cut_end"]        # perkataan terakhir "sendiri" tamat ~74.42 (masa sumber)
+TOTAL = CUT + EDL["tail"]   # masa sumber setara; end card 3.6s selepas perkataan terakhir
+TOTAL_O = TOTAL - REMOVED   # tempoh output sebenar
+
+def src2out(ts):
+    return ts - sum(min(max(ts - a, 0), b - a) for a, b in CUTS)
+def out2src(t):
+    off = 0.0
+    for a, b in CUTS:
+        if t + off >= a: off += b - a
+    return t + off
+def jump_mult(ts):
+    n = sum(1 for a, b in CUTS if ts >= b)
+    return 1.05 if n % 2 == 1 else 1.0        # jump-cut: ganti-ganti sedikit zoom
 END_SRC0, END_SRC1 = 79.10, 79.30   # bingkai senyum selepas ucapan (freeze selepas ini)
 PANEL_H = 1056              # L2: grafik atas 55%
 PRES_H = H - PANEL_H        # penyampai bawah 45%
@@ -253,7 +268,7 @@ def build_sprites():
     S["chip_mnt"] = pill("Sumber: Medical News Today")
     S["chip_na"] = pill("Sumber: Nutrition Advance")
     S["chip_lp"] = pill("Sumber: label produk")
-    S["bd"] = card_bg(900, 770, fill=DEEP, alpha=212, rad=40)
+    S["bd"] = card_bg(900, 735, fill=DEEP, alpha=212, rad=40)
     S["card1"] = card_bg(880, 560)
     S["card2"] = card_bg(880, 470)
     # kapsyen
@@ -273,9 +288,9 @@ CAPS = [
     C(20.84, 22.08, "Satu kajian"), C(22.08, 22.52, "ke atas"), C(22.52, 24.28, "114 orang", (0,)),
     C(24.28, 26.00, "dengan AMD awal", (1,)), C(26.00, 27.58, "suplemen goji harian", (1,)),
     C(27.58, 29.30, "ditingkatkan ketumpatan"), C(29.30, 30.80, "pigmen makula", (1,)),
-    C(31.60, 32.36, "Kajian lain"), C(32.36, 33.88, "tengok warga emas", (2,)), C(33.88, 34.74, "minum jus"),
-    C(34.74, 36.40, "buah beri"), C(36.40, 37.43, "goji ni", (0,)), C(37.43, 38.70, "90 hari", (0,)),
-    C(38.95, 40.20, "Paras zeaxanthin", (1,)), C(42.70, 44.50, "dan antioksidan"), C(44.50, 46.20, "mereka naik"),
+    C(31.60, 32.36, "Kajian lain"), C(32.36, 33.88, "tengok warga emas", (2,)), C(33.88, 34.68, "minum jus"),
+    C(35.97, 36.56, "buah beri"), C(36.56, 37.43, "goji ni", (0,)), C(37.43, 38.80, "90 hari", (0,)),
+    C(42.70, 43.74, "Paras zeaxanthin", (1,)), C(43.74, 44.72, "dan antioksidan"), C(44.72, 46.20, "mereka naik"),
     C(46.47, 47.72, "Tapi jujur"), C(47.72, 49.00, "kebanyakan kajian"), C(49.00, 50.20, "kecil ada pakar", (0,)),
     C(50.20, 51.44, "nutrisi yang cakap"), C(51.44, 53.16, "banyak artikel goji", (2,)),
     C(53.16, 54.76, "melebih-lebihkan"), C(54.76, 55.60, "manfaat"),
@@ -293,7 +308,7 @@ ZOOM_THROUGH = [3.9, 46.4, 71.6]
 PUNCH = [(11.82, "L2"), (22.52, "L2"), (47.00, "L1")]
 FLASH = [13.10, 47.00]
 L1_ZOOM = 1.15
-CAP_Y = 1458
+CAP_Y = 1462
 
 def seg_at(t):
     for a, b, k in SEGS:
@@ -308,6 +323,27 @@ def punch_mult(t, layout=None):
             b = ease_out(x / 0.10) if x < 0.10 else (1.0 if x < 0.45 else 1 - ease_io((x - 0.45) / 0.35))
             m = max(m, 1 + 0.12 * b)
     return m
+
+FACE_OUT_Y = 640            # dagu dikunci pada y=640 dalam bingkai output; overlay bermula >=796
+FACE = None
+def load_face():
+    global FACE
+    fp = os.path.join(ROOT, "work/face.json")
+    if not os.path.exists(fp): subprocess.check_call([sys.executable, "-I", os.path.join(ROOT, "scripts/face_track.py")])
+    raw = json.load(open(fp)); n = len(raw)
+    cx = np.full(n, np.nan); bot = np.full(n, np.nan)
+    for i, b in enumerate(raw):
+        if b and 120 <= b[2] <= 420 and 420 <= b[1] + b[3] / 2 <= 950: cx[i] = b[0] + b[2] / 2; bot[i] = b[1] + b[3]
+    idx = np.arange(n); ok = ~np.isnan(cx)
+    cx = np.interp(idx, idx[ok], cx[ok]); bot = np.interp(idx, idx[ok], bot[ok])
+    mx = lambda a, r: np.array([a[max(0, i - r):i + r + 1].max() for i in range(n)])
+    ma = lambda a, r: np.convolve(np.pad(a, r, mode="edge"), np.ones(2 * r + 1) / (2 * r + 1), "valid")
+    FACE = (ma(cx, 8), ma(mx(bot, 6), 8) + 20, bot)
+
+def view_face(src, z, i):
+    w, h = W / z, H / z
+    l = max(0, min(FACE[0][i] - 540 / z, W - w)); tp = max(0, min(FACE[1][i] - FACE_OUT_Y / z, H - h))
+    return src.resize((W, H), Image.BICUBIC, box=(l, tp, l + w, tp + h)), tp
 
 def view(src, z, anchor, out_anchor, ow, oh):
     ax, ay = anchor; ox, oy = out_anchor
@@ -357,7 +393,7 @@ def draw_bowl(canvas, t):
         sy = 635   # tengah permukaan kuah
         if t0 <= t < land:
             u = (t - t0) / 0.42
-            y = -80 + (sy + 80) * (u * u)
+            y = 330 + (sy - 330) * (u * u)
             paste(canvas, S["goji"], x, y, 1.0, 0.95)
         elif t >= land:
             bob = math.sin((t - land) * 7) * 4 * math.exp(-(t - land) * 2.2)
@@ -463,7 +499,7 @@ BD_RANGES = [(3.9, 22.3), (48.95, 71.7), (CUT, TOTAL + 1)]
 SLAM1_T = (0.0, 2.3)
 SLAM2_T = (47.0, 48.9)
 def draw_slams(canvas, t):
-    for (t0, t1), keys, ys in (((0.0, 2.3), ("slam1a", "slam1b"), (900, 1080)), ((47.0, 48.9), ("slam2",), (990,))):
+    for (t0, t1), keys, ys in (((0.0, 2.3), ("slam1a", "slam1b"), (940, 1120)), ((47.0, 48.9), ("slam2",), (1020,))):
         if not (t0 <= t < t1): continue
         x = t - t0
         sc = 1 + 0.15 * (1 - ease_out(x / 0.2)) if x < 0.2 else 1.0
@@ -481,23 +517,27 @@ def draw_caps(canvas, t, y):
             s = 0.9 + 0.1 * (s - 0.84) / 0.16 if s < 1 else s
             paste(canvas, spr, 540, y, a, s)
 
-GFX_SCALE, GFX_X, GFX_Y = 0.8, 108, 568   # grafik dalam koordinat lama -> zon y~750-1370 (bawah dagu)
+GFX_SCALE, GFX_X, GFX_Y = 0.8, 108, 582   # grafik koordinat lama -> zon y~820-1408 (jauh di bawah dagu)
 def render(k, src):
-    """src: PIL RGB 1080x1920. Video utama penuh; semua grafik = overlay (tiada panel)."""
-    t = k / FPS
-    s0, s1, lay = seg_at(t)
-    prog = clamp((t - s0) / (s1 - s0))
-    base = {"L1": 1.18, "L2": 1.08, "END": 1.12}[lay]
-    z = base * (1 + 0.035 * prog) * punch_mult(t)
-    frame = view(src, z, (470, 585), (540, 500), W, H).convert("RGBA")
-    layer = Image.new("RGBA", (W, PANEL_H), (0, 0, 0, 0)); draw_top(layer, t)
+    """src: PIL RGB 1080x1920. Video penuh; semua grafik overlay. Kembali (bingkai, statistik jarak muka)."""
+    ts = out2src(k / FPS)
+    i = min(src_index(k), len(FACE[0]) - 1)
+    s0, s1, lay = seg_at(ts)
+    prog = clamp((ts - s0) / (s1 - s0))
+    base = {"L1": 1.30, "L2": 1.28, "END": 1.24}[lay]
+    z = base * (1 + 0.035 * prog) * punch_mult(ts) * jump_mult(ts)
+    frame, top = view_face(src, z, i)
+    ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    layer = Image.new("RGBA", (W, PANEL_H), (0, 0, 0, 0)); draw_top(layer, ts)
     if layer.getbbox():
-        lay2 = layer.resize((int(W * GFX_SCALE), int(PANEL_H * GFX_SCALE)), Image.LANCZOS)
-        frame.alpha_composite(lay2, (GFX_X, GFX_Y))
-    frame = frame.convert("RGB")
-    draw_slams(frame, t)
-    draw_caps(frame, t, CAP_Y)
-    # zoom-through ~0.3s (0.15 keluar + 0.15 masuk)
+        ov.alpha_composite(layer.resize((int(W * GFX_SCALE), int(PANEL_H * GFX_SCALE)), Image.LANCZOS), (GFX_X, GFX_Y))
+    draw_slams(ov, ts); draw_caps(ov, ts, CAP_Y)
+    bb = ov.getchannel("A").point(lambda v: 255 if v > 12 else 0).getbbox()
+    face_bot = (FACE[2][i] - top) * z
+    in_tr = any(-0.16 <= ts - tc < 0.16 for tc in ZOOM_THROUGH)
+    stat = None if (bb is None or in_tr) else (round(float(bb[1] - face_bot), 1), round(ts, 2))
+    frame = frame.convert("RGBA"); frame.alpha_composite(ov); frame = frame.convert("RGB")
+    t = ts
     for tc in ZOOM_THROUGH:
         d = t - tc
         if -0.15 <= d < 0.15:
@@ -510,14 +550,13 @@ def render(k, src):
         d = t - tf
         if 0 <= d < 0.13:
             fl = Image.new("RGB", (W, H), WHITE); frame = Image.blend(frame, fl, 0.45 * (1 - d / 0.13))
-    return frame
+    return frame, stat
 
 # ---------------- sumber bingkai ----------------
 def src_index(k):
-    t = k / FPS
-    if t < CUT: return k
-    e = round(END_SRC0 * FPS) + (k - round(CUT * FPS))
-    return min(e, round(END_SRC1 * FPS))
+    ts = out2src(k / FPS)
+    if ts < CUT: return int(round(ts * FPS))
+    return min(round(END_SRC0 * FPS) + int(round((ts - CUT) * FPS)), round(END_SRC1 * FPS))
 
 def read_frames(idxs):
     """Penjana bingkai sumber untuk senarai indeks monoton."""
@@ -548,10 +587,14 @@ def render_chunk(args):
         if idxs[i] - idxs[i - 1] > 2: groups.append(g); g = [i]
         else: g.append(i)
     groups.append(g)
+    stats = []
     for g in groups:
         for i, fr in zip(g, read_frames([idxs[i] for i in g])):
-            enc.stdin.write(render(ks[i], fr).tobytes())
+            frame, st = render(ks[i], fr)
+            if st: stats.append(st)
+            enc.stdin.write(frame.tobytes())
     enc.stdin.close(); enc.wait()
+    json.dump(stats, open(os.path.join(ROOT, f"work/chunks/stats_{ci:02d}.json"), "w"))
     return out
 
 def main():
@@ -562,20 +605,23 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     a = ap.parse_args()
     os.makedirs(os.path.join(ROOT, "work/chunks"), exist_ok=True)
-    build_sprites()
+    build_sprites(); load_face()
     if a.preview:
         os.makedirs(os.path.join(ROOT, "work/preview"), exist_ok=True)
         for ts in a.preview.split(","):
-            k = int(round(float(ts) * FPS))
+            k = int(round(src2out(float(ts)) * FPS))
             fr = next(read_frames([src_index(k)]))
-            render(k, fr).save(os.path.join(ROOT, f"work/preview/p_{float(ts):06.2f}.png"))
+            render(k, fr)[0].save(os.path.join(ROOT, f"work/preview/p_{float(ts):06.2f}.png"))
         return
-    total = int(round(TOTAL * FPS)); step = 120
+    total = int(round(TOTAL_O * FPS)); step = 120
     jobs = [(i, k, min(k + step, total)) for i, k in enumerate(range(0, total, step))]
     with Pool(a.workers) as p: outs = p.map(render_chunk, jobs, chunksize=1)
     lst = os.path.join(ROOT, "work/chunks/list.txt")
     open(lst, "w").write("".join(f"file '{o}'\n" for o in outs))
     subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", a.out])
+    st = [s for i in range(len(jobs)) for s in json.load(open(os.path.join(ROOT, f"work/chunks/stats_{i:02d}.json")))]
+    cl = sorted(st)
+    print("jarak overlay-dagu (px): min", cl[0], "| <40px:", sum(1 for c, _ in st if c < 40), "daripada", len(st), "bingkai")
     print(a.out)
 
 if __name__ == "__main__":

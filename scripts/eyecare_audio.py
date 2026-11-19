@@ -4,14 +4,27 @@ Tiada TTS. Keluaran: work/audio_final.wav"""
 import os, subprocess, json, re
 import numpy as np
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SR = 44100; CUT = 74.44; TOTAL = 78.04
+EDL = json.load(open(os.path.join(ROOT, "scripts/eyecare_edl.json")))
+CUTS = [tuple(c) for c in EDL["cuts"]]; CUT = EDL["cut_end"]; SR = 44100
+REMOVED = sum(b - a for a, b in CUTS)
+TOTAL = CUT + EDL["tail"] - REMOVED          # tempoh output
+def s2o(ts): return ts - sum(min(max(ts - a, 0), b - a) for a, b in CUTS)
 N = int(TOTAL * SR)
 rng = np.random.default_rng(7)
 def tt(n): return np.arange(n) / SR
 
-# ---- suara asal, dipotong pada CUT (tiada penyusunan semula) ----
-raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", os.path.join(ROOT, "input/raw.mov"), "-t", f"{CUT}",
-    "-af", "highpass=f=75,acompressor=threshold=-24dB:ratio=2.2:attack=8:release=160:makeup=2,afade=t=out:st=%.3f:d=0.06" % (CUT - 0.06),
+# ---- suara asal: hanya buang bahagian gagap (EDL); tiada susunan semula ----
+keep, s = [], 0.0
+for a, b in CUTS: keep.append((s, a)); s = b
+keep.append((s, CUT))
+parts, labels = [], []
+for i, (a, b) in enumerate(keep):
+    f = f"atrim={a}:{b},asetpts=PTS-STARTPTS"
+    if i > 0: f += ",afade=t=in:d=0.01"
+    f += f",afade=t=out:st={b - a - (0.06 if i == len(keep) - 1 else 0.01):.3f}:d={0.06 if i == len(keep) - 1 else 0.01}"
+    parts.append(f"[0:a]{f}[a{i}]"); labels.append(f"[a{i}]")
+fc = ";".join(parts) + ";" + "".join(labels) + f"concat=n={len(keep)}:v=0:a=1,highpass=f=75,acompressor=threshold=-24dB:ratio=2.2:attack=8:release=160:makeup=2[o]"
+raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", os.path.join(ROOT, "input/raw.mov"), "-filter_complex", fc, "-map", "[o]",
     "-ac", "1", "-ar", str(SR), "-f", "f32le", "-"])
 v = np.frombuffer(raw, np.float32).copy()
 voice = np.zeros(N, np.float32); voice[:len(v)] = v[:N]
@@ -75,7 +88,7 @@ dly = int(0.31 * SR); music[1, dly:] += music[0, :-dly] * 0.25; music[0, dly:] +
 def lerp_env(points):
     xs = [p[0] for p in points]; ys = [p[1] for p in points]
     return np.interp(t_all, xs, ys)
-mg = lerp_env([(0, 0), (1.5, 0.8), (46.0, 0.8), (46.8, 0.22), (57.0, 0.22), (58.4, 0.8), (74.0, 0.8), (74.6, 1.15), (76.6, 1.0), (TOTAL, 0)])
+mg = lerp_env([(0, 0), (s2o(1.5), 0.8), (s2o(46.0), 0.8), (s2o(46.8), 0.22), (s2o(57.0), 0.22), (s2o(58.4), 0.8), (s2o(74.0), 0.8), (s2o(74.6), 1.15), (s2o(76.6), 1.0), (TOTAL, 0)])
 music *= (mg * duck_gain).astype(np.float32)[None, :]
 
 # ---- SFX procedural ----
@@ -114,14 +127,14 @@ def chime(f):
     return ((np.sin(2 * np.pi * f * tl) + 0.3 * np.sin(2 * np.pi * 2 * f * tl)) * np.exp(-tl * 2.6) * 0.22).astype(np.float32)
 EV = []  # (jenis, masa) - untuk laporan
 W = whoosh()
-for tc in (3.9, 46.4, 71.6): add(W, tc - 0.20, 0.75); EV.append(("whoosh", tc))
-for ts in (0.0, 47.0): add(slam(), ts, 0.9); EV.append(("slam", ts))
+for tc in (3.9, 46.4, 71.6): add(W, s2o(tc) - 0.20, 0.75); EV.append(("whoosh", tc))
+for ts in (0.0, 47.0): add(slam(), s2o(ts), 0.9); EV.append(("slam", ts))
 for tb in (4.47, 4.72, 4.97): add(bloop(), tb, 0.8, pan=0.5); EV.append(("bloop", tb))
 for i in range(22):
-    tk = 11.82 + 1.4 * (i / 22) ** 0.6; add(tick(), tk, 0.5)
-add(pop(), 13.2, 0.9)
-for tp in (9.55, 15.4, 22.3, 31.6, 49.0, 58.06, 66.7): add(pop(), tp, 0.55)
-add(chime(note(81)), 74.55, 0.8, 0.4); add(chime(note(76)), 74.85, 0.7, 0.6)
+    tk = s2o(11.82 + 1.4 * (i / 22) ** 0.6); add(tick(), tk, 0.5)
+add(pop(), s2o(13.2), 0.9)
+for tp in (9.55, 15.4, 22.3, 31.6, 49.0, 58.06, 66.7): add(pop(), s2o(tp), 0.55)
+add(chime(note(81)), s2o(74.55), 0.8, 0.4); add(chime(note(76)), s2o(74.85), 0.7, 0.6)
 sfx *= (0.35 + 0.65 * (1 - duck_gain / 1.0 * 0 )).astype(np.float32)[None, :] if False else 1.0
 
 # ---- mix ----
