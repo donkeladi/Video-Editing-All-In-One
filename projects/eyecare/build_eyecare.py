@@ -460,7 +460,8 @@ def base_frame(src, t):
         a, b = (0, T_SPLIT0) if t < T_SPLIT0 else (T_FULL1, T_END)
         s = 1.15 * (1 + 0.035 * seg_prog(t, a, b)) * punch_mul(t)
         ww, hw = W / s, H / s
-        box = window(FACE[0] - 540 / s, FACE[1] - 700 / s, ww, hw, W, H)
+        yo = 700 if t < T_SPLIT0 else 640  # beat 6: muka lebih tinggi, ruang untuk kad kotak
+        box = window(FACE[0] - 540 / s, FACE[1] - yo / s, ww, hw, W, H)
         return src.resize((W, H), Image.BILINEAR, box=box)
     s = 1.0 * (1 + 0.035 * seg_prog(t, T_SPLIT0, T_FULL1))
     ww, hw = W / s, 864 / s
