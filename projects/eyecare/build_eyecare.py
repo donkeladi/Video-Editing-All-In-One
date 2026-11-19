@@ -178,13 +178,13 @@ def card_title(kind, kw, rest, sub=None):
     return shadow_wrap(base)
 
 def card_conv():
-    w, h = 840, 470
+    w, h = 840, 420
     base = rr(w, h, 42, CARD, TEAL, 3); d = ImageDraw.Draw(base)
-    put(d, w / 2, 56, "badan tukar", F(NM, 40), SOFT, "m")
-    put(d, w / 2, 138, "beta-karotin", F(MB, 70), WHITE, "m")
-    cx = w / 2; d.rectangle([cx - 9, 192, cx + 9, 246], fill=TEAL); d.polygon([(cx - 36, 238), (cx + 36, 238), (cx, 284)], fill=TEAL)
-    fa = F(MX, 84); t2 = "vitamin"; tot = tw(fa, t2) + 44 + tw(fa, "A") + 44
-    x = (w - tot) / 2; cy = 372
+    put(d, w / 2, 50, "badan tukar", F(NM, 40), SOFT, "m")
+    put(d, w / 2, 122, "beta-karotin", F(MB, 64), WHITE, "m")
+    cx = w / 2; d.rectangle([cx - 8, 172, cx + 8, 218], fill=TEAL); d.polygon([(cx - 32, 212), (cx + 32, 212), (cx, 252)], fill=TEAL)
+    fa = F(MX, 78); t2 = "vitamin"; tot = tw(fa, t2) + 44 + tw(fa, "A") + 44
+    x = (w - tot) / 2; cy = 332
     put(d, x, cy, t2, fa, WHITE, "l"); kwbox(d, x + tw(fa, t2) + 44, cy, "A", fa, "l")
     return shadow_wrap(base)
 
@@ -200,6 +200,32 @@ def image_card(path, wd, crop=None, ring=TEAL):
     base = Image.new("RGBA", (wd, h), (0, 0, 0, 0)); m = Image.new("L", (wd, h), 0)
     ImageDraw.Draw(m).rounded_rectangle([0, 0, wd - 1, h - 1], 26, fill=255); base.paste(im, (0, 0), m)
     ImageDraw.Draw(base).rounded_rectangle([0, 0, wd - 1, h - 1], 26, outline=ring, width=4)
+    return shadow_wrap(base)
+
+def _fill(im, w, h, fx=0.5, fy=0.5):
+    sc = max(w / im.width, h / im.height); im = im.resize((int(im.width * sc) + 1, int(im.height * sc) + 1), Image.LANCZOS)
+    x = int((im.width - w) * fx); y = int((im.height - h) * fy); return im.crop((x, y, x + w, y + h))
+FOCUS = {"lobak": (0.5, 0.6), "goji": (0.55, 0.45), "avokado": (0.55, 0.55), "bunga": (0.5, 0.4)}
+def pbadge(kind, d_, ring=TEAL):
+    m = 10; im = _fill(Image.open(f"projects/eyecare/assets/ing_{kind}.jpg").convert("RGB"), d_, d_, *FOCUS[kind])
+    out = Image.new("RGBA", (d_ + 2 * m, d_ + 2 * m), (0, 0, 0, 0)); mk = Image.new("L", (d_ * 3, d_ * 3), 0)
+    ImageDraw.Draw(mk).ellipse([0, 0, d_ * 3 - 1, d_ * 3 - 1], fill=255); mk = mk.resize((d_, d_), Image.LANCZOS)
+    out.paste(im, (m, m), mk); ImageDraw.Draw(out).ellipse([m, m, m + d_, m + d_], outline=ring, width=max(4, d_ // 28))
+    return out
+
+def photo_card(kind, w, h, kw, rest=None, sub=None):
+    im = _fill(Image.open(f"projects/eyecare/assets/ing_{kind}.jpg").convert("RGB"), w, h, *FOCUS[kind]).convert("RGBA")
+    g = Image.new("RGBA", (w, h), (0, 0, 0, 0)); gd = ImageDraw.Draw(g)
+    for y in range(int(h * 0.45), h):
+        gd.line([0, y, w, y], fill=(22, 10, 46, int(225 * (y - h * 0.45) / (h * 0.55))))
+    im.alpha_composite(g); d = ImageDraw.Draw(im)
+    f = F(MX, 58); cy = h - (96 if sub else 62)
+    xe = kwbox(d, 52, cy, kw, f, "l") + 18
+    if rest: put(d, xe, cy, rest, f, WHITE, "l")
+    if sub: put(d, 34, h - 40, sub, F(NM, 36), SOFT, "l")
+    base = Image.new("RGBA", (w, h), (0, 0, 0, 0)); mk = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mk).rounded_rectangle([0, 0, w - 1, h - 1], 38, fill=255); base.paste(im, (0, 0), mk)
+    ImageDraw.Draw(base).rounded_rectangle([0, 0, w - 1, h - 1], 38, outline=TEAL, width=4)
     return shadow_wrap(base)
 
 def mal_chip():
@@ -254,98 +280,149 @@ class El:
         if a < 0.999: spr = spr.copy(); spr.putalpha(spr.getchannel("A").point(lambda v: int(v * a)))
         fr.paste(spr, (int(s.cx - spr.width / 2 + dx), int(s.cyv(t) - spr.height / 2 + dy)), spr)
 
+# ======================= pandangan & jejak muka =======================
+def seg_prog(t, a, b): return clamp((t - a) / (b - a))
+def punch_mul(t):
+    m = 1.0
+    for p in PUNCH:
+        u = t - p
+        if 0 <= u < 0.85:
+            k = out_cubic(u / 0.12) if u < 0.12 else (1.0 if u < 0.55 else 1 - out_cubic((u - 0.55) / 0.30))
+            m = max(m, 1 + 0.10 * k)
+    return m
+
+def window(x0, y0, ww, hw, mx, my):
+    x0 = min(max(x0, 0), mx - ww); y0 = min(max(y0, 0), my - hw); return (x0, y0, x0 + ww, y0 + hw)
+
+def face_yo(t): return 700 if t < T_SPLIT0 else 580
+
+def view(t):
+    a, b = (0, T_SPLIT0) if t < T_SPLIT0 else ((T_SPLIT0, T_FULL1) if t < T_FULL1 else (T_FULL1, T_END))
+    s_ = 1.15 * (1 + 0.035 * seg_prog(t, a, b)) * punch_mul(t); yo = face_yo(t)
+    return s_, window(FACE[0] - 540 / s_, FACE[1] - yo / s_, W / s_, H / s_, W, H)
+
+def track_face():
+    """Jejak muka (Haar, 10fps) -> projects/eyecare/face_track.json. Perlukan opencv-python-headless==4.10."""
+    import cv2
+    w, h, fps = 540, 960, 10
+    raw = sp.Popen(["ffmpeg", "-v", "error", "-i", SRC, "-vf", f"fps={fps},scale={w}:{h},format=gray", "-f", "rawvideo", "-"], stdout=sp.PIPE)
+    c = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml"); out = []; i = 0
+    while True:
+        b = raw.stdout.read(w * h)
+        if len(b) < w * h: break
+        g = np.frombuffer(b, np.uint8).reshape(h, w)
+        f = [x for x in c.detectMultiScale(g, 1.1, 6, minSize=(90, 90), maxSize=(400, 400)) if 120 < x[1] + x[3] / 2 < 700 and 100 < x[0] + x[2] / 2 < 440]
+        out.append([i / fps] + ([float(v * 2) for v in max(f, key=lambda r: r[2] * r[3])] if f else [None] * 4)); i += 1
+    json.dump(out, open("projects/eyecare/face_track.json", "w"))
+
+def _load_track():
+    from scipy.signal import medfilt
+    from scipy.ndimage import maximum_filter1d
+    d = [o for o in json.load(open("projects/eyecare/face_track.json")) if o[1] is not None]
+    t = np.array([o[0] for o in d]); bot = np.array([o[2] + o[4] for o in d])
+    return t, maximum_filter1d(medfilt(bot, 5), 7)   # buang outlier, kemudian ambil maksimum ±0.3s
+FT_T, FT_BOT = _load_track()
+
+def face_bot_out(t):
+    s_, box = view(t); return (float(np.interp(t, FT_T, FT_BOT)) - box[1]) * s_
+def zone_top(t0, t1, margin=12):
+    return max(face_bot_out(t) for t in np.arange(t0, t1, 0.1)) + margin
+def GD(t0, t1, top): return max(0.0, zone_top(t0, t1) - top)   # anjakan ke bawah supaya overlay di bawah dagu
+
 EL = []
 TEXTS = []
 def add(*a, **k):
     e = El(*a, **k); EL.append(e); return e
 
 def layout_at(t):
-    if t < T_SPLIT0: return "full"
-    if t < T_FULL1: return "split"
-    if t < T_END: return "full"
-    return "end"
+    return "full" if t < T_END else "end"
 
 CX = 510  # pusat safe-area x 60..960
 
 # ---------- HOOK ----------
 add(slam_sprite(), CX, 372, 0.0, 2.35, enter=0.16, c=0.6, fs=1.22, shake=(0.0, 0.28, 8), sfx="slam", a0=1.0)
 for kind, t, x in (("lobak", 0.0, 210), ("goji", 1.56, 410), ("bunga", 2.46, 610), ("avokado", 3.18, 810)):
-    add(badge(kind, 140), x, 1285, t, 11.20, margin=10)
+    add(pbadge(kind, 140), x, 1285, t, 11.20, margin=10)
 
-# ---------- LOBAK (11.36–24.36) ----------
-add(card_title("lobak", "LOBAK", "MERAH"), CX, 590, 11.45, 14.50, mode="up")
-add(card_conv(), CX, 590, 14.55, 21.40, mode="up")
+# ---------- LOBAK (11.36–24.36): overlay di bawah dagu; sumber di atas kepala ----------
+d = GD(11.45, 14.50, 810); add(photo_card("lobak", 760, 350, "LOBAK", "MERAH"), CX, 985 + d, 11.45, 14.50, mode="up")
+d = GD(14.55, 21.40, 840); add(card_conv(), CX, 1050 + d, 14.55, 21.40, mode="up")
 add(source_chip("Klarity Health"), CX, 292, 15.20, 19.60, mode="down")
-add(card_chips_label("vitamin A juga penting untuk"), CX, 450, 21.45, 24.25, mode="up")
-add(chip("pertumbuhan", 64, wmin=720), CX, 600, 21.52, 24.25, mode="left")
-add(chip("sistem imun", 64, wmin=720), CX, 760, 22.80, 24.25, mode="right")
+d = GD(21.45, 24.25, 842)
+add(card_chips_label("vitamin A juga penting untuk"), CX, 880 + d, 21.45, 24.25, mode="up")
+add(chip("pertumbuhan", 64, wmin=720), CX, 1010 + d, 21.52, 24.25, mode="left")
+add(chip("sistem imun", 64, wmin=720), CX, 1160 + d, 22.80, 24.25, mode="right")
 
 # ---------- GOJI (24.36–34.46) ----------
-add(card_title("goji", "GOJI", None, sub="dalam perubatan tradisional Cina"), CX, 590, 24.95, 28.30, mode="up")
+d = GD(24.95, 28.30, 810); add(photo_card("goji", 760, 350, "GOJI", None, sub="dalam perubatan tradisional Cina"), CX, 985 + d, 24.95, 28.30, mode="up")
 
 def counter_fn(t):
     n = int(2000 * out_cubic((t - 28.40) / 0.55)); txt = f"{n:,}" + ("+" if n >= 2000 else "")
-    w, h = 840, 500; base = rr(w, h, 42, CARD, TEAL, 3); d = ImageDraw.Draw(base)
-    full = "2,000+"; size = 210
-    while tw(F(MX, size), full) > 690: size -= 4
-    f = F(MX, size); wb = tw(f, full); x0 = w / 2 - wb / 2; cy = 190
-    d.rounded_rectangle([x0 - 36, cy - size * 0.68, x0 + wb + 36, cy + size * 0.68], 40, fill=TEAL)
-    put(d, w / 2, cy, txt, f, INK, "m")
-    put(d, w / 2, 410, "tahun", F(MB, 84), WHITE, "m")
-    bg = badge("goji", 100); base.alpha_composite(bg, (w - 100 - 26, 12))
+    w, h = 840, 430; base = rr(w, h, 42, CARD, TEAL, 3); d_ = ImageDraw.Draw(base)
+    full = "2,000+"; size = 190
+    while tw(F(MX, size), full) > 660: size -= 4
+    f = F(MX, size); wb = tw(f, full); x0 = w / 2 - wb / 2; cy = 160
+    d_.rounded_rectangle([x0 - 34, cy - size * 0.68, x0 + wb + 34, cy + size * 0.68], 38, fill=TEAL)
+    put(d_, w / 2, cy, txt, f, INK, "m")
+    put(d_, w / 2, 352, "tahun", F(MB, 76), WHITE, "m")
+    bg = pbadge("goji", 96); base.alpha_composite(bg, (w - 116 - 16, 8))
     return shadow_wrap(base)[0]
-add(None, CX, 590, 28.40, 31.45, enter=0.2, c=0.8, fn=counter_fn, size=(840, 500), shake=(28.95, 0.28, 7), sfx="tick")
+d = GD(28.40, 31.45, 830)
+add(None, CX, 1045 + d, 28.40, 31.45, enter=0.2, c=0.8, fn=counter_fn, size=(840, 430), shake=(28.95, 0.28, 7), sfx="tick")
 add(source_chip("News-Medical"), CX, 292, 29.80, 33.20, mode="down")
-add(card_chips_label("dalam kajian:"), CX, 450, 31.50, 34.42, mode="up")
-add(chip("antioksidan", 64, wmin=720), CX, 600, 31.58, 34.42, mode="left")
-add(chip("imun", 64, wmin=720), CX, 760, 33.62, 34.42, mode="right")
+d = GD(31.50, 34.42, 842)
+add(card_chips_label("dalam kajian:"), CX, 880 + d, 31.50, 34.42, mode="up")
+add(chip("antioksidan", 64, wmin=720), CX, 1010 + d, 31.58, 34.42, mode="left")
+add(chip("imun", 64, wmin=720), CX, 1160 + d, 33.62, 34.42, mode="right")
 
 # ---------- AVOKADO (34.62–43.18) ----------
 TILES = [240, 420, 600, 780]
-LAND = [40.45, 40.75, 41.05, 41.35]
-DROP = 0.8
+LAND = [41.00, 41.20, 41.40, 41.60]
+DROP = 0.55
 def avo_fn(t):
-    w, h = 840, 600; im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-    im.alpha_composite(badge("avokado", 210), (w // 2 - 115, 0))
-    f = F(MX, 76); wt = tw(f, "AVOKADO")
-    d.rounded_rectangle([w / 2 - wt / 2 - 28, 240, w / 2 + wt / 2 + 28, 330], 26, fill=TEAL); put(d, w / 2, 285, "AVOKADO", f, INK, "m")
-    if t >= 39.45:
-        s_ = clamp((t - 39.45) / 0.3); ft = F(MX, 76)
+    w, h = 840, 430; im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d_ = ImageDraw.Draw(im)
+    pb = pbadge("avokado", 120); im.alpha_composite(pb, (w // 2 - pb.width // 2, 0))
+    if t >= 40.50:
+        s_ = clamp((t - 40.50) / 0.3); ft = F(MX, 72)
         for i, (cx, tl) in enumerate(zip(TILES, LAND)):
             lit = t >= tl
             sc = 1 + (0.14 * math.sin(math.pi * clamp((t - tl) / 0.25)) if lit else 0)
-            half = int(60 * sc * (0.5 + 0.5 * s_))
-            d.rounded_rectangle([cx - half, 440 - half, cx + half, 440 + half], 22, fill=TEAL if lit else (26, 15, 52, 235), outline=TEAL, width=4)
-            put(d, cx, 440, "ADEK"[i], ft, INK if lit else TEAL, "m")
+            half = int(56 * sc * (0.5 + 0.5 * s_))
+            d_.rounded_rectangle([cx - half, 290 - half, cx + half, 290 + half], 20, fill=TEAL if lit else (26, 15, 52, 235), outline=TEAL, width=4)
+            put(d_, cx, 290, "ADEK"[i], ft, INK if lit else TEAL, "m")
             u = (t - (tl - DROP)) / DROP
             if 0 <= u < 1:
-                x = 420 + (cx - 420) * (0.35 * u + 0.65 * u * u); y = 225 + (372 - 225) * u * u
-                d.polygon([(x, y - 34), (x - 17, y + 6), (x, y + 18), (x + 17, y + 6)], fill=(255, 206, 70))
-                d.ellipse([x - 17, y - 2, x + 17, y + 32], fill=(255, 206, 70))
-        put(d, w / 2, 556, "vitamin larut lemak", F(NB, 44), SOFT, "m")
+                x = 420 + (cx - 420) * (0.35 * u + 0.65 * u * u); y = 128 + (230 - 128) * u * u
+                d_.polygon([(x, y - 34), (x - 17, y + 6), (x, y + 18), (x + 17, y + 6)], fill=(255, 206, 70))
+                d_.ellipse([x - 17, y - 2, x + 17, y + 32], fill=(255, 206, 70))
+        lab = F(NB, 42); wl = tw(lab, "vitamin larut lemak") + 56
+        d_.rounded_rectangle([w / 2 - wl / 2, 366, w / 2 + wl / 2, 420], 27, fill=(26, 15, 52, 225)); put(d_, w / 2, 393, "vitamin larut lemak", lab, SOFT, "m")
     return im
-add(None, CX, 640, 35.00, 43.08, fn=avo_fn, size=(840, 600), sfx="pop", mode="up")
+d = GD(35.00, 39.20, 810); add(photo_card("avokado", 760, 350, "AVOKADO"), CX, 985 + d, 35.00, 39.20, mode="up")
+d = GD(40.45, 43.08, 830); add(None, CX, 1045 + d, 40.45, 43.08, fn=avo_fn, size=(840, 430), sfx="pop", mode="up")
 add(source_chip("Berita Harian 2019"), CX, 292, 36.20, 39.70, mode="down")
 
 # ---------- EYEBRIGHT (43.2–55.4) ----------
-add(card_title("bunga", "EYEBRIGHT", None, sub="bunga Eropah"), CX, 525, 43.90, 55.40, mode="up")
+d = GD(43.90, 48.70, 800); add(photo_card("bunga", 760, 330, "EYEBRIGHT", None, sub="bunga Eropah"), CX, 965 + d, 43.90, 48.70, mode="up")
 add(source_chip("Planta Medica 2023"), CX, 292, 45.90, 49.20, mode="down")
 add(source_chip("Christopher Hobbs"), CX, 292, 50.10, 53.60, mode="down")
-add(card_chips_label("KEGUNAAN TRADISIONAL"), CX, 740, 48.75, 55.40, mode="up")
+d = GD(48.75, 55.40, 842)
+add(card_chips_label("KEGUNAAN TRADISIONAL"), CX, 880 + d, 48.75, 55.40, mode="up")
 _cm, _cs, _ca = chip("mata", 52, padx=34, wmin=210), chip("selsema", 52, padx=34, wmin=210), chip("alahan", 52, padx=34, wmin=210)
 _wm, _ws, _wa = _cm[0].width, _cs[0].width, _ca[0].width; _gap = 4
 _x0 = CX - (_wm + _ws + _wa + 2 * _gap) / 2
-add(_cm, _x0 + _wm / 2, 850, 48.95, 55.40, mode="left")
-add(_cs, _x0 + _wm + _gap + _ws / 2, 850, 53.65, 55.40, mode="up")
-add(_ca, _x0 + _wm + _ws + 2 * _gap + _wa / 2, 850, 54.85, 55.40, mode="right")
+add(_cm, _x0 + _wm / 2, 995 + d, 48.95, 55.40, mode="left")
+add(_cs, _x0 + _wm + _gap + _ws / 2, 995 + d, 53.65, 55.40, mode="up")
+add(_ca, _x0 + _wm + _ws + 2 * _gap + _wa / 2, 995 + d, 54.85, 55.40, mode="right")
 
 # ---------- PRODUK (55.62–65.94) ----------
-add(image_card("projects/eyecare/assets/box_packshot.png", 620), CX, 1075, 56.40, 61.70, mode="up")
-add(image_card("projects/eyecare/assets/hologram_real.png", 620, crop=(14, 4, 396, 186)), CX, 1078, 61.70, T_SKIP0 - 0.05, fs=0.75, c=0.9)
+d = GD(56.40, T_SKIP0, 934)
+add(image_card("projects/eyecare/assets/box_packshot.png", 560), CX, 1062 + d, 56.40, 61.70, mode="up")
+add(image_card("projects/eyecare/assets/hologram_real.png", 560, crop=(14, 4, 396, 186)), CX, 1068 + d, 61.70, T_SKIP0 - 0.05, fs=0.75, c=0.9)
 for kind, t, x in (("lobak", 57.50, CX - 216), ("goji", 57.72, CX - 72), ("bunga", 57.94, CX + 72), ("avokado", 58.16, CX + 216)):
-    add(badge(kind, 100), x, 1290, t, 60.80, margin=10)
-add(mal_chip(), CX, 1290, 60.90, 63.35, mode="right")
-add(claim_chip(), CX, 1295, 63.40, T_SKIP0 - 0.05, mode="left")
+    add(pbadge(kind, 100), x, 1255 + d, t, 60.80, margin=10)
+add(mal_chip(), CX, 1255 + d, 60.90, 63.35, mode="right")
+add(claim_chip(), CX, 1262 + d, 63.40, T_SKIP0 - 0.05, mode="left")
 
 # ---------- END CARD ----------
 def _line(text, fname, size, kw=None, maxw=860):
@@ -432,7 +509,7 @@ def cap_sprite(words):
     return im
 
 CHUNKS = make_chunks()
-def _capcy(t): return 985 if layout_at(t) == "split" else 1440
+def _capcy(t): return 1440
 for a, b, words in CHUNKS:
     TEXTS.append(" ".join(words))
     add(cap_sprite(words), CX, _capcy, a, b, enter=0.30, ex=0.10, c=0.9, fs=0.72, sfx=None)
@@ -463,36 +540,10 @@ def bg_frame(t, h):
     im.paste(fan, (W - 70 - 450, 70 - 450), fan)
     return im
 
-def seg_prog(t, a, b): return clamp((t - a) / (b - a))
-def punch_mul(t):
-    m = 1.0
-    for p in PUNCH:
-        u = t - p
-        if 0 <= u < 0.85:
-            k = out_cubic(u / 0.12) if u < 0.12 else (1.0 if u < 0.55 else 1 - out_cubic((u - 0.55) / 0.30))
-            m = max(m, 1 + 0.13 * k)
-    return m
-
-def window(x0, y0, ww, hw, mx, my):
-    x0 = min(max(x0, 0), mx - ww); y0 = min(max(y0, 0), my - hw); return (x0, y0, x0 + ww, y0 + hw)
-
 def base_frame(src, t):
-    lay = layout_at(t)
-    if lay == "end": return bg_frame(t, H)
-    if lay == "full":
-        a, b = (0, T_SPLIT0) if t < T_SPLIT0 else (T_FULL1, T_END)
-        s = 1.15 * (1 + 0.035 * seg_prog(t, a, b)) * punch_mul(t)
-        ww, hw = W / s, H / s
-        yo = 700 if t < T_SPLIT0 else 640  # beat 6: muka lebih tinggi, ruang untuk kad kotak
-        box = window(FACE[0] - 540 / s, FACE[1] - yo / s, ww, hw, W, H)
-        return src.resize((W, H), Image.BILINEAR, box=box)
-    s = 1.1 * (1 + 0.035 * seg_prog(t, T_SPLIT0, T_FULL1))
-    ww, hw = W / s, 864 / s
-    box = window(FACE[0] - 540 / s, FACE[1] - 230 / s, ww, hw, W, H)
-    full = Image.new("RGB", (W, H))
-    full.paste(bg_frame(t, 1056), (0, 0)); full.paste(src.resize((W, 864), Image.BILINEAR, box=box), (0, 1056))
-    ImageDraw.Draw(full).rectangle([0, 1053, W, 1059], fill=TEAL)
-    return full
+    if layout_at(t) == "end": return bg_frame(t, H)
+    s_, box = view(t)
+    return src.resize((W, H), Image.BILINEAR, box=box)
 
 def zoom_through(fr, k):
     z = 1 + 0.38 * k * k
@@ -593,10 +644,13 @@ def check():
     for e in EL:
         if e.size is None or e.t0 >= T_END: continue
         w, h = e.size; w -= 2 * e.margin; h -= 2 * e.margin
-        if not callable(e.cy):
-            x0, x1, y0, y1 = e.cx - w / 2, e.cx + w / 2, e.cy - h / 2, e.cy + h / 2
-            if x0 < 60 or x1 > 960 or y0 < 250 or y1 > 1500: bad.append(("safe-area", e.t0, round(x0), round(x1), round(y0), round(y1)))
-            if layout_at(e.t0 + 0.01) == "full" and layout_at(e.t1 - 0.02) == "full" and not (y1 <= 500 or y0 >= 905): bad.append(("muka", e.t0, round(y0), round(y1)))
+        if callable(e.cy): continue
+        x0, x1, y0, y1 = e.cx - w / 2, e.cx + w / 2, e.cy - h / 2, e.cy + h / 2
+        if x0 < 60 or x1 > 960 or y0 < 250 or y1 > 1500: bad.append(("safe-area", e.t0, round(x0), round(x1), round(y0), round(y1)))
+        if y1 <= 345 or (e.t0 < T_SPLIT0 and y1 <= 495): continue      # di atas kepala (sumber / slam hook)
+        zt = zone_top(e.t0, e.t1, 6)
+        if y0 < zt: bad.append(("muka", round(e.t0, 2), round(y0), "dagu+", round(zt)))
+        if y1 > 1405 and not (e.t0 < T_SPLIT0): bad.append(("rapat-kapsyen", round(e.t0, 2), round(y1)))
     for a, b, wd in CHUNKS:
         if BAN.search(" ".join(wd)): bad.append(("larangan", a, wd))
     return bad
@@ -608,7 +662,8 @@ def write_srt():
 
 if __name__ == "__main__":
     m = sys.argv[1]
-    if m == "check":
+    if m == "track": track_face()
+    elif m == "check":
         print(check()); write_srt(); print(len(CHUNKS), "chunks; slam=", sum(e.sfx in ("slam",) for e in EL), "flash=", len(FLASH))
     elif m == "render": render(int(sys.argv[2]), int(sys.argv[3]), sys.argv[4])
     elif m == "audio": synth_audio(); finalize_audio()
