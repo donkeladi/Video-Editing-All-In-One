@@ -134,6 +134,70 @@ def endcard_sprite():
     mal = chip_sprite("MAL22076147T")
     return ph, t, sub, mal
 
+# ---------------------------------------------------------------- infografik
+@functools.lru_cache(None)
+def node_sprite(icon, r):
+    D = 2 * r + 16; im = Image.new("RGBA", (D, D), (0, 0, 0, 0))
+    sh = Image.new("RGBA", (D, D), (0, 0, 0, 0)); ImageDraw.Draw(sh).ellipse((8, 14, D - 8, D - 2), fill=(0, 0, 0, 70)); im.alpha_composite(sh.filter(ImageFilter.GaussianBlur(7)))
+    k = 3; c = Image.new("RGBA", (D * k, D * k), (0, 0, 0, 0)); ImageDraw.Draw(c).ellipse((8 * k, 8 * k, (D - 8) * k, (D - 8) * k), fill=(255, 255, 255, 250))
+    im.alpha_composite(c.resize((D, D), Image.LANCZOS))
+    sz = int(r * 1.25)
+    if icon == "A":
+        f = font(MONT9, int(r * 1.25)); ImageDraw.Draw(im).text((D / 2, D / 2 + 4), "A", font=f, fill=PURPLE + (255,), anchor="mm")
+    elif icon == "oilparticle":
+        pa = svg_png("particle", int(r * 1.5)); im.alpha_composite(pa, (D // 2 - pa.width // 2, D // 2 - pa.height // 2))
+        for ang, (dx, dy) in enumerate([(-0.62, -0.28), (0.62, -0.18), (0.0, 0.66)]):
+            dr = svg_png("droplet", int(r * 0.42)); im.alpha_composite(dr, (int(D / 2 + dx * r - dr.width / 2), int(D / 2 + dy * r - dr.height / 2)))
+    else:
+        ic = svg_png(icon, sz); im.alpha_composite(ic, (D // 2 - ic.width // 2, D // 2 - ic.height // 2))
+    return im
+@functools.lru_cache(None)
+def label_sprite(text): return text_sprite(text, MONT7, 36, fill=WHITE, stroke=0, px=12, py=6, boxr=12)
+@functools.lru_cache(None)
+def infocard_sprite(icon, text, w):
+    h = 78; im = rr(w, h, h // 2, (255, 255, 255, 247)); ic = svg_png(icon, 54); im.alpha_composite(ic, (22, (h - ic.height) // 2))
+    t = text_sprite(text, MONT7, 31, fill=PURPLE_DARK, px=4, py=4); im.alpha_composite(t, (84, (h - t.height) // 2)); return im
+@functools.lru_cache(None)
+def ingcard_sprite(icon, name, tag, mg):
+    w, h = 370, 172; im = rr(w, h, 30, (255, 255, 255, 247)); ic = svg_png(icon, 92); im.alpha_composite(ic, (18, (h - ic.height) // 2))
+    d = ImageDraw.Draw(im)
+    d.text((132, 38), name, font=font(MONT7, 31), fill=PURPLE_DARK + (255,), anchor="lm")
+    d.text((132, 96), mg, font=font(MONT9, 54), fill=PURPLE + (255,), anchor="lm")
+    d.text((134, 142), tag, font=font(NOTO6, 26), fill=(110, 100, 140, 255), anchor="lm"); return im
+@functools.lru_cache(None)
+def tracker_sprite(step, title):
+    W2, H2 = 900, 84; im = Image.new("RGBA", (W2, H2), (0, 0, 0, 0))
+    t = text_sprite(f"0{step}  {title}", MONT8, 38, fill=WHITE, stroke=0, px=2, py=2); im.alpha_composite(t, (-8, 0))
+    d = ImageDraw.Draw(im); seg = (W2 - 3 * 16) // 4
+    for k in range(4):
+        x0 = k * (seg + 16); d.rounded_rectangle((x0, 66, x0 + seg, 74), 4, fill=(255, 255, 255, 255 if k < step else 60))
+    return im
+def line_layer(pts, p, w=8, head=True):
+    xs = [q[0] for q in pts]; ys = [q[1] for q in pts]; pad = 26
+    ox, oy = int(math.floor(min(xs))) - pad, int(math.floor(min(ys))) - pad; k = 2
+    lay = Image.new("RGBA", ((int(math.ceil(max(xs))) - ox + pad) * k, (int(math.ceil(max(ys))) - oy + pad) * k), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
+    P = [((x - ox) * k, (y - oy) * k) for x, y in pts]
+    segs = [math.dist(P[i], P[i + 1]) for i in range(len(P) - 1)]; tot = sum(segs); goal = tot * p; acc = 0; col = (255, 255, 255, 235)
+    cur = [P[0]]
+    for i, L in enumerate(segs):
+        if acc + L <= goal: cur.append(P[i + 1]); acc += L
+        else:
+            f = (goal - acc) / L if L else 0; cur.append((P[i][0] + (P[i + 1][0] - P[i][0]) * f, P[i][1] + (P[i + 1][1] - P[i][1]) * f)); break
+    if len(cur) > 1: d.line(cur, fill=col, width=w * k, joint="curve")
+    for q in cur[1:-1] if len(cur) > 2 else []: d.ellipse((q[0] - w * k / 2, q[1] - w * k / 2, q[0] + w * k / 2, q[1] + w * k / 2), fill=col)
+    if head and p >= 0.999:
+        a, b = P[-2], P[-1]; ang = math.atan2(b[1] - a[1], b[0] - a[0]); L = 26 * k; W = 15 * k
+        tip = (b[0] + math.cos(ang) * 2 * k, b[1] + math.sin(ang) * 2 * k)
+        d.polygon([tip, (tip[0] - L * math.cos(ang) + W * math.sin(ang), tip[1] - L * math.sin(ang) - W * math.cos(ang)),
+                   (tip[0] - L * math.cos(ang) - W * math.sin(ang), tip[1] - L * math.sin(ang) + W * math.cos(ang))], fill=col)
+    return lay.resize((lay.width // k, lay.height // k), Image.LANCZOS), (ox, oy)
+def paste_layer(cv, lay, ox, oy, alpha, rects):
+    a = lay.getchannel("A")
+    if alpha < 0.999: a = a.point(lambda v: int(v * alpha))
+    cv.paste(lay.convert("RGB"), (int(ox), int(oy)), a); rects.append((int(ox), int(oy), int(ox) + lay.width, int(oy) + lay.height))
+def fade(t, t0, t1, fin=0.12, fout=0.12):
+    return min(1, (t - t0) / fin) * (min(1, (t1 - t) / fout) if t1 - t < fout else 1)
+
 # ---------------------------------------------------------------- muka
 def load_faces(n=1765):
     d = json.load(open(os.path.join(ROOT, "work/faces.json"))); ks = sorted(int(k) for k in d)
@@ -179,6 +243,8 @@ def top_bg():
     a = np.array(PURPLE_DARK, float)[None, None]; b = np.array((0x3B, 0x2A, 0x66), float)[None, None]
     g = (a + (b - a) * y) * np.ones((1, W, 1))
     xx = np.linspace(-1, 1, W)[None, :, None]; g = g * (1 - 0.10 * xx ** 2)
+    ys, xs = np.mgrid[0:SPLIT_Y, 0:W]; dots = ((xs % 54) < 3) & ((ys % 54) < 3) & (ys > 250)
+    g[dots] = g[dots] * 0.78 + 255 * 0.22
     return Image.fromarray(g.clip(0, 255).astype(np.uint8))
 
 # ---------------------------------------------------------------- komposisi
@@ -189,7 +255,9 @@ def paste(cv, spr, cx, cy, scale=1.0, alpha=1.0, rects=None, dy=0):
     a = spr.getchannel("A")
     if alpha < 0.999: a = a.point(lambda v: int(v * alpha))
     cv.paste(spr.convert("RGB"), (x, y), a)
-    if rects is not None: rects.append((x, y, x + spr.width, y + spr.height))
+    if rects is not None:
+        bb = a.point(lambda v: 255 if v > 24 else 0).getbbox()
+        if bb: rects.append((x + bb[0], y + bb[1], x + bb[2], y + bb[3]))
 
 def steam(cv, t, cx, y_base, rects):
     lay = Image.new("RGBA", (300, 200), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
@@ -209,15 +277,15 @@ def sprite_scene(cv, t, e, rects):
     cx, cy = 510, 470
     bob = 6 * math.sin(t * 2.6)
     if e.get("pan"):
-        paste(cv, svg_png("pan", 620), 510, 780, s, a, rects)
-        steam(cv, t, 510, 735, rects)
-    paste(cv, svg_png("particle", 340), cx, cy + bob, s, a, rects)
+        paste(cv, svg_png("pan", 520), 510, 735, s, a, rects)
+        steam(cv, t, 510, 668, rects)
+    paste(cv, svg_png("particle", 290), cx, cy + bob, s, a, rects)
     if e.get("orbit"):
         n = 7
         for k in range(n):
             ang = (t - e["t0"]) * 1.5 + k * 2 * math.pi / n
-            ox, oy = 225 * math.cos(ang), 95 * math.sin(ang); depth = 0.78 + 0.22 * math.sin(ang)
-            paste(cv, svg_png("droplet", 74), cx + ox * s, cy + oy * s + bob, s * depth, a, rects)
+            ox, oy = 190 * math.cos(ang), 78 * math.sin(ang); depth = 0.78 + 0.22 * math.sin(ang)
+            paste(cv, svg_png("droplet", 64), cx + ox * s, cy + oy * s + bob, s * depth, a, rects)
 
 def draw_elements(cv, t, rects):
     for e in ELEMENTS:
@@ -226,9 +294,27 @@ def draw_elements(cv, t, rects):
         if k == "icon":
             bob = 5 * math.sin((t - e["t0"]) * 3.0)
             paste(cv, svg_png(e["name"], e["size"]), e["cx"], e["cy"] + bob, s, a, rects)
-        elif k == "card_a": paste(cv, card_a_sprite(), 510, 505, s, a, rects)
+        elif k == "node":
+            r = e["r"]; paste(cv, node_sprite(e["icon"], r), e["cx"], e["cy"], s, a, rects)
+            a2, s2 = anim(t, e["t0"] + 0.10, e["t1"]); paste(cv, label_sprite(e["label"]), e["cx"], e["cy"] + r + 46, s2, a2, rects)
+        elif k == "line":
+            p = eo((t - e["t0"]) / 0.35); lay, (ox, oy) = line_layer(e["pts"], p); paste_layer(cv, lay, ox, oy, fade(t, e["t0"], e["t1"]), rects)
+        elif k == "callout":
+            p = eo((t - e["t0"]) / 0.30); cx, cy = e["cx"], e["cy"]; tx, ty = e["target"]
+            ch = chip_sprite(e["text"]); ang = math.atan2(ty - cy, tx - cx)
+            sx, sy = cx + math.cos(ang) * (ch.width / 2 if abs(math.cos(ang)) * ch.height > abs(math.sin(ang)) * ch.width else ch.height / 2 * abs(math.cos(ang)) / max(1e-6, abs(math.sin(ang)))), 0
+            # titik mula: tepi chip paling hampir sasaran
+            sx = cx + (ch.width / 2 if tx > cx else -ch.width / 2) if abs(tx - cx) > ch.width / 2 else cx
+            sy = cy if abs(tx - cx) > ch.width / 2 else (cy + ch.height / 2 if ty > cy else cy - ch.height / 2)
+            lay, (ox, oy) = line_layer([(sx, sy), (tx, ty)], p, w=5, head=False); paste_layer(cv, lay, ox, oy, fade(t, e["t0"], e["t1"]), rects)
+            if p >= 0.999:
+                dot = Image.new("RGBA", (24, 24), (0, 0, 0, 0)); ImageDraw.Draw(dot).ellipse((2, 2, 22, 22), fill=(255, 255, 255, 255)); paste(cv, dot, tx, ty, 1, fade(t, e["t0"], e["t1"]), rects)
+            paste(cv, ch, cx, cy, s, a, rects)
+        elif k == "infocard": paste(cv, infocard_sprite(e["icon"], e["text"], e["w"]), e["cx"], e["cy"], s, a, rects)
+        elif k == "ingcard": paste(cv, ingcard_sprite(e["icon"], e["name"], e["tag"], e["mg"]), e["cx"], e["cy"], s, a, rects)
+        elif k == "tracker": paste(cv, tracker_sprite(e["step"], e["title"]), 510, 305, 1.0, fade(t, e["t0"], e["t1"], 0.15, 0.10), rects)
         elif k == "chip": paste(cv, chip_sprite(e["text"]), e["cx"], e["cy"], s, a, rects)
-        elif k == "src": paste(cv, src_sprite(e["text"]), 510, 305, s, a, rects)
+        elif k == "src": paste(cv, src_sprite(e["text"]), 510, 885, s, a, rects)
         elif k == "particle": sprite_scene(cv, t, e, rects)
         elif k == "photo": paste(cv, photo_sprite(e["name"], e["h"]), e["cx"], e["cy"], s, a, rects)
         elif k == "endcard":
@@ -267,7 +353,7 @@ def compose(layout, t, i, img, rects):
         cv = Image.new("RGB", (W, H)); cv.paste(top_bg(), (0, 0))
         pv, fr = presenter(img, i, 1.10 * sc_push * sc_p, W, H - SPLIT_Y, 540, 270)
         cv.paste(pv, (0, SPLIT_Y)); face = (fr[0], fr[1] + SPLIT_Y, fr[2], fr[3] + SPLIT_Y)
-        draw_elements(cv, t, rects); draw_captions(cv, t, 985, rects)
+        draw_elements(cv, t, rects); draw_captions(cv, t, 1000, rects)
     for ft in FLASHES:
         d = t - ft
         if 0 <= d < 0.12:
