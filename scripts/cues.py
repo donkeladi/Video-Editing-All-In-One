@@ -40,7 +40,7 @@ titles=[
  T(54.78,60.73,[L('SOKONGAN HARIAN',55.36,57.4,size='kick'),L('TAMBAHAN',56.96,58.52),L('DS PHARMA',58.52,59.68),L('*EYE CARE*',59.68)]),
  T(60.73,66.25,[L('ADA JUGA',60.73,size='kick'),L('*EYEBRIGHT*',61.08),L('bunga Eropah, digunakan secara tradisional untuk mata',62.2,size='sub')]),
  T(66.25,71.4,[L('BERDAFTAR',66.25,size='kick'),L('*MAL22076147T*',67.24),L('digunakan secara tradisional untuk kesihatan mata',67.5,size='sub')]),
- T(71.4,END,[L('NAK DAPATKAN?',71.6,size='kick'),L('*TENGOK PROFIL*',72.76)]),
+ T(71.4,END,[L('NAK DAPATKAN?',71.6,size='kick'),L('*TENGOK PROFIL*',72.76,74.0),L('CEK *BEG KUNING*',74.0)]),
 ]
 cards=[C(1.36,2.32,'carrot'),C(2.32,2.62,'goji',rot=-3),C(2.62,3.90,'avocado'),C(3.90,5.2,'eyebright',rot=-3),
  C(7.98,15.66,'carrot'),C(19.10,31.0,'goji',rot=-3),C(31.0,42.76,'avocado'),
@@ -55,7 +55,7 @@ caps=[(0.88,2.6,"Nak ambil *lobak merah*, *goji*,"),(2.6,4.58,"*avokado* dan jug
 (51.7,54.78,"bila umur dah meningkat *40 tahun*"),(54.78,58.02,"Kalau nak sokongan harian tambahan"),(58.02,60.73,"ada *DS Pharma Eye Care*"),
 (60.73,62.2,"Ada *eyebright* juga,"),(62.2,66.25,"bunga Eropah yang digunakan secara tradisional untuk mata"),
 (66.25,67.5,"*Berdaftar* dengan MAL22076147T"),(67.5,71.4,"digunakan secara tradisional untuk kesihatan mata"),
-(71.4,74.9,"Jadi kalau nak dapatkan ni, boleh tengok dekat *profil*")]
+(71.4,73.6,"Jadi kalau nak dapatkan ni, boleh tengok dekat *profil*"),(73.6,75.4,"ataupun cek *beg kuning* sekarang")]
 caps=[dict(t0=m(a),t1=m(b),text=t) for a,b,t in caps]
 for i in range(len(caps)-1):
     if caps[i+1]['t0']-caps[i]['t1']<0.8: caps[i]['t1']=caps[i+1]['t0']

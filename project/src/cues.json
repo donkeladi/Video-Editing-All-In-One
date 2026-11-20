@@ -394,6 +394,12 @@
     {
      "text": "*TENGOK PROFIL*",
      "t": 66.26,
+     "until": 67.5,
+     "size": "big"
+    },
+    {
+     "text": "CEK *BEG KUNING*",
+     "t": 67.5,
      "until": null,
      "size": "big"
     }
@@ -609,8 +615,13 @@
   },
   {
    "t0": 64.87,
-   "t1": 68.42,
+   "t1": 67.1,
    "text": "Jadi kalau nak dapatkan ni, boleh tengok dekat *profil*"
+  },
+  {
+   "t0": 67.1,
+   "t1": 68.42,
+   "text": "ataupun cek *beg kuning* sekarang"
   }
  ],
  "segs": [
