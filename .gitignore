@@ -9,3 +9,5 @@ output/*
 *.wav
 *.mp3
 work/
+__pycache__/
+*.pyc
