@@ -108,9 +108,11 @@ pop(cs[12][0],cs[13][1],"Digunakan secara "+ACC+"tradisional"+TXT+r"\N"+"bukan "
 # 5) panel rajah pop-up (kad blueprint) + penanda bernombor
 ing0=cs[14][0]+CARD_D+0.1
 BR=[("flower",nt(2.2,True),nt(5.0,False),850,640,1.0),
-    ("ingredients",ing0,nt(47.4,False),862,640,0.88),
+    ("komposisi",ing0,nt(47.4,False),800,810,1.15),
     ("box_back",nt(47.5,True),nt(49.3,False),862,620,0.88),
-    ("box_front",nt(49.3,True),nt(52.8,False),862,620,0.88)]
+    ("box_front",nt(49.3,True),nt(52.8,False),862,620,0.88),
+    ("kkm",nt(52.9,True),nt(54.5,False),862,640,0.88),
+    ("farma",nt(54.5,True),nt(57.6,False),862,640,0.88)]
 M=json.load(open("work/cards/cards.json"))
 for name,a,b,cx,cy,kk in BR:
     m=M[name]; ox=cx-m["W"]*kk/2; oy=cy-m["H"]*kk/2; d=b-a; n=len(m["marks"]); sp=min(0.5,(d-1.0)/n)
@@ -118,9 +120,10 @@ for name,a,b,cx,cy,kk in BR:
     for i,mk in enumerate(m["marks"]):
         t=a+0.5+i*sp; x0,y0,x1,y1=[mk["rect"][0]*kk+ox,mk["rect"][1]*kk+oy,mk["rect"][2]*kk+ox,mk["rect"][3]*kk+oy]
         TICKS.append((t,"tick2"))
+        if mk.get("hi"): ev.append((2,t+0.2,b-0.12,"Hi",r"{\an7\pos(0,0)\p1\fad(150,100)}m %d %d l %d %d %d %d %d %d"%(x0,y0,x1,y0,x1,y1,x0,y1)))
         ev.append((3,t,b-0.12,"Draw",r"{\an7\pos(0,0)\p1\clip(%d,%d,%d,%d)\t(0,220,\clip(%d,%d,%d,%d))\fad(0,100)}m %d %d l %d %d %d %d %d %d %d %d"%(x0-4,y0-4,x0-4,y1+4,x0-4,y0-4,x1+4,y1+4,x0,y0,x1,y0,x1,y1,x0,y1,x0,y0)))
         ev.append((4,t+0.05,b-0.12,"Tag",r"{\an1\pos(%d,%d)\fad(60,100)}%02d"%(x0-2,y0-3,i+1)))
-        ev.append((4,t+0.15,b-0.12,"Leg",r"{\an7\fs%d\pos(%d,%d)\fad(120,100)}"%(round(20*kk),ox+16*kk,oy+(m["legend_y"]+6)*kk+i*34*kk)+ACC+"%02d"%(i+1)+TXT+"  "+mk["label"]))
+        if m.get("legend",True): ev.append((4,t+0.15,b-0.12,"Leg",r"{\an7\fs%d\pos(%d,%d)\fad(120,100)}"%(round(20*kk),ox+16*kk,oy+(m["legend_y"]+6)*kk+i*34*kk)+ACC+"%02d"%(i+1)+TXT+"  "+mk["label"]))
 # ASS
 ass=["[Script Info]","ScriptType: v4.00+","PlayResX: 1080","PlayResY: 1920","WrapStyle: 0","",
 "[V4+ Styles]","Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding",
@@ -130,6 +133,7 @@ f"Style: Hook,{FONT},120,&H00FFE89B,&H00FFE89B,&H00331200,&H90000000,1,0,0,0,100
 f"Style: HookSub,{FONT},46,&H00FFF5ED,&H00FFF5ED,&H00331200,&H90000000,1,0,0,0,100,100,0,0,1,4,2,8,60,60,300,1",
 f"Style: Pop,{FONT},68,&H00FFF5ED,&H00FFF5ED,&H00331200,&H90000000,1,0,0,0,100,100,0,0,1,6,2,8,60,60,110,1",
 f"Style: Draw,{FONT},20,&HFF000000,&HFF000000,&H00FFE89B,&H00000000,0,0,0,0,100,100,0,0,1,3,0,7,0,0,0,1",
+f"Style: Hi,{FONT},20,&HB0FFE89B,&HB0FFE89B,&H00FFE89B,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1",
 f"Style: Tag,{MONO},24,&H00613312,&H00613312,&H00FFE89B,&H00000000,1,0,0,0,100,100,0,0,3,5,0,1,0,0,0,1",
 f"Style: Leg,{MONO},20,&H00FFF5ED,&H00FFF5ED,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1","",
 "[Events]","Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text"]
