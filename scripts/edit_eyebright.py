@@ -90,6 +90,13 @@ expr=str(kf[-1][1])
 for (t0,z0),(t1,z1) in reversed(list(zip(kf,kf[1:]))):
     if t1<=t0: continue
     expr=f"if(lt(t,{t1:.3f}),{z0}+({z1-z0:.3f})*(t-{t0:.3f})/{t1-t0:.3f},{expr})"
+# B-roll cutaway (masa video asal): (fail, mula, tamat)
+BR=[("input/broll/flower.jpg",2.2,5.0),
+    ("input/broll/poster_box.jpg",43.56,45.4),
+    ("input/broll/poster_ingredients.jpg",45.4,47.4),
+    ("input/broll/box_back_crop.jpg",47.5,49.2),
+    ("input/broll/box_front.jpg",49.3,52.8)]
+BR=[(f,nt(a,True),nt(b,False)) for f,a,b in BR]
 # filter graph
 f=[]
 for i,(a,b,d) in enumerate(P):
@@ -102,9 +109,19 @@ for i in range(1,len(P)):
     f.append(f"[{pa}][a{i}]acrossfade=d={d}[c{i}]")
     pv,pa=f"x{i}",f"c{i}"
 zz=f"({expr})"
-f.append(f"[{pv}]scale=w='1080*{zz}':h='1920*{zz}':eval=frame:flags=bicubic,crop=w=1080:h=1920:x='(iw-ow)/2':y='(ih-oh)*(0.5-0.25*clip(({zz}-1.13)/0.37,0,1))',setsar=1,ass=work/eyebright.ass[vout]")
+f.append(f"[{pv}]scale=w='1080*{zz}':h='1920*{zz}':eval=frame:flags=bicubic,crop=w=1080:h=1920:x='(iw-ow)/2':y='(ih-oh)*(0.5-0.25*clip(({zz}-1.13)/0.37,0,1))',setsar=1,format=yuv420p[zc]")
+cur="zc"
+for j,(fn,a,b) in enumerate(BR):
+    d=b-a; k=j+1
+    f.append(f"[{k}:v]split[bg{k}][fg{k}]")
+    f.append(f"[bg{k}]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=40:5,eq=brightness=-0.08[bb{k}]")
+    f.append(f"[fg{k}]scale=w='1000*(1+0.05*t/{d:.3f})':h='1200*(1+0.05*t/{d:.3f})':force_original_aspect_ratio=decrease:eval=frame:flags=bicubic[ff{k}]")
+    f.append(f"[bb{k}][ff{k}]overlay=x='(W-w)/2':y='H*0.40-h/2':eval=frame,format=yuva420p,fade=t=in:st=0:d=0.15:alpha=1,fade=t=out:st={d-0.15:.3f}:d=0.15:alpha=1,setpts=PTS+{a:.3f}/TB[L{k}]")
+    f.append(f"[{cur}][L{k}]overlay=eof_action=pass:format=auto[o{k}]")
+    cur=f"o{k}"
+f.append(f"[{cur}]ass=work/eyebright.ass[vout]")
 f.append(f"[{pa}]loudnorm=I=-13:TP=-1.5:LRA=11[aout]")
 open("work/filter.txt","w").write(";\n".join(f))
-subprocess.run(["ffmpeg","-y","-i",SRC,"-filter_complex_script","work/filter.txt","-map","[vout]","-map","[aout]",
+subprocess.run(["ffmpeg","-y","-i",SRC]+sum([["-loop","1","-framerate","30","-t",f"{b-a:.3f}","-i",fn] for fn,a,b in BR],[])+["-filter_complex_script","work/filter.txt","-map","[vout]","-map","[aout]",
  "-c:v","libx264","-crf","18","-preset","medium","-pix_fmt","yuv420p","-c:a","aac","-b:a","192k","-ar","44100","-movflags","+faststart",OUT],check=True)
 print(OUT,total)
