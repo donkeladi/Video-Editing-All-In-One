@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Edit video Eyebright: buang senyap, transisi xfade, zoom in/out beransur, subtitle ASS, -14 LUFS.
-Guna: python3 scripts/edit_eyebright.py"""
+Guna: python3 scripts/make_cards.py && python3 scripts/edit_eyebright.py"""
 import subprocess, os, re
 SRC="input/eyebright.mov"; OUT="output/eyebright_final.mp4"
 PAD=0.2; OV=0.2
@@ -59,7 +59,7 @@ def ts(t):
     h=int(t//3600);m=int(t%3600//60);s=t%60
     return f"{h}:{m:02d}:{s:05.2f}"
 os.makedirs("work",exist_ok=True); os.makedirs("output",exist_ok=True)
-Y=r"{\1c&H1EC8FF&}"; W=r"{\1c&HFFFFFF&}"
+Y=r"{\1c&HC0D03F&}"; W=r"{\1c&HFFFFFF&}"
 KEYS={"eyebright","tradisional","terhad","terbukti","antioksidan","anti-radang","mal22076147t"}
 def hl(w):
     k=re.sub(r"[^\w-]","",w).lower()
@@ -104,24 +104,23 @@ pop(cs[8][0],cs[8][1],Y+"Antioksidan"+W+" &"+r"\N"+Y+"Anti-radang")
 pop(cs[12][0],cs[13][1],"Digunakan secara "+Y+"tradisional"+W+r"\N"+"bukan "+Y+"terbukti",y=110)
 # 5) B-roll (masa akhir) + pill pop-up bahan
 ing0=cs[14][0]+CARD_D+0.1
-BR=[("input/broll/flower.jpg",nt(2.2,True),nt(5.0,False)),
-    ("input/broll/poster_ingredients.jpg",ing0,nt(47.4,False)),
-    ("input/broll/box_back_crop.jpg",nt(47.5,True),nt(49.2,False)),
-    ("input/broll/box_front.jpg",nt(49.3,True),nt(52.8,False))]
+# kad pop-up gaya keratan akhbar (PNG dari make_cards.py): (fail, mula, tamat, pusat_x, pusat_y, lebar, sudut)
+BR=[("work/cards/flower.png",nt(2.2,True),nt(5.0,False),830,640,400,5),
+    ("work/cards/ingredients.png",ing0,nt(47.4,False),860,640,460,-4),
+    ("work/cards/box_back.png",nt(47.5,True),nt(49.2,False),860,600,460,4),
+    ("work/cards/box_front.png",nt(49.3,True),nt(52.8,False),860,600,460,-3)]
 def pill(a,b,txt,y):
     ev.append((2,a,b,"Pill",r"{\an5\pos(540,%d)\fscx50\fscy50\t(0,150,\fscx112\fscy112)\t(150,260,\fscx100\fscy100)\fad(0,120)}"%y+txt))
-pill(ing0+0.5,BR[1][2],"Ekstrak Eyebright 40mg",1330)
-pill(BR[2][1]+0.2,BR[2][2],"Berdaftar: MAL22076147T",1090)
 # ASS
 FONT="Inter"
 ass=["[Script Info]","ScriptType: v4.00+","PlayResX: 1080","PlayResY: 1920","WrapStyle: 0","",
 "[V4+ Styles]","Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding",
 f"Style: Cap,{FONT},58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,5,2,2,80,80,430,1",
 f"Style: Card,{FONT},84,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0,0,4,110,60,720,1",
-f"Style: Hook,{FONT},120,&H001EC8FF,&H001EC8FF,&H00000000,&H90000000,1,0,0,0,100,100,2,0,1,6,3,8,60,60,150,1",
+f"Style: Hook,{FONT},120,&H00C0D03F,&H00C0D03F,&H00000000,&H90000000,1,0,0,0,100,100,2,0,1,6,3,8,60,60,150,1",
 f"Style: HookSub,{FONT},46,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,4,2,8,60,60,300,1",
 f"Style: Pop,{FONT},68,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,6,2,8,60,60,110,1",
-f"Style: Pill,{FONT},54,&H00101010,&H00101010,&H001EC8FF,&H00000000,1,0,0,0,100,100,0,0,3,20,0,5,60,60,0,1","",
+f"Style: Pill,{FONT},54,&H00101010,&H00101010,&H00C0D03F,&H00000000,1,0,0,0,100,100,0,0,3,20,0,5,60,60,0,1","",
 "[Events]","Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text"]
 for ly,a,b,st,tx in ev:
     ass.append(f"Dialogue: {ly},{ts(a)},{ts(b)},{st},,0,0,0,,{tx}")
@@ -160,35 +159,35 @@ for i in range(1,len(P)):
     f.append(f"[{pa}][a{i}]acrossfade=d={d}[c{i}]")
     pv,pa=f"x{i}",f"c{i}"
 zz=f"({expr})"
-f.append(f"[{pv}]scale=w='1080*{zz}':h='1920*{zz}':eval=frame:flags=bicubic,crop=w=1080:h=1920:x='(iw-ow)/2':y='(ih-oh)*(0.5-0.25*clip(({zz}-1.13)/0.37,0,1))',setsar=1,eq=contrast=1.07:saturation=1.12:gamma=0.97,colorbalance=rs=0.04:rm=0.03:bm=-0.03:bs=-0.04,vignette=PI/5.5,unsharp=5:5:0.5:5:5:0,format=yuv420p[zc]")
+f.append(f"[{pv}]scale=w='1080*{zz}':h='1920*{zz}':eval=frame:flags=bicubic,crop=w=1080:h=1920:x='(iw-ow)/2':y='(ih-oh)*(0.5-0.25*clip(({zz}-1.13)/0.37,0,1))',setsar=1,eq=contrast=1.06:saturation=1.06:brightness=0.01,colorbalance=bs=0.02:bm=0.02,vignette=PI/6.5,unsharp=5:5:0.5:5:5:0,format=yuv420p[zc]")
 cur="zc"
-for j,(fn,a,b) in enumerate(BR):
+for j,(fn,a,b,cx,cy,wd,ang) in enumerate(BR):
     d=b-a; k=j+1
-    f.append(f"[{k}:v]split[bg{k}][fg{k}]")
-    f.append(f"[bg{k}]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=40:5,eq=brightness=-0.08[bb{k}]")
-    f.append(f"[fg{k}]scale=w='1000*(1+0.05*t/{d:.3f})':h='1200*(1+0.05*t/{d:.3f})':force_original_aspect_ratio=decrease:eval=frame:flags=bicubic[ff{k}]")
-    f.append(f"[bb{k}][ff{k}]overlay=x='(W-w)/2':y='H*0.40-h/2':eval=frame,format=yuva420p,fade=t=in:st=0:d=0.15:alpha=1,fade=t=out:st={d-0.15:.3f}:d=0.15:alpha=1,setpts=PTS+{a:.3f}/TB[L{k}]")
-    f.append(f"[{cur}][L{k}]overlay=eof_action=pass:format=auto[o{k}]")
+    e=f"(1-pow(1-min(t/0.55,1),3))"                     # easeOutCubic 0.55s
+    S=f"max(0.02,{e}*min(1,max((({d:.3f})-t)/0.2,0.02)))"  # masuk spin+zoom, keluar mengecil
+    A=f"({ang}*PI/180+(1-{e})*(-2.5*PI))"
+    f.append(f"[{k}:v]format=rgba,rotate=a='{A}':ow='hypot(iw,ih)':oh='hypot(iw,ih)':c=black@0,scale=w='max(4,{wd}*1.12*{S})':h=-1:eval=frame:flags=bicubic,setpts=PTS+{a:.3f}/TB[L{k}]")
+    f.append(f"[{cur}][L{k}]overlay=x='{cx}-w/2':y='{cy}-h/2':eval=frame:eof_action=pass:format=auto[o{k}]")
     cur=f"o{k}"
 # kad hitam + grain semasa kad tajuk
 for ci,(t0,_,_) in enumerate(CARDS):
     en=f"between(t,{t0:.3f},{t0+CARD_D:.3f})"
-    f.append(f"[{cur}]format=yuv420p,drawbox=x=0:y=0:w=iw:h=ih:color=black@1:t=fill:enable='{en}',noise=alls=16:allf=t:enable='{en}'[cd{ci}]")
+    f.append(f"[{cur}]format=yuv420p,drawbox=x=0:y=0:w=iw:h=ih:color=0x0b1f2e@1:t=fill:enable='{en}',noise=alls=16:allf=t:enable='{en}'[cd{ci}]")
     cur=f"cd{ci}"
 # light leak: oren/merah di mula kad, biru-putih di hujung kad
 LK=[]
 for t0,_,_ in CARDS:
-    LK.append((t0-0.05,"0xffb040","0x701000",1.0)); LK.append((t0+CARD_D-0.1,"0xb0d0ff","0x101840",0.7))
+    LK.append((t0-0.05,"0xd8fbff","0x0a4a58",0.9)); LK.append((t0+CARD_D-0.1,"0xffffff","0x103040",0.6))
 for m,(a,c0,c1,op) in enumerate(LK):
     k=len(BR)+1+m; a=max(a,0)
     env=f"if(between(T,{a:.3f},{a+0.12:.3f}),(T-{a:.3f})/0.12,if(between(T,{a+0.12:.3f},{a+0.57:.3f}),1-(T-{a+0.12:.3f})/0.45,0))"
     f.append(f"[{k}:v]scale=1080:1920,format=gbrp[lk{m}]")
     f.append(f"[{cur}]format=gbrp[ba{m}]")
-    f.append(f"[ba{m}][lk{m}]blend=all_expr='A+(255-A)*(B/255)*{op}*{env}',format=yuv420p[lb{m}]")
+    f.append(f"[ba{m}][lk{m}]blend=all_expr='A+(255-A)*(B/255)*{op}*{env}':enable='between(t,{a:.3f},{a+0.57:.3f})',format=yuv420p[lb{m}]")
     cur=f"lb{m}"
 f.append(f"[{cur}]ass=work/eyebright.ass[vout]")
 f.append(f"[{pa}]loudnorm=I=-13:TP=-1.5:LRA=11[aout]")
 open("work/filter.txt","w").write(";\n".join(f))
-subprocess.run(["ffmpeg","-y","-i",SRC]+sum([["-loop","1","-framerate","30","-t",f"{b-a:.3f}","-i",fn] for fn,a,b in BR],[])+sum([["-f","lavfi","-i",f"gradients=s=270x480:r=30:d={total+1:.2f}:c0={c0}:c1={c1}:x0=230:y0=60:x1=20:y1=420:type=1"] for a,c0,c1,op in LK],[])+["-filter_complex_script","work/filter.txt","-map","[vout]","-map","[aout]","-t",f"{total:.3f}",
+subprocess.run(["ffmpeg","-y","-i",SRC]+sum([["-loop","1","-framerate","30","-t",f"{b-a:.3f}","-i",fn] for fn,a,b,*_ in BR],[])+sum([["-f","lavfi","-i",f"gradients=s=270x480:r=30:d={total+1:.2f}:c0={c0}:c1={c1}:x0=230:y0=60:x1=20:y1=420:type=1"] for a,c0,c1,op in LK],[])+["-filter_complex_script","work/filter.txt","-map","[vout]","-map","[aout]","-t",f"{total:.3f}",
  "-c:v","libx264","-crf","18","-preset","medium","-pix_fmt","yuv420p","-c:a","aac","-b:a","192k","-ar","44100","-movflags","+faststart",OUT],check=True)
 print(OUT,total)
