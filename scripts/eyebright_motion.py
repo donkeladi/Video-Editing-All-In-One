@@ -13,6 +13,8 @@ import json, subprocess, sys, os, math, random
 from PIL import Image, ImageDraw, ImageFont
 
 W, H, FPS = 1080, 1920, 30
+CX = 510          # pusat visual: ofset ke kiri supaya jauh dari butang TikTok di kanan
+# Zon selamat TikTok: x 100-920, y 180-1500 (atas ~170px, bawah ~420px, kanan ~160px dikecualikan)
 VID, NAME = "input/eyebright.mov", "eyebright"
 GAP, PAD_IN, PAD_OUT, XF, XF_HARD = 0.30, 0.12, 0.20, 0.12, 0.034
 FX, FY = 0.55, 0.35
@@ -237,19 +239,19 @@ _rng = random.Random(7)
 PARTS = [(side, _rng.random(), _rng.uniform(-90, 90), _rng.choice((9, 12, 15))) for side in (0, 1) for _ in range(22)]
 
 # ================= render satu frame =================
-CARD_W, CARD_H, CARD_CY = 900, 380, 1075
+CARD_W, CARD_H, CARD_CY = 820, 380, 1075
 
 def card_xform(t, t_in, t_out):
     u = t - t_in
     if u < 0 or t > t_out + 0.25: return None
     a = clamp(u / 0.15) * clamp((t_out + 0.25 - t) / 0.25)
-    s = (0.82 + 0.18 * eob(u / 0.32)) * (1 - 0.04 * (1 - clamp((t_out + 0.25 - t) / 0.25)))
+    s = (0.85 + 0.15 * eo3(u / 0.32)) * (1 - 0.04 * (1 - clamp((t_out + 0.25 - t) / 0.25)))
     return s, a
 
 def draw_slam(cv, t, t0, t1, sp, cx, cy, rot=-3.0):
     u = t - t0
     if u < 0 or t > t1: return False
-    s = 1 + 1.15 * (1 - eo3(u / 0.14))
+    s = 1 + 0.55 * (1 - eo3(u / 0.14))
     sh = max(0.0, 1 - u / 0.4)
     dx, dy = math.sin(u * 95) * 14 * sh, math.cos(u * 80) * 10 * sh
     place(cv, sp, cx + dx, cy + dy, s, clamp(u / 0.04) * clamp((t1 - t) / 0.14), rot)
@@ -259,16 +261,16 @@ def src_chip(cv, t, t_in, t_out, txt):
     u = t - t_in
     if u < 0 or t > t_out + 0.2: return
     sp = chip_sp(txt, 30, (10, 14, 26), (225, 232, 245), padx=26, pady=12, outline=(120, 135, 160), bga=215, heavy=False)
-    blit(cv, sp, (W - sp.width) / 2, 1550 + 22 * (1 - eo3(u / 0.3)), clamp(u / 0.25) * clamp((t_out + 0.2 - t) / 0.2))
+    blit(cv, sp, CX - sp.width / 2, 832 - 16 * (1 - eo3(u / 0.3)) - sp.height / 2, clamp(u / 0.25) * clamp((t_out + 0.2 - t) / 0.2))
 
 def hook_icons(cv, t):
     used = False
-    for t0, sp_fn, cx, rot in ((A["carrot"], carrot_sp, 190, 28), (A["goji"], goji_sp, 880, -12)):
+    for t0, sp_fn, cx, rot in ((A["carrot"], carrot_sp, 195, 28), (A["goji"], goji_sp, 830, -12)):
         u = t - t0
         if u < 0 or t > A["hook_out"] + 0.25: continue
         out = clamp((A["hook_out"] + 0.25 - t) / 0.25)
         s = eob(u / 0.35) * (1 + 0.035 * math.sin(u * 5)) * out
-        if s > 0.02: place(cv, sp_fn(250), cx, 1700, s, 1.0, rot); used = True
+        if s > 0.02: place(cv, sp_fn(200), cx, 1160, s, 1.0, rot); used = True
     return used
 
 def scene_split(cv, t):
@@ -281,14 +283,14 @@ def scene_split(cv, t):
                                                                  d.rectangle((W * k // 2, 0, W * k, 8 * k), fill=RED + (255,))), 1))
     blit(cv, panel, 0, top)
     dy = top - 880
-    place(cv, carrot_sp(180), 235, 1010 + dy, eob((u - 0.15) / 0.35), 1, 20)
-    place(cv, goji_sp(180), 845, 1010 + dy, eob((u - 0.25) / 0.35), 1, -10)
-    c = (540, 1100 + dy)
+    place(cv, carrot_sp(180), 190, 1010 + dy, eob((u - 0.15) / 0.35), 1, 20)
+    place(cv, goji_sp(180), 790, 1010 + dy, eob((u - 0.25) / 0.35), 1, -10)
+    c = (CX, 1100 + dy)
     if t >= A["pigmen"]:
         up = t - A["pigmen"]
         for side, ph, off, r in PARTS:
             p = ((up * 0.85 + ph) % 1.0)
-            sx, sy = (235, 1010 + dy) if side == 0 else (845, 1010 + dy)
+            sx, sy = (190, 1010 + dy) if side == 0 else (790, 1010 + dy)
             cx_, cy_ = (sx + c[0]) / 2, (sy + c[1]) / 2 + off
             x = (1 - p) ** 2 * sx + 2 * (1 - p) * p * cx_ + p * p * c[0]
             y = (1 - p) ** 2 * sy + 2 * (1 - p) * p * cy_ + p * p * c[1]
@@ -304,29 +306,29 @@ def scene_split(cv, t):
 
 def layer_lobak(t):
     L = card_bg(CARD_W, CARD_H, ORANGE)
-    ic = carrot_sp(120); fa, fb = font(44), font(48)
-    tb = text_sp("beta-karotin", 44, ORANGE); pill = chip_sp("vitamin A", 48, GOLD, (20, 20, 20), padx=30, pady=14)
-    gw = 120 + 18 + tb.width + 40 + 120 + 36 + pill.width
+    ic = carrot_sp(100)
+    tb = text_sp("beta-karotin", 40, ORANGE); pill = chip_sp("vitamin A", 44, GOLD, (20, 20, 20), padx=26, pady=12)
+    gw = 100 + 18 + tb.width + 28 + 100 + 28 + pill.width
     x = (CARD_W - gw) // 2; cy = 150
-    L.alpha_composite(ic.rotate(25, resample=Image.BICUBIC, expand=True), (x - 10, cy - 70)); x += 138
-    L.alpha_composite(tb, (x, cy - tb.height // 2)); x += tb.width + 40
+    icr = ic.rotate(25, resample=Image.BICUBIC, expand=True); L.alpha_composite(icr, (x - (icr.width - 100) // 2, cy - icr.height // 2)); x += 118
+    L.alpha_composite(tb, (x, cy - tb.height // 2)); x += tb.width + 28
     p = eio((t - A["arrow"]) / 0.55)                       # anak panah dilukis
     if p > 0:
-        lay = Image.new("RGBA", (120 * 3, 60 * 3), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
-        xe = 10 + 100 * p
-        d.line((10 * 3, 30 * 3, xe * 3, 30 * 3), fill=WHITE + (255,), width=9 * 3)
+        lay = Image.new("RGBA", (100 * 3, 60 * 3), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
+        xe = 8 + 82 * p
+        d.line((8 * 3, 30 * 3, xe * 3, 30 * 3), fill=WHITE + (255,), width=9 * 3)
         if p > 0.82:
-            hp = clamp((p - 0.82) / 0.18); hx = 112
+            hp = clamp((p - 0.82) / 0.18); hx = 92
             d.line((hx * 3, 30 * 3, (hx - 22 * hp) * 3, (30 - 20 * hp) * 3), fill=WHITE + (255,), width=9 * 3)
             d.line((hx * 3, 30 * 3, (hx - 22 * hp) * 3, (30 + 20 * hp) * 3), fill=WHITE + (255,), width=9 * 3)
-        L.alpha_composite(lay.resize((120, 60), Image.LANCZOS), (x, cy - 30))
-    x += 120 + 36
+        L.alpha_composite(lay.resize((100, 60), Image.LANCZOS), (x, cy - 30))
+    x += 100 + 28
     s = eob((t - A["vitA"]) / 0.35)
     if s > 0.02:
         q = pill.resize((max(1, int(pill.width * s)), max(1, int(pill.height * s))), Image.BILINEAR)
         L.alpha_composite(q, (x + (pill.width - q.width) // 2, cy - q.height // 2))
     cs = [("mata", A["chip1"], TEAL), ("daya tahan badan", A["chip2"], ORANGE)]
-    sps = [chip_sp(tx, 38, WHITE, (20, 20, 30), padx=28, pady=14, outline=col) for tx, _, col in cs]
+    sps = [chip_sp(tx, 36, WHITE, (20, 20, 30), padx=26, pady=13, outline=col) for tx, _, col in cs]
     tw = sum(s_.width for s_ in sps) + 30; x = (CARD_W - tw) // 2
     for sp_, (tx, t0, col) in zip(sps, cs):
         s = eob((t - t0) / 0.3)
@@ -343,11 +345,11 @@ def layer_goji(t):
         o = 1 - eio(k)
         g = goji_sp(240); s = eob((t - A["goji_in"] - 0.1) / 0.35) * o
         if s > 0.02:
-            q = g.resize((max(1, int(g.width * s)), max(1, int(g.height * s))), Image.BILINEAR); L.alpha_composite(q, (240 - q.width // 2, CARD_H // 2 - q.height // 2))
+            q = g.resize((max(1, int(g.width * s)), max(1, int(g.height * s))), Image.BILINEAR); L.alpha_composite(q, (200 - q.width // 2, CARD_H // 2 - q.height // 2))
         zs = eob((t - A["zea"]) / 0.3) * o
         if zs > 0.02:
-            c = chip_sp("zeaxanthin", 54, TEAL, (255, 255, 255), padx=36, pady=18)
-            q = c.resize((max(1, int(c.width * zs)), max(1, int(c.height * zs))), Image.BILINEAR); L.alpha_composite(q, (610 - q.width // 2, CARD_H // 2 - q.height // 2))
+            c = chip_sp("zeaxanthin", 50, TEAL, (255, 255, 255), padx=32, pady=16)
+            q = c.resize((max(1, int(c.width * zs)), max(1, int(c.height * zs))), Image.BILINEAR); L.alpha_composite(q, (560 - q.width // 2, CARD_H // 2 - q.height // 2))
     if k > 0:                                              # rajah mata ringkas
         e = eye_sp(); s = 0.88 * eob(k)
         q = e.resize((max(1, int(e.width * s)), max(1, int(e.height * s))), Image.BILINEAR); q = fade(q, k)
@@ -394,9 +396,9 @@ def layer_avo(t):
             d_ = soft_dot((10, 13, 17)[n % 3], YELLOW); L.alpha_composite(fade(d_, clamp(ph / 0.1) * clamp((1 - ph) / 0.25)), (int(x - d_.width / 2), int(y - d_.height / 2)))
     ls = eob((t - A["lutein"]) / 0.35)
     if ls > 0.02:
-        lab = chip_sp("lutein", 56, YELLOW, (20, 20, 20), padx=40, pady=18)
+        lab = chip_sp("lutein", 52, YELLOW, (20, 20, 20), padx=36, pady=16)
         q = lab.resize((max(1, int(lab.width * ls)), max(1, int(lab.height * ls))), Image.BILINEAR)
-        L.alpha_composite(q, (int(CARD_W - 190 - q.width / 2), int(CARD_H / 2 - q.height / 2)))
+        L.alpha_composite(q, (int(CARD_W - 170 - q.width / 2), int(CARD_H / 2 - q.height / 2)))
     return L
 
 PROD = Image.open("assets/product_box.png").convert("RGB")
@@ -416,10 +418,14 @@ def rounded_img(im, r):
 
 def layer_prod(t):
     L = card_bg(CARD_W, CARD_H, GOLD)
-    iw, ih = 840, 340
+    iw, ih = 760, 250
     p = clamp((t - A["prod_in"]) / (A["prod_zoom_end"] - A["prod_in"]))
     im = PROD.resize((iw, ih), Image.LANCZOS, box=prod_window(p, iw / ih))
-    L.alpha_composite(rounded_img(im, 26), (30, 20))
+    L.alpha_composite(rounded_img(im, 24), (30, 22))
+    u = t - A["trad"]
+    if u > 0:
+        for n, ln in enumerate(("Digunakan secara tradisional", "untuk kesihatan mata")):
+            tsp = text_sp(ln, 32, WHITE, heavy=False); L.alpha_composite(fade(tsp, clamp(u / 0.3 - n * 0.2)), ((CARD_W - tsp.width) // 2, 292 + n * 44))
     return L
 
 def render(t):
@@ -433,24 +439,20 @@ def render(t):
                                      (layer_avo, A["avo_in"], A["avo_out"], "Sumber: Klikdokter Indonesia")):
         xf = card_xform(t, t_in, t_out)
         if xf:
-            s, a = xf; L = lay_fn(t); place(cv, L, W / 2, CARD_CY, s, a); src_chip(cv, t, t_in + 0.25, t_out, src); used = True
+            s, a = xf; L = lay_fn(t); place(cv, L, CX, CARD_CY, s, a); src_chip(cv, t, t_in + 0.25, t_out, src); used = True
     xf = card_xform(t, A["prod_in"], A["prod_out"])
     if xf:
-        s, a = xf; place(cv, layer_prod(t), W / 2, CARD_CY, s, a); used = True
+        s, a = xf; place(cv, layer_prod(t), CX, CARD_CY, s, a); used = True
         for t0, txt, size, bg, fg, y in ((A["mal"], "MAL22076147T", 58, YELLOW, (20, 20, 20), 815),):
             u = t - t0
             if 0 <= u and t < A["prod_out"] + 0.2:
-                place(cv, chip_sp(txt, size, bg, fg, padx=40, pady=16), W / 2, y, eob(u / 0.32), clamp((A["prod_out"] + 0.2 - t) / 0.2))
-        u = t - A["trad"]
-        if 0 <= u and t < A["prod_out"] + 0.2:
-            c = chip_sp("Digunakan secara tradisional untuk kesihatan mata", 33, (10, 90, 82), WHITE, padx=30, pady=14, heavy=False)
-            blit(cv, c, (W - c.width) / 2, 1550 + 22 * (1 - eo3(u / 0.3)), clamp(u / 0.25) * clamp((A["prod_out"] + 0.2 - t) / 0.2))
-    slam_hook = plate_sp(["KENAPA", "WARNA?"], 118, YELLOW, (20, 20, 20))
-    slam_kar = plate_sp(["KAROTENOID"], 104, ORANGE, WHITE)
-    slam_pig = plate_sp(["PIGMEN"], 150, TEAL, WHITE)
-    used |= draw_slam(cv, t, 0.0, 1.55, slam_hook, W / 2, 285)
-    used |= draw_slam(cv, t, A["karot"], A["split_out"], slam_kar, W / 2, 285, -2.5)
-    used |= draw_slam(cv, t, A["pig_in"], A["pig_out"], slam_pig, W / 2, 285, 2.5)
+                place(cv, chip_sp(txt, size, bg, fg, padx=40, pady=16), CX, y, eob(u / 0.32), clamp((A["prod_out"] + 0.2 - t) / 0.2))
+    slam_hook = plate_sp(["KENAPA", "WARNA?"], 92, YELLOW, (20, 20, 20))
+    slam_kar = plate_sp(["KAROTENOID"], 80, ORANGE, WHITE)
+    slam_pig = plate_sp(["PIGMEN"], 120, TEAL, WHITE)
+    used |= draw_slam(cv, t, 0.0, 1.55, slam_hook, CX, 335)
+    used |= draw_slam(cv, t, A["karot"], A["split_out"], slam_kar, CX, 320, -2.5)
+    used |= draw_slam(cv, t, A["pig_in"], A["pig_out"], slam_pig, CX, 320, 2.5)
     return cv, used
 
 def end_card(t):
@@ -459,14 +461,14 @@ def end_card(t):
     cv = bg.copy()
     a = clamp(u / 0.25)
     lay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ph = rounded_img(PROD.resize((900, int(900 * PROD.height / PROD.width)), Image.LANCZOS), 30)
-    place(lay, ph, W / 2, 560 + 20 * (1 - eo3(u / 0.5)), 1, 1)
-    place(lay, text_sp("DS Pharma Eye Care", 78, WHITE), W / 2, 850, 1, 1)
-    place(lay, chip_sp("MAL22076147T", 56, YELLOW, (20, 20, 20), padx=40, pady=16), W / 2, 990, 1, 1)
-    place(lay, text_sp("Digunakan secara tradisional", 42, WHITE, heavy=False), W / 2, 1110, 1, 1)
-    place(lay, text_sp("untuk kesihatan mata.", 42, WHITE, heavy=False), W / 2, 1170, 1, 1)
-    place(lay, text_sp("Bukan ganti pemeriksaan mata.", 34, (190, 205, 225), heavy=False), W / 2, 1270, 1, 1)
-    place(lay, chip_sp("Dapatkan di profile / beg kuning", 38, TEAL, WHITE, padx=36, pady=16), W / 2, 1450, 1, 1)
+    ph = rounded_img(PROD.resize((800, int(800 * PROD.height / PROD.width)), Image.LANCZOS), 30)
+    place(lay, ph, CX, 560 + 20 * (1 - eo3(u / 0.5)), 1, 1)
+    place(lay, text_sp("DS Pharma Eye Care", 78, WHITE), CX, 850, 1, 1)
+    place(lay, chip_sp("MAL22076147T", 56, YELLOW, (20, 20, 20), padx=40, pady=16), CX, 990, 1, 1)
+    place(lay, text_sp("Digunakan secara tradisional", 42, WHITE, heavy=False), CX, 1110, 1, 1)
+    place(lay, text_sp("untuk kesihatan mata.", 42, WHITE, heavy=False), CX, 1170, 1, 1)
+    place(lay, text_sp("Bukan ganti pemeriksaan mata.", 34, (190, 205, 225), heavy=False), CX, 1270, 1, 1)
+    place(lay, chip_sp("Dapatkan di profile / beg kuning", 38, TEAL, WHITE, padx=36, pady=16), CX, 1400, 1, 1)
     cv.alpha_composite(fade(lay, a))
     return fade(cv, a)
 
@@ -490,7 +492,7 @@ def build_subs():
             chunk.clear()
         for tk in toks:
             chunk.append(tk); tx = " ".join(c[0] for c in chunk if c[0])
-            if tk[0] and (tk[0][-1] in ".?!," or sum(1 for c in chunk if c[0]) >= 4 or len(tx) >= 26): flush()
+            if tk[0] and (tk[0][-1] in ".?!," or sum(1 for c in chunk if c[0]) >= 4 or len(tx) >= 24): flush()
         flush()
     for k in range(len(cues) - 1):
         if cues[k + 1][0] - cues[k][1] < 0.35: cues[k][1] = cues[k + 1][0]
@@ -504,7 +506,7 @@ def build_subs():
     with open(f"work/{NAME}.ass", "w") as f:
         f.write("[Script Info]\nScriptType: v4.00+\nPlayResX: 1080\nPlayResY: 1920\nWrapStyle: 0\n\n"
                 "[V4+ Styles]\nFormat: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding\n"
-                "Style: Default,DejaVu Sans,74,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,6,2,2,70,70,430,1\n\n"
+                "Style: Default,DejaVu Sans,70,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,6,2,2,90,170,430,1\n\n"
                 "[Events]\nFormat: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text\n")
         for t0, t1, tx in cues:
             tx = tx.replace("zeaxanthin", "{\\c&HA6B814&}zeaxanthin{\\c&HFFFFFF&}")      # teal #14B8A6
