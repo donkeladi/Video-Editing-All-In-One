@@ -59,68 +59,79 @@ def ts(t):
     h=int(t//3600);m=int(t%3600//60);s=t%60
     return f"{h}:{m:02d}:{s:05.2f}"
 os.makedirs("work",exist_ok=True); os.makedirs("output",exist_ok=True)
-Y=r"{\1c&HC0D03F&}"; W=r"{\1c&HFFFFFF&}"
+import json
+# Palet Blueprint: latar #123361, teks #edf5ff, aksen #9be8ff (ASS = BGR)
+ACC=r"{\1c&HFFE89B&}"; TXT=r"{\1c&HFFF5ED&}"; Y=ACC; W=TXT
+MONO="DejaVu Sans Mono"; FONT="Inter"
 KEYS={"eyebright","tradisional","terhad","terbukti","antioksidan","anti-radang","mal22076147t"}
 def hl(w):
     k=re.sub(r"[^\w-]","",w).lower()
-    return f"{Y}{w}{W}" if k in KEYS else w
+    return f"{ACC}{w}{TXT}" if k in KEYS else w
 cs=[(nt(a,True),nt(b,False)) for a,b,t in CH]
-ev=[]  # (layer,start,end,style,text)
-# 1) sari kata kecil, muncul perkataan demi perkataan
+ev=[]; TICKS=[]   # ev: (layer,start,end,style,text); TICKS: (masa,jenis)
+# 1) sari kata kecil, perkataan demi perkataan
 for (s_,e_),(a,b,t) in zip(cs,CH):
-    ws=t.split(); L=[len(w)+1 for w in ws]; tot=sum(L); cum=0
-    ts_=[]
-    for l in L: ts_.append(s_+(e_-s_)*0.8*cum/tot); cum+=l
+    ws=t.split(); L_=[len(w)+1 for w in ws]; tot=sum(L_); cum=0; ts_=[]
+    for l in L_: ts_.append(s_+(e_-s_)*0.8*cum/tot); cum+=l
     for i in range(len(ws)):
         end=ts_[i+1] if i+1<len(ws) else e_
         shown=" ".join(hl(w) for w in ws[:i+1]); hid=" ".join(ws[i+1:])
-        txt=shown+(" {\\alpha&HFF&}"+hid if hid else "")
-        ev.append((0,ts_[i],end,"Cap",txt))
-# 2) kad tajuk "Fakta #n" ala typewriter
-CARDS=[(cs[5][0],"Fakta #1",["Kegunaan","Tradisional"]),
-       (cs[9][0],"Fakta #2",["Kajian Manusia","Masih Terhad"]),
-       (cs[14][0],"Fakta #3",["Produk","Berdaftar"])]
+        ev.append((0,ts_[i],end,"Cap",shown+(" {\\alpha&HFF&}"+hid if hid else "")))
+# 2) kad bahagian ala blueprint, tajuk ditaip
+CARDS=[(cs[5][0],"FAKTA 01",["Kegunaan","Tradisional"]),
+       (cs[9][0],"FAKTA 02",["Kajian Manusia","Masih Terhad"]),
+       (cs[14][0],"FAKTA 03",["Produk","Berdaftar"])]
 CARD_D=1.7; CPS=0.035
+LBL=r"{\fn"+MONO+r"\fs46\1c&HFFE89B&}"; TTL=r"{\fn"+FONT+r"\fs84\1c&HFFF5ED&}"
 for t0,lab,lines in CARDS:
-    full=[lab]+lines; n=sum(len(x) for x in full)
+    full=[lab]+lines; n=sum(len(x) for x in full); TICKS.append((t0,"thunk"))
     for k in range(1,n+1):
         rem=k; out=[]
         for li,x in enumerate(full):
             take=x[:rem]; rem-=len(take)
-            out.append((Y+take+W) if li==0 else take)
+            out.append((LBL+take+TTL) if li==0 else take)
             if rem<=0: break
-        txt="\\N".join(out)+("{\\alpha&HFF&}"+"" if False else "")
-        if k<n: txt+="\u2588"
+        txt="\\N".join(out)+("\u2588" if k<n else "")
         st=t0+0.15+(k-1)*CPS; en=t0+0.15+k*CPS if k<n else t0+CARD_D
         ev.append((1,st,en,"Card",txt))
-# 3) teks hook atas
-ev.append((1,0.2,1.75,"Hook",r"{\fscx70\fscy70\t(0,180,\fscx108\fscy108)\t(180,300,\fscx100\fscy100)}EYEBRIGHT"))
+        if k%2==0 and k<n: TICKS.append((st,"tick"))
+# 3) hook
+ev.append((1,0.2,1.75,"Hook",r"{\fscx70\fscy70\t(0,180,\fscx108\fscy108)\t(180,300,\fscx100\fscy100)}EYEBRIGHT")); TICKS.append((0.2,"tick"))
 ev.append((1,0.45,1.75,"HookSub",r"{\fad(150,0)}Bunga yang digunakan berabad-abad"))
-# 4) pop-up frasa kunci (atas)
+# 4) frasa kunci (atas)
 def pop(a,b,txt,y=130):
+    TICKS.append((a,"tick"))
     ev.append((1,a,b,"Pop",r"{\an8\pos(540,%d)\fscx80\fscy80\t(0,160,\fscx106\fscy106)\t(160,260,\fscx100\fscy100)\fad(0,120)}"%y+txt))
-pop(cs[6][0],cs[6][1],"Hidung berair &"+r"\N"+Y+"alahan bermusim")
-pop(cs[8][0],cs[8][1],Y+"Antioksidan"+W+" &"+r"\N"+Y+"Anti-radang")
-pop(cs[12][0],cs[13][1],"Digunakan secara "+Y+"tradisional"+W+r"\N"+"bukan "+Y+"terbukti",y=110)
-# 5) B-roll (masa akhir) + pill pop-up bahan
+pop(cs[6][0],cs[6][1],"Hidung berair &"+r"\N"+ACC+"alahan bermusim")
+pop(cs[8][0],cs[8][1],ACC+"Antioksidan"+TXT+" &"+r"\N"+ACC+"Anti-radang")
+pop(cs[12][0],cs[13][1],"Digunakan secara "+ACC+"tradisional"+TXT+r"\N"+"bukan "+ACC+"terbukti",y=110)
+# 5) panel rajah pop-up (kad blueprint) + penanda bernombor
 ing0=cs[14][0]+CARD_D+0.1
-# kad pop-up gaya keratan akhbar (PNG dari make_cards.py): (fail, mula, tamat, pusat_x, pusat_y, lebar, sudut)
-BR=[("work/cards/flower.png",nt(2.2,True),nt(5.0,False),830,640,400,5),
-    ("work/cards/ingredients.png",ing0,nt(47.4,False),860,640,460,-4),
-    ("work/cards/box_back.png",nt(47.5,True),nt(49.2,False),860,600,460,4),
-    ("work/cards/box_front.png",nt(49.3,True),nt(52.8,False),860,600,460,-3)]
-def pill(a,b,txt,y):
-    ev.append((2,a,b,"Pill",r"{\an5\pos(540,%d)\fscx50\fscy50\t(0,150,\fscx112\fscy112)\t(150,260,\fscx100\fscy100)\fad(0,120)}"%y+txt))
+BR=[("flower",nt(2.2,True),nt(5.0,False),850,640,1.0),
+    ("ingredients",ing0,nt(47.4,False),862,640,0.88),
+    ("box_back",nt(47.5,True),nt(49.3,False),862,620,0.88),
+    ("box_front",nt(49.3,True),nt(52.8,False),862,620,0.88)]
+M=json.load(open("work/cards/cards.json"))
+for name,a,b,cx,cy,kk in BR:
+    m=M[name]; ox=cx-m["W"]*kk/2; oy=cy-m["H"]*kk/2; d=b-a; n=len(m["marks"]); sp=min(0.5,(d-1.0)/n)
+    TICKS.append((a,"thunk"))
+    for i,mk in enumerate(m["marks"]):
+        t=a+0.5+i*sp; x0,y0,x1,y1=[mk["rect"][0]*kk+ox,mk["rect"][1]*kk+oy,mk["rect"][2]*kk+ox,mk["rect"][3]*kk+oy]
+        TICKS.append((t,"tick2"))
+        ev.append((3,t,b-0.12,"Draw",r"{\an7\pos(0,0)\p1\clip(%d,%d,%d,%d)\t(0,220,\clip(%d,%d,%d,%d))\fad(0,100)}m %d %d l %d %d %d %d %d %d %d %d"%(x0-4,y0-4,x0-4,y1+4,x0-4,y0-4,x1+4,y1+4,x0,y0,x1,y0,x1,y1,x0,y1,x0,y0)))
+        ev.append((4,t+0.05,b-0.12,"Tag",r"{\an1\pos(%d,%d)\fad(60,100)}%02d"%(x0-2,y0-3,i+1)))
+        ev.append((4,t+0.15,b-0.12,"Leg",r"{\an7\fs%d\pos(%d,%d)\fad(120,100)}"%(round(20*kk),ox+16*kk,oy+(m["legend_y"]+6)*kk+i*34*kk)+ACC+"%02d"%(i+1)+TXT+"  "+mk["label"]))
 # ASS
-FONT="Inter"
 ass=["[Script Info]","ScriptType: v4.00+","PlayResX: 1080","PlayResY: 1920","WrapStyle: 0","",
 "[V4+ Styles]","Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding",
-f"Style: Cap,{FONT},58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,5,2,2,80,80,430,1",
-f"Style: Card,{FONT},84,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0,0,4,110,60,720,1",
-f"Style: Hook,{FONT},120,&H00C0D03F,&H00C0D03F,&H00000000,&H90000000,1,0,0,0,100,100,2,0,1,6,3,8,60,60,150,1",
-f"Style: HookSub,{FONT},46,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,4,2,8,60,60,300,1",
-f"Style: Pop,{FONT},68,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,6,2,8,60,60,110,1",
-f"Style: Pill,{FONT},54,&H00101010,&H00101010,&H00C0D03F,&H00000000,1,0,0,0,100,100,0,0,3,20,0,5,60,60,0,1","",
+f"Style: Cap,{FONT},58,&H00FFF5ED,&H00FFF5ED,&H00331200,&H90000000,1,0,0,0,100,100,0,0,1,5,2,2,80,80,430,1",
+f"Style: Card,{FONT},84,&H00FFF5ED,&H00FFF5ED,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0,0,4,110,60,720,1",
+f"Style: Hook,{FONT},120,&H00FFE89B,&H00FFE89B,&H00331200,&H90000000,1,0,0,0,100,100,2,0,1,6,3,8,60,60,150,1",
+f"Style: HookSub,{FONT},46,&H00FFF5ED,&H00FFF5ED,&H00331200,&H90000000,1,0,0,0,100,100,0,0,1,4,2,8,60,60,300,1",
+f"Style: Pop,{FONT},68,&H00FFF5ED,&H00FFF5ED,&H00331200,&H90000000,1,0,0,0,100,100,0,0,1,6,2,8,60,60,110,1",
+f"Style: Draw,{FONT},20,&HFF000000,&HFF000000,&H00FFE89B,&H00000000,0,0,0,0,100,100,0,0,1,3,0,7,0,0,0,1",
+f"Style: Tag,{MONO},24,&H00613312,&H00613312,&H00FFE89B,&H00000000,1,0,0,0,100,100,0,0,3,5,0,1,0,0,0,1",
+f"Style: Leg,{MONO},20,&H00FFF5ED,&H00FFF5ED,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1","",
 "[Events]","Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text"]
 for ly,a,b,st,tx in ev:
     ass.append(f"Dialogue: {ly},{ts(a)},{ts(b)},{st},,0,0,0,,{tx}")
@@ -159,35 +170,42 @@ for i in range(1,len(P)):
     f.append(f"[{pa}][a{i}]acrossfade=d={d}[c{i}]")
     pv,pa=f"x{i}",f"c{i}"
 zz=f"({expr})"
-f.append(f"[{pv}]scale=w='1080*{zz}':h='1920*{zz}':eval=frame:flags=bicubic,crop=w=1080:h=1920:x='(iw-ow)/2':y='(ih-oh)*(0.5-0.25*clip(({zz}-1.13)/0.37,0,1))',setsar=1,eq=contrast=1.06:saturation=1.06:brightness=0.01,colorbalance=bs=0.02:bm=0.02,vignette=PI/6.5,unsharp=5:5:0.5:5:5:0,format=yuv420p[zc]")
+f.append(f"[{pv}]scale=w='1080*{zz}':h='1920*{zz}':eval=frame:flags=bicubic,crop=w=1080:h=1920:x='(iw-ow)/2':y='(ih-oh)*(0.5-0.25*clip(({zz}-1.13)/0.37,0,1))',setsar=1,eq=contrast=1.06:saturation=1.04:brightness=0.01,colorbalance=bs=0.03:bm=0.02,vignette=PI/6.5,unsharp=5:5:0.5:5:5:0,format=yuv420p[zc]")
 cur="zc"
-for j,(fn,a,b,cx,cy,wd,ang) in enumerate(BR):
-    d=b-a; k=j+1
-    e=f"(1-pow(1-min(t/0.55,1),3))"                     # easeOutCubic 0.55s
-    S=f"max(0.02,{e}*min(1,max((({d:.3f})-t)/0.2,0.02)))"  # masuk spin+zoom, keluar mengecil
-    A=f"({ang}*PI/180+(1-{e})*(-2.5*PI))"
-    f.append(f"[{k}:v]format=rgba,rotate=a='{A}':ow='hypot(iw,ih)':oh='hypot(iw,ih)':c=black@0,scale=w='max(4,{wd}*1.12*{S})':h=-1:eval=frame:flags=bicubic,setpts=PTS+{a:.3f}/TB[L{k}]")
+for j,(name,a,b,cx,cy,kk) in enumerate(BR):
+    d=b-a; k=j+1; wd=M[name]["W"]*kk
+    f.append(f"[{k}:v]format=rgba,fade=t=in:st=0:d=0.3:alpha=1,fade=t=out:st={d-0.2:.3f}:d=0.2:alpha=1,scale=w='{wd}*(0.9+0.1*min(t/0.35,1))':h=-1:eval=frame:flags=bicubic,setpts=PTS+{a:.3f}/TB[L{k}]")
     f.append(f"[{cur}][L{k}]overlay=x='{cx}-w/2':y='{cy}-h/2':eval=frame:eof_action=pass:format=auto[o{k}]")
     cur=f"o{k}"
-# kad hitam + grain semasa kad tajuk
-for ci,(t0,_,_) in enumerate(CARDS):
-    en=f"between(t,{t0:.3f},{t0+CARD_D:.3f})"
-    f.append(f"[{cur}]format=yuv420p,drawbox=x=0:y=0:w=iw:h=ih:color=0x0b1f2e@1:t=fill:enable='{en}',noise=alls=16:allf=t:enable='{en}'[cd{ci}]")
-    cur=f"cd{ci}"
-# light leak: oren/merah di mula kad, biru-putih di hujung kad
-LK=[]
-for t0,_,_ in CARDS:
-    LK.append((t0-0.05,"0xd8fbff","0x0a4a58",0.9)); LK.append((t0+CARD_D-0.1,"0xffffff","0x103040",0.6))
-for m,(a,c0,c1,op) in enumerate(LK):
-    k=len(BR)+1+m; a=max(a,0)
-    env=f"if(between(T,{a:.3f},{a+0.12:.3f}),(T-{a:.3f})/0.12,if(between(T,{a+0.12:.3f},{a+0.57:.3f}),1-(T-{a+0.12:.3f})/0.45,0))"
-    f.append(f"[{k}:v]scale=1080:1920,format=gbrp[lk{m}]")
-    f.append(f"[{cur}]format=gbrp[ba{m}]")
-    f.append(f"[ba{m}][lk{m}]blend=all_expr='A+(255-A)*(B/255)*{op}*{env}':enable='between(t,{a:.3f},{a+0.57:.3f})',format=yuv420p[lb{m}]")
-    cur=f"lb{m}"
-f.append(f"[{cur}]ass=work/eyebright.ass[vout]")
-f.append(f"[{pa}]loudnorm=I=-13:TP=-1.5:LRA=11[aout]")
+nb=len(BR)+1
+en="+".join(f"between(t,{t0:.3f},{t0+CARD_D:.3f})" for t0,_,_ in CARDS)
+f.append(f"[{cur}][{nb}:v]overlay=enable='{en}':format=auto[bg]")      # latar grid blueprint semasa kad Fakta
+f.append(f"[bg][{nb+1}:v]overlay=format=auto[hud]")                      # grid halus + sudut HUD
+f.append(f"[hud]ass=work/eyebright.ass[vout]")
+f.append(f"[{pa}][{nb+2}:a]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-13:TP=-1.5:LRA=11[aout]")
 open("work/filter.txt","w").write(";\n".join(f))
-subprocess.run(["ffmpeg","-y","-i",SRC]+sum([["-loop","1","-framerate","30","-t",f"{b-a:.3f}","-i",fn] for fn,a,b,*_ in BR],[])+sum([["-f","lavfi","-i",f"gradients=s=270x480:r=30:d={total+1:.2f}:c0={c0}:c1={c1}:x0=230:y0=60:x1=20:y1=420:type=1"] for a,c0,c1,op in LK],[])+["-filter_complex_script","work/filter.txt","-map","[vout]","-map","[aout]","-t",f"{total:.3f}",
+# SFX kod: bunyi tik mekanikal + bed sintetik perlahan (tiada audio berbayar)
+import numpy as np, wave
+sr=44100; n=int((total+1)*sr); au=np.zeros(n,dtype=np.float64); rng=np.random.default_rng(7)
+tt=np.arange(n)/sr
+bed=sum(np.sin(2*np.pi*fq*tt+ph) for fq,ph in [(110,0),(164.81,1.3),(220,2.1),(329.63,0.4)])
+bed*=(0.6+0.4*np.sin(2*np.pi*0.11*tt))*10**(-44/20)/4
+au+=bed
+def add(t,x,g):
+    i=int(t*sr)
+    if i<n: x=x[:n-i]; au[i:i+len(x)]+=x*g
+def mk_tick(f0,dur,noise):
+    m=int(dur*sr); u=np.arange(m)/sr; e=np.exp(-u*(5/dur))
+    return (np.sin(2*np.pi*f0*u)*0.7+rng.standard_normal(m)*noise)*e
+tick=mk_tick(2600,0.012,0.4); thunk=mk_tick(140,0.09,0.05); tick2=np.concatenate([tick,np.zeros(int(0.045*sr)),tick*0.7])
+for t,k in TICKS: add(t,{"tick":tick,"tick2":tick2,"thunk":thunk}[k],{"tick":0.10,"tick2":0.12,"thunk":0.35}[k])
+au=np.clip(au,-1,1)
+with wave.open("work/sfx.wav","wb") as w_:
+    w_.setnchannels(1); w_.setsampwidth(2); w_.setframerate(sr); w_.writeframes((au*32767).astype("<i2").tobytes())
+inp=["-i",SRC]
+for name,a,b,*_ in BR: inp+=["-loop","1","-framerate","30","-t",f"{b-a:.3f}","-i",f"work/cards/{name}.png"]
+for im in ("bg_grid","hud"): inp+=["-loop","1","-framerate","30","-t",f"{total+1:.2f}","-i",f"work/cards/{im}.png"]
+inp+=["-i","work/sfx.wav"]
+subprocess.run(["ffmpeg","-y"]+inp+["-filter_complex_script","work/filter.txt","-map","[vout]","-map","[aout]","-t",f"{total:.3f}",
  "-c:v","libx264","-crf","18","-preset","medium","-pix_fmt","yuv420p","-c:a","aac","-b:a","192k","-ar","44100","-movflags","+faststart",OUT],check=True)
 print(OUT,total)
